@@ -44,7 +44,7 @@ class Text extends DisplayWidget {
   }
 
   @override
-  String build(StringBuffer buf) {
+  String build(IndentedStringBuffer buf) {
     final buffer = StringBuffer();
     final spans = [
       if (leading.isNotEmpty) StyledText(leading, style: style),

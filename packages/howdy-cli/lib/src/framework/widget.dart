@@ -69,13 +69,16 @@ sealed class Widget<T> {
   /// Render current visual state as a string. Does NOT write to output.
   /// Usually you want to override [build] instead of [render].
   String render() {
-    final buf = StringBuffer();
+    final buf = IndentedStringBuffer();
     final str = build(buf);
     return str;
   }
 
-  /// Todo: Docstring
-  String build(StringBuffer buf);
+  /// Build the widget's visual output into [buf].
+  ///
+  /// Use [IndentedStringBuffer.indent] and [IndentedStringBuffer.dedent]
+  /// to control indentation instead of hardcoding spaces.
+  String build(IndentedStringBuffer buf);
 
   /// Run standalone — manages raw mode, reads keys, writes to output.
   ///

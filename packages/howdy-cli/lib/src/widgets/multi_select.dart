@@ -58,29 +58,34 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   }
 
   /// Build the option list string.
-  String renderOptionsString() {
-    final buf = StringBuffer();
+  String renderOptionsString(IndentedStringBuffer buf) {
     for (var i = 0; i < options.length; i++) {
       final isCursor = i == selectedIndex;
       final isChecked = selected[i];
-      final marker = isChecked ? Icon.optionFilled : Icon.optionEmpty;
-      final prefix = isCursor ? '${Icon.cursor} ' : '  ';
+      final label = options[i].label;
 
-      if (isCursor) {
-        buf.writeln(
-          '  $prefix$marker ${options[i].label}'.style(theme.selected),
-        );
+      if (!isDone) {
+        final prefix = isCursor ? '${Icon.cursor} ' : '  ';
+        final marker = isChecked
+            ? Icon.optionFilled.selected
+            : Icon.optionEmpty.body;
+        buf.write(prefix);
+        buf.write(marker);
+        buf.writeln(' ${label.style(isChecked ? theme.selected : theme.body)}');
       } else {
-        buf.writeln(
-          '  $prefix$marker ${options[i].label}'.style(theme.body),
-        );
+        final prefix = '  ';
+        final marker = isChecked ? Icon.check.success : Icon.optionEmpty.body;
+        buf.write(prefix);
+        buf.write(marker);
+        buf.writeln(' ${label.style(isChecked ? theme.success : theme.body)}');
       }
     }
+    buf.dedent();
     return buf.toString();
   }
 
   @override
-  String build(StringBuffer buf) {
+  String build(IndentedStringBuffer buf) {
     // The prompt label (with hint for multiselect)
     buf.writeln(label.style(theme.label));
 
@@ -88,21 +93,16 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     if (help != null) buf.writeln(help!.style(theme.body));
 
     // The result / option list
-    if (isDone) {
-      buf.writeln('  ${Icon.check} $selectedLabels'.success);
-    } else {
-      buf.write(renderOptionsString());
-    }
+    buf.indent();
+    renderOptionsString(buf);
 
-    // Controls string
-    if (isStandalone) buf.writeln(usage.dim);
-
-    // Reserve a line for the error
     if (isStandalone) {
-      buf.write(
-        error != null ? '  ${Icon.error} $error'.style(theme.error) : '',
-      );
+      buf.writeln();
+      buf.writeln(usage.dim);
+      hasError ? buf.writeln('${Icon.error} $error'.style(theme.error)) : '';
+      buf.writeln();
     }
+    buf.dedent();
     return buf.toString();
   }
 

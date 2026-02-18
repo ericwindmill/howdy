@@ -55,4 +55,6 @@ extension Theming on String {
   String get error => StyledText(this, style: Theme.current.error).render();
   String get warning => StyledText(this, style: Theme.current.warning).render();
   String get success => StyledText(this, style: Theme.current.success).render();
+  String get selected =>
+      StyledText(this, style: Theme.current.selected).render();
 }

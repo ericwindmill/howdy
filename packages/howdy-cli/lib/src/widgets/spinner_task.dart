@@ -33,7 +33,7 @@ class SpinnerTask<T> extends InteractiveWidget<T> {
   }
 
   @override
-  String build(StringBuffer buf) {
+  String build(IndentedStringBuffer buf) {
     if (_isDone) {
       return '${renderSpans([StyledText('✔ '), StyledText(label)])}\n';
     }

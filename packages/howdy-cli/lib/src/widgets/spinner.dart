@@ -28,7 +28,7 @@ class Spinner extends DisplayWidget {
   bool _success = true;
 
   @override
-  String build(StringBuffer buf) {
+  String build(IndentedStringBuffer buf) {
     if (_stopped) {
       if (_success) {
         return renderSpans([

@@ -81,7 +81,7 @@ class ConfirmInput extends InteractiveWidget<bool> {
   bool get isDone => _isDone;
 
   @override
-  String build(StringBuffer buf) {
+  String build(IndentedStringBuffer buf) {
     // The prompt label
     buf.writeln(label.style(theme.label));
 
@@ -89,20 +89,23 @@ class ConfirmInput extends InteractiveWidget<bool> {
     if (help != null) buf.writeln(help!.style(theme.body));
 
     // The input / result line
+    buf.indent();
     if (isDone) {
-      buf.writeln('  ${Icon.check} ${_value ? 'Yes' : 'No'}'.success);
+      buf.writeln('${Icon.check} ${_value ? 'Yes' : 'No'}'.success);
     } else {
       buf.writeln(
-        '  ${Icon.cursor} ($_hint)'.style(theme.defaultValue),
+        '${Icon.cursor} ($_hint)'.style(theme.defaultValue),
       );
     }
 
     // Reserve a line for the error, regardless of whether it exists
     if (isStandalone) {
-      buf.write(
-        hasError ? '${Icon.error} $error'.style(theme.error) : '',
-      );
+      buf.writeln();
+      buf.writeln(usage.dim);
+      hasError ? buf.writeln('${Icon.error} $error'.style(theme.error)) : '';
+      buf.writeln();
     }
+    buf.dedent();
     return buf.toString();
   }
 

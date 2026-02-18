@@ -87,7 +87,7 @@ class Group extends MultiWidget {
   }
 
   @override
-  String build(StringBuffer buf) {
+  String build(IndentedStringBuffer buf) {
     for (var i = 0; i < widgets.length; i++) {
       buf.writeln(widgets[i].render());
     }

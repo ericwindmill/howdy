@@ -94,7 +94,7 @@ class Prompt extends InteractiveWidget<String> {
   bool get isDone => _isDone;
 
   @override
-  String build(StringBuffer buf) {
+  String build(IndentedStringBuffer buf) {
     // The prompt for the user
     buf.writeln(label.style(theme.label));
 
@@ -102,32 +102,33 @@ class Prompt extends InteractiveWidget<String> {
     if (help != null) buf.writeln(help!.style(theme.body));
 
     // The input line
+    buf.indent();
     switch ((isDone, _input.isEmpty)) {
       // When complete
       case (true, _):
-        buf.writeln('  ${Icon.check} $value'.success);
+        buf.writeln('${Icon.check} $value'.success);
       // When awaiting, and user hasn't typed yet (show default)
       case (false, true):
         buf.writeln(
-          '  ${Icon.cursor.style(theme.cursor)} ${(defaultValue ?? '').style(theme.defaultValue)}',
+          '${Icon.cursor.style(theme.cursor)} ${(defaultValue ?? '').style(theme.defaultValue)}',
         );
       // When awaiting more input, and user hasn't pressed enter
       case (false, false):
         buf.writeln(
-          '  ${Icon.cursor.style(theme.cursor)} $_input'.style(
+          '${Icon.cursor.style(theme.cursor)} $_input'.style(
             theme.body,
           ),
         );
     }
 
-    buf.writeln(isStandalone ? '  ${usage.dim}' : '');
-
-    // Reserve a line for the error, regardless of whether it exists
     if (isStandalone) {
-      buf.write(
-        hasError ? '  ${Icon.error} $error'.style(theme.error) : '',
-      );
+      buf.writeln();
+      buf.writeln(usage.dim);
+      hasError ? buf.writeln('${Icon.error} $error'.style(theme.error)) : '';
+      buf.writeln();
     }
+    buf.dedent();
+
     return buf.toString();
   }
 

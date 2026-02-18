@@ -1,5 +1,4 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/theme.dart';
 
 /// A single-choice select list.
 ///
@@ -55,26 +54,31 @@ class Select<T> extends InteractiveWidget<T> {
   }
 
   /// Build the option list string.
-  String renderOptionsString() {
-    final buf = StringBuffer();
+  String renderOptionsString(IndentedStringBuffer buf) {
     for (var i = 0; i < options.length; i++) {
       final isSelected = i == selectedIndex;
       final option = options[i];
       final style = option.textStyle.hasStyle ? option.textStyle : theme.body;
 
-      if (isSelected) {
+      if (isSelected && !isDone) {
         buf.writeln(
-          '  ${Icon.cursor} ${option.label}'.style(theme.selected),
+          '${Icon.cursor} ${option.label}'.style(theme.selected),
+        );
+      } else if (isSelected && isDone) {
+        buf.writeln(
+          '${Icon.check} ${option.label}'.style(theme.success),
         );
       } else {
-        buf.writeln('    ${option.label}'.style(style));
+        buf.indent();
+        buf.writeln(option.label.style(style));
+        buf.dedent();
       }
     }
     return buf.toString();
   }
 
   @override
-  String build(StringBuffer buf) {
+  String build(IndentedStringBuffer buf) {
     // The prompt label
     buf.writeln(label.style(theme.label));
 
@@ -82,18 +86,17 @@ class Select<T> extends InteractiveWidget<T> {
     if (help != null) buf.writeln(help!.style(theme.body));
 
     // The result / option list
-    if (isDone) {
-      buf.writeln('  ${Icon.check} ${options[selectedIndex].label}'.success);
-    } else {
-      buf.write(renderOptionsString());
-    }
+    buf.indent();
+    renderOptionsString(buf);
 
-    // Reserve a line for the error
     if (isStandalone) {
-      buf.write(
-        error != null ? '  ${Icon.error} $error'.style(theme.error) : '',
-      );
+      buf.writeln();
+      buf.writeln(usage.dim);
+      hasError ? buf.writeln('${Icon.error} $error'.style(theme.error)) : '';
+      buf.writeln();
     }
+    buf.dedent();
+
     return buf.toString();
   }
 

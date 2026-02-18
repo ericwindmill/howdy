@@ -1,11 +1,11 @@
 import 'package:howdy/howdy.dart';
 import 'package:howdy/src/terminal/theme.dart';
 
-/// A MultiWidget renders its children with a unified UI.
+/// A multi-page form container.
 ///
-/// Form displays one [Group] at a time. When a group completes,
-/// the form advances to the next page. After all pages are done, the
-/// form returns MultiWidgetResults, which has a
+/// Each page can be a [Group] (multiple widgets) or a single
+/// [InteractiveWidget]. When a page completes, the form advances
+/// to the next one. After all pages are done, returns [MultiWidgetResults].
 ///
 /// ```dart
 /// final results = Form([
@@ -13,24 +13,15 @@ import 'package:howdy/src/terminal/theme.dart';
 ///     Prompt(label: 'Name'),
 ///     Select(label: 'Language', options: [...]),
 ///   ]),
-///   Group([
-///     Multiselect(label: 'Features', options: [...]),
-///     ConfirmInput(label: 'Use git?'),
-///   ]),
-/// ]).render();
-///
-/// // results[0] -> [name, language]  (page 1)
-/// // results[1] -> [features, git]   (page 2)
+///   Multiselect(label: 'Features', options: [...]),
+///   ConfirmInput(label: 'Use git?'),
+/// ]).write();
 /// ```
 class Form extends MultiWidget {
   Form(super.widgets, {this.title}) {
-    // Suppress inline error rendering — Form owns the error display.
-    for (final group in groups) {
-      for (final widget in group.widgets) {
-        if (widget is InteractiveWidget) {
-          widget.renderContext = RenderContext.form;
-        }
-      }
+    // Suppress inline error/chrome rendering — Form owns that display.
+    for (final widget in widgets) {
+      _setFormContext(widget);
     }
   }
 
@@ -40,64 +31,73 @@ class Form extends MultiWidget {
   int _pageIndex = 0;
   bool _isDone = false;
 
-  /// Typed view of [widgets] as [Group]s.
-  List<Group> get groups => widgets.cast<Group>();
-
   /// Convenience to run a form and return results.
-  static MultiWidgetResults send(List<Group> groups, {String? title}) {
-    return Form(groups, title: title).write();
+  static MultiWidgetResults send(List<Widget> pages, {String? title}) {
+    return Form(pages, title: title).write();
+  }
+
+  /// The widget for the current page.
+  Widget get _currentPage => widgets[_pageIndex];
+
+  /// The currently focused interactive widget on the current page.
+  ///
+  /// For a [MultiWidget] page, this is the focused child.
+  /// For a single [InteractiveWidget] page, that widget itself.
+  InteractiveWidget? get _focusedWidget {
+    final page = _currentPage;
+    if (page is MultiWidget) {
+      final focused = page.widgets[page.focusIndex];
+      return focused is InteractiveWidget ? focused : null;
+    }
+    if (page is InteractiveWidget) return page;
+    return null;
   }
 
   @override
-  String build(StringBuffer buf) {
+  String build(IndentedStringBuffer buf) {
+    final focused = _focusedWidget;
+    final errorText = focused?.error;
+
     // Show title with page indicator
+    buf.indent();
     if (title != null) {
-      buf.write(
-        '${title!.label}'
+      buf.writeln(
+        '${title!.style(TextStyle(foreground: Color.greyLight))} '
         '${'(page ${_pageIndex + 1}/${widgets.length})'.dim}',
       );
       buf.writeln();
     }
 
-    // Render the current group
-    buf.write(groups[_pageIndex].render());
+    // Render the current page
+    buf.write(_currentPage.render());
+
+    // ── Guide line ──
+    buf.writeln(_guideTextFor(focused).dim);
 
     // ── Error line (from the focused widget) ──
-    final currentGroup = groups[_pageIndex];
-    final focused = currentGroup.widgets[currentGroup.focusIndex];
-    final errorText = (focused is InteractiveWidget) ? focused.error : null;
     buf.writeln(
       errorText != null
           ? '${Icon.error} $errorText'.style(Theme.current.error)
           : '',
     );
 
-    // ── Guide line with page indicator ──
-    buf.write(
-      '${_guideTextFor(focused).dim}  ${'${_pageIndex + 1}/${widgets.length}'.dim}',
-    );
-
     return buf.toString();
   }
 
   /// Returns context-appropriate guide text for the focused widget.
-  String _guideTextFor(Widget focused) {
-    if (focused is InteractiveWidget) {
-      return focused.usage;
-    }
-    return '';
+  String _guideTextFor(InteractiveWidget? focused) {
+    return focused?.usage ?? '';
   }
 
   @override
   KeyResult handleKey(KeyEvent event) {
     if (_isDone) return KeyResult.ignored;
 
-    final currentGroup = groups[_pageIndex];
-    final result = currentGroup.handleKey(event);
+    final result = _currentPage.handleKey(event);
 
     if (result == KeyResult.done) {
-      // Group completed — advance to next page
-      if (_pageIndex < groups.length - 1) {
+      // Page completed — advance to next
+      if (_pageIndex < widgets.length - 1) {
         _pageIndex++;
         return KeyResult.consumed;
       } else {
@@ -107,5 +107,17 @@ class Form extends MultiWidget {
     }
 
     return result;
+  }
+
+  /// Recursively set [RenderContext.form] on all interactive widgets
+  /// so they suppress their own standalone chrome.
+  void _setFormContext(Widget widget) {
+    if (widget is InteractiveWidget) {
+      widget.renderContext = RenderContext.form;
+    } else if (widget is MultiWidget) {
+      for (final child in widget.widgets) {
+        _setFormContext(child);
+      }
+    }
   }
 }

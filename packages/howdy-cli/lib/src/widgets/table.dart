@@ -70,7 +70,7 @@ class Table extends DisplayWidget {
   }
 
   @override
-  String build(StringBuffer buf) {
+  String build(IndentedStringBuffer buf) {
     final colCount = headers.length;
     final resolvedRows = _resolveRows(colCount);
     final widths = _measureWidths(colCount, resolvedRows);
