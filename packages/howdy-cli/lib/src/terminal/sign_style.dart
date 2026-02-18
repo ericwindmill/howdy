@@ -1,6 +1,7 @@
-/// Border character sets for [Sign] rendering.
+/// Border character sets for [Sign] rendering and [String.withBorder].
 ///
-/// Defines the 6 characters needed to draw a box border.
+/// Defines the characters needed to draw a box border, plus per-side
+/// flags that control which edges are actually rendered.
 ///
 /// ```dart
 /// Sign(
@@ -16,6 +17,10 @@ class SignStyle {
     required this.bottomRight,
     required this.horizontal,
     required this.vertical,
+    this.top = true,
+    this.right = true,
+    this.bottom = true,
+    this.left = true,
   });
 
   /// Top-left corner character.
@@ -35,6 +40,39 @@ class SignStyle {
 
   /// Vertical line character.
   final String vertical;
+
+  /// Whether to draw the top border edge.
+  final bool top;
+
+  /// Whether to draw the right border edge.
+  final bool right;
+
+  /// Whether to draw the bottom border edge.
+  final bool bottom;
+
+  /// Whether to draw the left border edge.
+  final bool left;
+
+  /// Returns a copy of this style with the given sides overridden.
+  SignStyle copyWith({
+    bool? top,
+    bool? right,
+    bool? bottom,
+    bool? left,
+  }) {
+    return SignStyle(
+      topLeft: topLeft,
+      topRight: topRight,
+      bottomLeft: bottomLeft,
+      bottomRight: bottomRight,
+      horizontal: horizontal,
+      vertical: vertical,
+      top: top ?? this.top,
+      right: right ?? this.right,
+      bottom: bottom ?? this.bottom,
+      left: left ?? this.left,
+    );
+  }
 
   /// Rounded Unicode box.
   ///
@@ -97,8 +135,12 @@ class SignStyle {
     bottomRight: '',
     horizontal: '',
     vertical: '│',
+    top: false,
+    right: false,
+    bottom: false,
+    left: true,
   );
 
-  /// Whether this style draws a full enclosing box.
-  bool get hasBox => horizontal.isNotEmpty;
+  /// Whether this style draws a full enclosing box (all four sides).
+  bool get hasBox => top && right && bottom && left;
 }

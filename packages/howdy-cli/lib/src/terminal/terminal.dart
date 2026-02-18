@@ -123,6 +123,15 @@ class Terminal {
     if (byte == 127 || byte == 8) return const SpecialKey(Key.backspace);
     if (byte == 32) return const SpecialKey(Key.space);
 
+    // Ctrl+C (ETX, byte 3): raw mode prevents the OS from converting this to
+    // SIGINT, so the ProcessSignal handler never fires. Clean up and exit here.
+    if (byte == 3) {
+      disableRawMode();
+      cursorShow();
+      resetCursorShape();
+      exit(0);
+    }
+
     if (byte == 27) return _parseEscapeSequence();
 
     if (byte >= 32 && byte < 127) return CharKey(String.fromCharCode(byte));
@@ -326,12 +335,23 @@ class Terminal {
     _previousEchoMode = _input.echoMode;
     _input.lineMode = false;
     _input.echoMode = false;
+    // Dart's lineMode=false only clears ICANON, not ISIG. That means the OS
+    // still converts Ctrl+C into SIGINT instead of byte 3. The async SIGINT
+    // handler can never fire because the Dart event loop is blocked inside
+    // readByteSync(). Disabling ISIG via stty makes Ctrl+C deliver byte 3
+    // directly to our sync read loop, where we handle it explicitly.
+    if (!Platform.isWindows) {
+      Process.runSync('stty', ['-isig']);
+    }
   }
 
   /// Restore the terminal to its previous mode.
   void disableRawMode() {
     _input.lineMode = _previousLineMode;
     _input.echoMode = _previousEchoMode;
+    if (!Platform.isWindows) {
+      Process.runSync('stty', ['isig']);
+    }
   }
 
   /// Run [fn] with raw mode enabled, restoring on exit.

@@ -26,7 +26,7 @@ class ConfirmInput extends InteractiveWidget<bool> {
   bool _isDone = false;
 
   @override
-  String get usage => 'y/n to choose, enter to submit';
+  String get usage => '< / > to choose, enter to submit';
 
   /// Convenience factory, uses active theme values.
   static bool send(
@@ -87,6 +87,7 @@ class ConfirmInput extends InteractiveWidget<bool> {
 
     // Optional help text
     if (help != null) buf.writeln(help!.style(theme.body));
+    buf.writeln();
 
     // The input / result line
     buf.indent();

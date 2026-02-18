@@ -1,4 +1,5 @@
 import 'package:howdy/howdy.dart';
+import 'package:howdy/src/terminal/extensions.dart';
 
 /// A widget that wraps [List<StyledText>] content in a configurable border.
 ///
@@ -65,77 +66,32 @@ class Sign extends DisplayWidget {
   @override
   String build(IndentedStringBuffer buf) {
     final innerWidth = _resolveInnerWidth();
-    final outerWidth = innerWidth + padding.horizontal;
-
-    // Helper: render a border character (optionally styled).
-    String b(String char) {
-      if (char.isEmpty) return '';
-      final bs = borderStyle;
-      return bs != null ? StyledText(char, style: bs).render() : char;
-    }
 
     // Top margin.
     for (var i = 0; i < margin.top; i++) {
       buf.writeln();
     }
 
-    final leftMarginStr = ' ' * margin.left;
-
-    // Top border.
-    if (style.hasBox) {
-      buf.writeln(
-        '$leftMarginStr'
-        '${b(style.topLeft)}'
-        '${b(style.horizontal) * outerWidth}'
-        '${b(style.topRight)}',
-      );
-    }
-
-    // Top padding rows.
-    for (var i = 0; i < padding.top; i++) {
-      buf.writeln(
-        '$leftMarginStr'
-        '${b(style.vertical)}'
-        '${' ' * outerWidth}'
-        '${style.hasBox ? b(style.vertical) : ''}',
-      );
-    }
-
-    // Content rows — word-wrap each StyledText paragraph.
+    // Render each StyledText span with word-wrap into a plain string,
+    // then delegate all border drawing to withBorder.
+    final contentBuf = StringBuffer();
     for (final span in content) {
-      final lines = wordWrap(span.text, innerWidth);
-      for (final line in lines) {
-        final paddedLine = line.padRight(innerWidth);
-        final styledLine = StyledText(paddedLine, style: span.style).render();
-        buf.writeln(
-          '$leftMarginStr'
-          '${b(style.vertical)}'
-          '${' ' * padding.left}'
-          '$styledLine'
-          '${' ' * padding.right}'
-          '${style.hasBox ? b(style.vertical) : ''}',
-        );
+      for (final line in wordWrap(span.text, innerWidth)) {
+        contentBuf.writeln(StyledText(line, style: span.style).render());
       }
     }
 
-    // Bottom padding rows.
-    for (var i = 0; i < padding.bottom; i++) {
-      buf.writeln(
-        '$leftMarginStr'
-        '${b(style.vertical)}'
-        '${' ' * outerWidth}'
-        '${style.hasBox ? b(style.vertical) : ''}',
-      );
-    }
+    final leftMarginStr = ' ' * margin.left;
+    final bordered = contentBuf.toString().withBorder(
+      style: style,
+      padding: padding,
+      borderStyle: borderStyle,
+    );
 
-    // Bottom border.
-    if (style.hasBox) {
-      buf.writeln(
-        '$leftMarginStr'
-        '${b(style.bottomLeft)}'
-        '${b(style.horizontal) * outerWidth}'
-        '${b(style.bottomRight)}',
-      );
+    // Prepend left margin to every line.
+    for (final line in bordered.split('\n')) {
+      if (line.isEmpty) continue; // skip the trailing empty from split
+      buf.writeln('$leftMarginStr$line');
     }
 
     // Bottom margin.

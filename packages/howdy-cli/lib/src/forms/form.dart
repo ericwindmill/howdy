@@ -1,4 +1,5 @@
 import 'package:howdy/howdy.dart';
+import 'package:howdy/src/terminal/extensions.dart';
 import 'package:howdy/src/terminal/theme.dart';
 
 /// A multi-page form container.
@@ -68,8 +69,24 @@ class Form extends MultiWidget {
       buf.writeln();
     }
 
-    // Render the current page
-    buf.write(_currentPage.render());
+    // Render each widget individually with a focus-aware left border.
+    final page = _currentPage;
+    final pageWidgets = page is MultiWidget ? page.widgets : [page];
+    final focusIdx = page is MultiWidget ? page.focusIndex : 0;
+
+    for (var i = 0; i < pageWidgets.length; i++) {
+      final isFocused = i == focusIdx;
+      final borderStyle = isFocused
+          ? TextStyle(foreground: Color.white)
+          : TextStyle(dim: true);
+      buf.writeln(
+        pageWidgets[i].render().withBorder(
+          style: SignStyle.leftOnly,
+          padding: EdgeInsets.only(left: 1),
+          borderStyle: borderStyle,
+        ),
+      );
+    }
 
     // ── Guide line ──
     buf.writeln(_guideTextFor(focused).dim);
