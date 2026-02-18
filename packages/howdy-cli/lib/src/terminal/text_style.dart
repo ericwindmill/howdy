@@ -6,27 +6,57 @@
 ///
 /// Add new named colors by adding enum values with RGB tuples.
 enum Color {
-  // Standard colors (approximate RGB equivalents)
+  // Greyscale
+  white(255, 255, 255),
+  greyLight(180, 180, 180),
+  grey(128, 128, 128),
+  greyDark(64, 64, 64),
   black(0, 0, 0),
-  red(204, 0, 0),
-  green(78, 154, 6),
-  yellow(196, 160, 0),
-  blue(52, 101, 164),
-  magenta(117, 80, 123),
-  cyan(6, 152, 154),
-  purpleLight(114, 70, 235),
-  purple(69, 9, 235),
-  white(211, 215, 207),
 
-  // Bright colors
-  brightBlack(85, 87, 83),
-  brightRed(239, 41, 41),
-  brightGreen(138, 226, 52),
-  brightYellow(252, 233, 79),
-  brightBlue(114, 159, 207),
-  brightMagenta(173, 127, 168),
-  brightCyan(52, 226, 226),
-  brightWhite(238, 238, 236),
+  // Red
+  redLight(239, 83, 80),
+  red(204, 0, 0),
+  redDark(140, 0, 0),
+
+  // Orange
+  orangeLight(255, 183, 77),
+  orange(245, 124, 0),
+  orangeDark(180, 80, 0),
+
+  // Yellow
+  yellowLight(255, 238, 88),
+  yellow(196, 160, 0),
+  yellowDark(140, 112, 0),
+
+  // Green
+  greenLight(129, 199, 132),
+  green(56, 142, 60),
+  greenDark(27, 94, 32),
+
+  // Blue
+  blueLight(100, 181, 246),
+  blue(30, 136, 229),
+  blueDark(21, 76, 153),
+
+  // Purple
+  purpleLight(149, 117, 205),
+  purple(103, 58, 183),
+  purpleDark(69, 9, 160),
+
+  // Magenta
+  magentaLight(206, 147, 216),
+  magenta(171, 71, 188),
+  magentaDark(123, 31, 138),
+
+  // Teal
+  tealLight(77, 208, 225),
+  teal(0, 150, 136),
+  tealDark(0, 96, 100),
+
+  // Cyan
+  cyanLight(77, 208, 225),
+  cyan(0, 188, 212),
+  cyanDark(0, 131, 143),
   ;
 
   final int r;

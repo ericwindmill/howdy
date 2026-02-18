@@ -25,33 +25,19 @@ class Select<T> extends InteractiveWidget<T> {
   Select({
     required super.label,
     required this.options,
+    super.key,
     super.help,
     super.validator,
-    TextStyle? labelStyle,
-    TextStyle? helpStyle,
-    TextStyle? selectedStyle,
-    TextStyle? optionStyle,
-    TextStyle? successStyle,
-    TextStyle? errorStyle,
-  }) : labelStyle = labelStyle ?? Theme.current.title,
-       helpStyle = helpStyle ?? Theme.current.label,
-       selectedStyle = selectedStyle ?? const TextStyle(foreground: Color.cyan),
-       optionStyle = optionStyle ?? Theme.current.body,
-       successStyle = successStyle ?? Theme.current.success,
-       errorStyle = errorStyle ?? Theme.current.error;
+    super.theme,
+  });
 
   final List<Option<T>> options;
 
-  final TextStyle labelStyle;
-  final TextStyle helpStyle;
-  final TextStyle selectedStyle;
-  final TextStyle optionStyle;
-  final TextStyle successStyle;
-  final TextStyle errorStyle;
-
   int selectedIndex = 0;
   bool _isDone = false;
-  String? _error;
+
+  @override
+  String get usage => 'up/down to select, enter to submit';
 
   /// Convenience factory, uses active theme values.
   static T send<T>({
@@ -74,10 +60,12 @@ class Select<T> extends InteractiveWidget<T> {
     for (var i = 0; i < options.length; i++) {
       final isSelected = i == selectedIndex;
       final option = options[i];
-      final style = option.textStyle.hasStyle ? option.textStyle : optionStyle;
+      final style = option.textStyle.hasStyle ? option.textStyle : theme.body;
 
       if (isSelected) {
-        buf.writeln('  ${Icon.cursor} ${option.label}'.style(selectedStyle));
+        buf.writeln(
+          '  ${Icon.cursor} ${option.label}'.style(theme.selected),
+        );
       } else {
         buf.writeln('    ${option.label}'.style(style));
       }
@@ -86,32 +74,26 @@ class Select<T> extends InteractiveWidget<T> {
   }
 
   @override
-  String renderCompact() {
-    final buf = StringBuffer();
-    buf.writeln(label.style(labelStyle));
-    return buf.toString();
-  }
-
-  @override
   String build(StringBuffer buf) {
-    final parts = [
-      // The prompt label
-      label.style(labelStyle),
+    // The prompt label
+    buf.writeln(label.style(theme.label));
 
-      // Optional help text
-      if (help != null) help!.style(helpStyle),
+    // Optional help text
+    if (help != null) buf.writeln(help!.style(theme.body));
 
-      // The result / option list
-      if (isDone)
-        '${Icon.check} ${options[selectedIndex].label}'.success
-      else
-        renderOptionsString(),
+    // The result / option list
+    if (isDone) {
+      buf.writeln('  ${Icon.check} ${options[selectedIndex].label}'.success);
+    } else {
+      buf.write(renderOptionsString());
+    }
 
-      // Reserve a line for the error
-      _error != null ? '${Icon.error} $_error'.style(errorStyle) : '',
-    ];
-
-    buf.writeAll(parts, '\n');
+    // Reserve a line for the error
+    if (isStandalone) {
+      buf.write(
+        error != null ? '  ${Icon.error} $error'.style(theme.error) : '',
+      );
+    }
     return buf.toString();
   }
 
@@ -134,11 +116,11 @@ class Select<T> extends InteractiveWidget<T> {
         if (validator != null) {
           final error = validator!(value);
           if (error != null) {
-            _error = error;
+            this.error = error;
             return KeyResult.consumed;
           }
         }
-        _error = null;
+        error = null;
         _isDone = true;
         return KeyResult.done;
       default:

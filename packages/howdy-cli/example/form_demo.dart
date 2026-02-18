@@ -15,6 +15,7 @@ void main() {
       Prompt(
         label: 'Project name',
         validator: (v) => v.isEmpty ? 'Name is required' : null,
+        key: 'name',
       ),
       Select<String>(
         label: 'Language',
@@ -23,6 +24,7 @@ void main() {
           Option(label: 'TypeScript', value: 'ts'),
           Option(label: 'Python', value: 'python'),
         ],
+        key: 'lang',
       ),
     ]),
 
@@ -37,18 +39,16 @@ void main() {
           Option(label: 'Docker', value: 'docker'),
         ],
         validator: (v) => v.isEmpty ? 'Select at least one' : null,
+        key: 'features',
       ),
-      ConfirmInput(label: 'Initialize git?', defaultValue: true),
+      ConfirmInput(label: 'Initialize git?', defaultValue: true, key: 'git'),
     ]),
   ], title: 'Create Project');
 
-  final page1 = results[0];
-  final page2 = results[1];
-
-  final name = page1[0] as String;
-  final lang = page1[1] as String;
-  final features = page2[0] as List<String>;
-  final useGit = page2[1] as bool;
+  final name = results['name'] as String;
+  final lang = results['lang'] as String;
+  final features = results['features'] as List<String>;
+  final useGit = results['git'] as bool;
 
   print('');
   Table.send(

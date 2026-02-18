@@ -1,5 +1,6 @@
 import 'package:howdy/howdy.dart';
 import 'package:howdy/src/terminal/extensions.dart';
+import 'package:howdy/src/terminal/theme.dart';
 
 class Text extends DisplayWidget {
   Text(
@@ -22,7 +23,7 @@ class Text extends DisplayWidget {
     Text(
       input,
       leading: Icon.warning + ' ',
-      style: TextStyle(foreground: Color.yellow),
+      style: Theme.current.warning,
     ).write();
   }
 
@@ -30,7 +31,7 @@ class Text extends DisplayWidget {
     Text(
       input,
       leading: Icon.error + ' ',
-      style: TextStyle(foreground: Color.red),
+      style: Theme.current.error,
     ).write();
   }
 
@@ -38,7 +39,7 @@ class Text extends DisplayWidget {
     Text(
       input,
       leading: Icon.check + ' ',
-      style: TextStyle(foreground: Color.green),
+      style: Theme.current.success,
     ).write();
   }
 

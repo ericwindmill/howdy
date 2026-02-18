@@ -48,6 +48,13 @@ extension StyledString on String {
     return StyledText(this, style: TextStyle(dim: true)).render();
   }
 
+  String get extraDim {
+    return StyledText(
+      this,
+      style: TextStyle(dim: true, foreground: Color.grey),
+    ).render();
+  }
+
   String get red {
     return StyledText(
       this,

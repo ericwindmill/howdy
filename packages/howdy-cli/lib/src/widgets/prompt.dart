@@ -23,28 +23,9 @@ class Prompt extends InteractiveWidget<String> {
     super.help,
     super.defaultValue,
     super.validator,
-    TextStyle? labelStyle,
-    TextStyle? helpStyle,
-    TextStyle? defaultStyle,
-    TextStyle? inputStyle,
-    TextStyle? cursorStyle,
-    TextStyle? successStyle,
-    TextStyle? errorStyle,
-  }) : labelStyle = labelStyle ?? Theme.current.title,
-       helpStyle = helpStyle ?? Theme.current.label,
-       defaultStyle = defaultStyle ?? Theme.current.label,
-       inputStyle = inputStyle ?? Theme.current.body,
-       successStyle = successStyle ?? Theme.current.success,
-       errorStyle = errorStyle ?? Theme.current.error,
-       cursorStyle = cursorStyle ?? Theme.current.body;
-
-  final TextStyle labelStyle;
-  final TextStyle helpStyle;
-  final TextStyle defaultStyle;
-  final TextStyle inputStyle;
-  final TextStyle cursorStyle;
-  final TextStyle successStyle;
-  final TextStyle errorStyle;
+    super.key,
+    super.theme,
+  });
 
   /// Convenience factory, uses active theme values
   static String send(
@@ -65,9 +46,10 @@ class Prompt extends InteractiveWidget<String> {
   final StringBuffer _input = StringBuffer();
   bool _isDone = false;
 
-  String? _error;
-
   bool get hasInput => _input.isNotEmpty;
+
+  @override
+  String get usage => 'type your answer, enter to submit';
 
   @override
   KeyResult handleKey(KeyEvent event) {
@@ -77,15 +59,15 @@ class Prompt extends InteractiveWidget<String> {
         if (validator != null) {
           final error = validator!(value);
           if (error != null) {
-            _error = error;
+            this.error = error;
             return KeyResult.consumed;
           }
         }
-        _error = null;
+        error = null;
         _isDone = true;
         return KeyResult.done;
       case SpecialKey(key: Key.backspace):
-        _error = null;
+        error = null;
         if (_input.isNotEmpty) {
           final current = _input.toString();
           _input.clear();
@@ -94,7 +76,7 @@ class Prompt extends InteractiveWidget<String> {
         }
         return KeyResult.ignored;
       case CharKey(char: final c):
-        _error = null;
+        error = null;
         _input.write(c);
         return KeyResult.consumed;
       default:
@@ -113,32 +95,39 @@ class Prompt extends InteractiveWidget<String> {
 
   @override
   String build(StringBuffer buf) {
-    final parts = [
-      // The prompt for the user
-      label.style(labelStyle),
+    // The prompt for the user
+    buf.writeln(label.style(theme.label));
 
-      // Explain the field to the user
-      if (help != null) help!.style(helpStyle),
+    // Explain the field to the user
+    if (help != null) buf.writeln(help!.style(theme.body));
 
-      // The input line
-      switch ((isDone, _input.isEmpty)) {
-        // When complete
-        (true, _) => '${Icon.check} $value'.success,
+    // The input line
+    switch ((isDone, _input.isEmpty)) {
+      // When complete
+      case (true, _):
+        buf.writeln('  ${Icon.check} $value'.success);
+      // When awaiting, and user hasn't typed yet (show default)
+      case (false, true):
+        buf.writeln(
+          '  ${Icon.cursor.style(theme.cursor)} ${(defaultValue ?? '').style(theme.defaultValue)}',
+        );
+      // When awaiting more input, and user hasn't pressed enter
+      case (false, false):
+        buf.writeln(
+          '  ${Icon.cursor.style(theme.cursor)} $_input'.style(
+            theme.body,
+          ),
+        );
+    }
 
-        // When awaiting, and user hasn't typed yet (show default)
-        (false, true) => '${Icon.cursor} ${defaultValue ?? ''}'.style(
-          labelStyle,
-        ),
+    buf.writeln(isStandalone ? '  ${usage.dim}' : '');
 
-        // When awaiting, and user hasn't pressed enter
-        (false, false) => '${Icon.cursor} $_input'.style(inputStyle),
-      },
-
-      // Reserve a line for the error, regardless of whether it exists
-      hasError ? '${Icon.error} $_error'.style(errorStyle) : '',
-    ];
-
-    buf.writeAll(parts, '\n');
+    // Reserve a line for the error, regardless of whether it exists
+    if (isStandalone) {
+      buf.write(
+        hasError ? '  ${Icon.error} $error'.style(theme.error) : '',
+      );
+    }
     return buf.toString();
   }
 

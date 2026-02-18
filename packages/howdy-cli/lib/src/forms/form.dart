@@ -1,11 +1,11 @@
 import 'package:howdy/howdy.dart';
 import 'package:howdy/src/terminal/theme.dart';
 
-/// A multi-page form composed of [Group]s.
+/// A MultiWidget renders its children with a unified UI.
 ///
-/// Form displays one [Group] (page) at a time. When a group completes,
+/// Form displays one [Group] at a time. When a group completes,
 /// the form advances to the next page. After all pages are done, the
-/// form returns a list of results — one [List<Object?>] per group.
+/// form returns MultiWidgetResults, which has a
 ///
 /// ```dart
 /// final results = Form([
@@ -22,11 +22,17 @@ import 'package:howdy/src/terminal/theme.dart';
 /// // results[0] -> [name, language]  (page 1)
 /// // results[1] -> [features, git]   (page 2)
 /// ```
-class Form extends InteractiveWidget<List<List<Object?>>> {
-  Form(this.groups, {this.title});
-
-  /// The groups (pages) in this form.
-  final List<Group> groups;
+class Form extends MultiWidget {
+  Form(super.widgets, {this.title}) {
+    // Suppress inline error rendering — Form owns the error display.
+    for (final group in groups) {
+      for (final widget in group.widgets) {
+        if (widget is InteractiveWidget) {
+          widget.renderContext = RenderContext.form;
+        }
+      }
+    }
+  }
 
   /// Optional title shown above each page.
   final String? title;
@@ -34,8 +40,11 @@ class Form extends InteractiveWidget<List<List<Object?>>> {
   int _pageIndex = 0;
   bool _isDone = false;
 
+  /// Typed view of [widgets] as [Group]s.
+  List<Group> get groups => widgets.cast<Group>();
+
   /// Convenience to run a form and return results.
-  static List<List<Object?>> send(List<Group> groups, {String? title}) {
+  static MultiWidgetResults send(List<Group> groups, {String? title}) {
     return Form(groups, title: title).write();
   }
 
@@ -44,7 +53,8 @@ class Form extends InteractiveWidget<List<List<Object?>>> {
     // Show title with page indicator
     if (title != null) {
       buf.write(
-        '${title!.style(Theme.current.title)}  ${'(page ${_pageIndex + 1}/${groups.length})'.dim}',
+        '${title!.label}'
+        '${'(page ${_pageIndex + 1}/${widgets.length})'.dim}',
       );
       buf.writeln();
     }
@@ -52,7 +62,30 @@ class Form extends InteractiveWidget<List<List<Object?>>> {
     // Render the current group
     buf.write(groups[_pageIndex].render());
 
+    // ── Error line (from the focused widget) ──
+    final currentGroup = groups[_pageIndex];
+    final focused = currentGroup.widgets[currentGroup.focusIndex];
+    final errorText = (focused is InteractiveWidget) ? focused.error : null;
+    buf.writeln(
+      errorText != null
+          ? '${Icon.error} $errorText'.style(Theme.current.error)
+          : '',
+    );
+
+    // ── Guide line with page indicator ──
+    buf.write(
+      '${_guideTextFor(focused).dim}  ${'${_pageIndex + 1}/${widgets.length}'.dim}',
+    );
+
     return buf.toString();
+  }
+
+  /// Returns context-appropriate guide text for the focused widget.
+  String _guideTextFor(Widget focused) {
+    if (focused is InteractiveWidget) {
+      return focused.usage;
+    }
+    return '';
   }
 
   @override
@@ -74,47 +107,5 @@ class Form extends InteractiveWidget<List<List<Object?>>> {
     }
 
     return result;
-  }
-
-  @override
-  List<List<Object?>> get value {
-    return [for (final group in groups) group.value];
-  }
-
-  @override
-  bool get isDone => _isDone;
-
-  @override
-  List<List<Object?>> write() {
-    terminal.cursorHide();
-    terminal.updateScreen(render());
-
-    final result = terminal.runRawModeSync(() {
-      while (true) {
-        final event = terminal.readKeySync();
-        final keyResult = handleKey(event);
-
-        if (keyResult == KeyResult.consumed || keyResult == KeyResult.done) {
-          terminal.updateScreen(render());
-        }
-
-        if (keyResult == KeyResult.done) {
-          return value;
-        }
-      }
-    });
-
-    terminal.clearScreen();
-    terminal.write(render());
-    terminal.cursorShow();
-    return result;
-  }
-
-  @override
-  String renderCompact() {
-    if (title != null) {
-      return '${title!.style(Theme.current.title)}  ${'(${groups.length} pages)'.dim}\n';
-    }
-    return '${'Form'.style(Theme.current.title)}  ${'(${groups.length} pages)'.dim}\n';
   }
 }

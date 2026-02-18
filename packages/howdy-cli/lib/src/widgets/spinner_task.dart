@@ -22,6 +22,9 @@ class SpinnerTask<T> extends InteractiveWidget<T> {
   T? _value;
   bool _isDone = false;
 
+  @override
+  String get usage => '';
+
   static Future<T> send<T>({
     required String label,
     required Future<T> Function() task,

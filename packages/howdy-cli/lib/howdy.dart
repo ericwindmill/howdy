@@ -14,8 +14,9 @@ export 'src/framework/widget.dart';
 
 // Widgets
 export 'src/widgets/confirm_input.dart';
-export 'src/widgets/select.dart';
+export 'src/widgets/group.dart';
 export 'src/widgets/multi_select.dart';
+export 'src/widgets/select.dart';
 export 'src/widgets/spinner.dart';
 export 'src/widgets/spinner_task.dart';
 export 'src/widgets/table.dart';
@@ -25,4 +26,3 @@ export 'src/widgets/prompt.dart';
 
 // Forms
 export 'src/forms/form.dart';
-export 'src/forms/group.dart';

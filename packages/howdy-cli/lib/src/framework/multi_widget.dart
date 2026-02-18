@@ -10,6 +10,9 @@ class MultiWidgetResults {
   Object? operator [](String key) {
     return _values[key];
   }
+
+  /// All result keys.
+  Iterable<String> get keys => _values.keys;
 }
 
 abstract class MultiWidget extends Widget<MultiWidgetResults> {
@@ -17,11 +20,7 @@ abstract class MultiWidget extends Widget<MultiWidgetResults> {
 
   final List<Widget> widgets;
 
-  int _focusIndex = 0;
-
-  bool _isDone = false;
-
-  bool get isDone => _isDone;
+  int get focusIndex => 0;
 
   @override
   MultiWidgetResults get value {
@@ -29,74 +28,23 @@ abstract class MultiWidget extends Widget<MultiWidgetResults> {
     for (final widget in widgets) {
       if (widget is DisplayWidget) continue;
 
-      results[key ?? widget.value] = widget.value;
+      // Merge child MultiWidget results (e.g. Group inside Form)
+      // into the parent so all keys are accessible at the top level.
+      if (widget is MultiWidget) {
+        final childResults = widget.value;
+        for (final key in childResults.keys) {
+          results[key] = childResults[key];
+        }
+      } else {
+        results[widget.key ?? ''] = widget.value;
+      }
     }
 
     return results;
   }
 
-  /* * * * * * * * * * *
-  
-  Handle key stroke section.
-
-  Recieves key events, handles navigation, and delegates
-  interaction to child widgets
-
-  * * * * * * * * * * */
-  KeyResult handleKey(KeyEvent event) {
-    if (isDone) return KeyResult.ignored;
-    final focused = widgets[_focusIndex];
-
-    // Check for group-level navigation first
-    if (event case SpecialKey(key: Key.shiftTab)) {
-      if (_focusIndex > 0) {
-        _focusIndex--;
-        return KeyResult.consumed;
-      }
-      return KeyResult.ignored;
-    }
-
-    // delegate to widget
-    var result = switch (focused) {
-      DisplayWidget _ => _handleKeyDisplayWidget(event),
-      InteractiveWidget w => _handleKeyInputWidget(event, w),
-      MultiWidget w => _handleKeyMultiWidget(event, w),
-    };
-
-    // handle navigation
-    if (result == KeyResult.done) {
-      // Widget completed — advance focus
-      if (_focusIndex < widgets.length - 1) {
-        _focusIndex++;
-        return KeyResult.consumed;
-      } else {
-        // All widgets done
-        _isDone = true;
-        return KeyResult.done;
-      }
-    }
-
-    return result;
-  }
-
-  KeyResult _handleKeyDisplayWidget(KeyEvent event) {
-    return KeyResult.done;
-  }
-
-  KeyResult _handleKeyInputWidget(KeyEvent event, InteractiveWidget widget) {
-    return widget.handleKey(event);
-  }
-
-  KeyResult _handleKeyMultiWidget(KeyEvent event, MultiWidget widget) {
-    return widget.handleKey(event);
-  }
-
-  /* * * * * * * * * * *
-  
-  Build and write section
-
-  * * * * * * * * * * */
-
+  // For now, all Multiwidgets use the same write logic.
+  // It's possible that I'll need to make this an abstract method, we'll see.
   @override
   MultiWidgetResults write() {
     terminal.cursorHide();

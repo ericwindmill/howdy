@@ -27,34 +27,20 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     required this.options,
     super.help,
     super.validator,
-    TextStyle? labelStyle,
-    TextStyle? helpStyle,
-    TextStyle? selectedStyle,
-    TextStyle? optionStyle,
-    TextStyle? successStyle,
-    TextStyle? errorStyle,
-  }) : labelStyle = labelStyle ?? Theme.current.title,
-       helpStyle = helpStyle ?? Theme.current.label,
-       selectedStyle = selectedStyle ?? const TextStyle(foreground: Color.cyan),
-       optionStyle = optionStyle ?? Theme.current.body,
-       successStyle = successStyle ?? Theme.current.success,
-       errorStyle = errorStyle ?? Theme.current.error {
+    super.key,
+    super.theme,
+  }) {
     selected = List<bool>.filled(options.length, false);
   }
 
   final List<Option<T>> options;
   late final List<bool> selected;
 
-  final TextStyle labelStyle;
-  final TextStyle helpStyle;
-  final TextStyle selectedStyle;
-  final TextStyle optionStyle;
-  final TextStyle successStyle;
-  final TextStyle errorStyle;
-
   int selectedIndex = 0;
   bool _isDone = false;
-  String? _error;
+
+  @override
+  String get usage => 'space to toggle, enter to submit';
 
   /// Convenience factory, uses active theme values.
   static List<T> send<T>({
@@ -82,46 +68,45 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
 
       if (isCursor) {
         buf.writeln(
-          '  $prefix$marker ${options[i].label}'.style(selectedStyle),
+          '  $prefix$marker ${options[i].label}'.style(theme.selected),
         );
       } else {
-        buf.writeln('  $prefix$marker ${options[i].label}'.style(optionStyle));
+        buf.writeln(
+          '  $prefix$marker ${options[i].label}'.style(theme.body),
+        );
       }
     }
     return buf.toString();
   }
 
   @override
-  String renderCompact() {
-    final buf = StringBuffer();
-    buf.writeln(label.style(labelStyle));
-    return buf.toString();
-  }
-
-  @override
   String build(StringBuffer buf) {
-    final parts = [
-      // The prompt label (with hint for multiselect)
-      '${label.style(labelStyle)}  ${'(space to toggle, enter to confirm)'.dim}',
+    // The prompt label (with hint for multiselect)
+    buf.writeln(label.style(theme.label));
 
-      // Optional help text
-      if (help != null) help!.style(helpStyle),
+    // Optional help text
+    if (help != null) buf.writeln(help!.style(theme.body));
 
-      // The result / option list
-      if (isDone)
-        '${Icon.check} $_selectedLabels'.success
-      else
-        renderOptionsString(),
+    // The result / option list
+    if (isDone) {
+      buf.writeln('  ${Icon.check} $selectedLabels'.success);
+    } else {
+      buf.write(renderOptionsString());
+    }
 
-      // Reserve a line for the error
-      _error != null ? '${Icon.error} $_error'.style(errorStyle) : '',
-    ];
+    // Controls string
+    if (isStandalone) buf.writeln(usage.dim);
 
-    buf.writeAll(parts, '\n');
+    // Reserve a line for the error
+    if (isStandalone) {
+      buf.write(
+        error != null ? '  ${Icon.error} $error'.style(theme.error) : '',
+      );
+    }
     return buf.toString();
   }
 
-  String get _selectedLabels {
+  String get selectedLabels {
     final labels = <String>[];
     for (var i = 0; i < options.length; i++) {
       if (selected[i]) labels.add(options[i].label);
@@ -151,11 +136,11 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
         if (validator != null) {
           final error = validator!(value);
           if (error != null) {
-            _error = error;
+            this.error = error;
             return KeyResult.consumed;
           }
         }
-        _error = null;
+        error = null;
         _isDone = true;
         return KeyResult.done;
       default:

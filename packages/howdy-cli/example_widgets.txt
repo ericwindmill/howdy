@@ -115,7 +115,7 @@ the results together
 
 ```example
 
-  Title or Description.dim (optional, one line)
+  Title or Description.dim (optional, one line) 1/2 (page number, aligned right)
 
   <-----
   
@@ -127,5 +127,5 @@ the results together
   ---->
 
   error or warning line (can be blank, warning is yellow, error is red)
-  guide.dim (e.g. "up/down to select, enter for next" changes depend on focused element)    1/2 (page number, aligned right)
+  guide.dim (e.g. "up/down to select, enter for next" changes depend on focused element)    
 ```

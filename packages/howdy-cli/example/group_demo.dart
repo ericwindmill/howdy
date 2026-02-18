@@ -23,6 +23,7 @@ void main() {
         if (value.contains(' ')) return 'Name cannot contain spaces';
         return null;
       },
+      key: 'name',
     ),
     Select<String>(
       label: 'Language',
@@ -31,6 +32,7 @@ void main() {
         Option(label: 'TypeScript', value: 'ts'),
         Option(label: 'Python', value: 'python'),
       ],
+      key: 'lang',
     ),
     Multiselect<String>(
       label: 'Features',
@@ -44,14 +46,15 @@ void main() {
         if (selected.isEmpty) return 'Select at least one feature';
         return null;
       },
+      key: 'features',
     ),
-    ConfirmInput(label: 'Initialize git?', defaultValue: true),
+    ConfirmInput(label: 'Initialize git?', defaultValue: true, key: 'git'),
   ]);
 
-  final name = results[0] as String;
-  final lang = results[1] as String;
-  final features = results[2] as List<String>;
-  final useGit = results[3] as bool;
+  final name = results['name'] as String;
+  final lang = results['lang'] as String;
+  final features = results['features'] as List<String>;
+  final useGit = results['git'] as bool;
 
   print('');
   Table.send(

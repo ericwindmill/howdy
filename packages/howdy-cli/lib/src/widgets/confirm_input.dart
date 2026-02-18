@@ -15,32 +15,18 @@ import 'package:howdy/src/terminal/theme.dart';
 class ConfirmInput extends InteractiveWidget<bool> {
   ConfirmInput({
     required super.label,
+    super.key,
     super.help,
     super.defaultValue = false,
     super.validator,
-    TextStyle? labelStyle,
-    TextStyle? helpStyle,
-    TextStyle? hintStyle,
-    TextStyle? successStyle,
-    TextStyle? errorStyle,
-    TextStyle? valueStyle,
-  }) : labelStyle = labelStyle ?? Theme.current.title,
-       helpStyle = helpStyle ?? Theme.current.label,
-       hintStyle = hintStyle ?? Theme.current.label,
-       successStyle = successStyle ?? Theme.current.success,
-       errorStyle = errorStyle ?? Theme.current.error,
-       valueStyle = valueStyle ?? Theme.current.body;
-
-  final TextStyle labelStyle;
-  final TextStyle helpStyle;
-  final TextStyle hintStyle;
-  final TextStyle successStyle;
-  final TextStyle errorStyle;
-  final TextStyle valueStyle;
+    super.theme,
+  });
 
   bool _value = false;
   bool _isDone = false;
-  String? _error;
+
+  @override
+  String get usage => 'y/n to choose, enter to submit';
 
   /// Convenience factory, uses active theme values.
   static bool send(
@@ -77,12 +63,12 @@ class ConfirmInput extends InteractiveWidget<bool> {
     if (validator != null) {
       final error = validator!(chosen);
       if (error != null) {
-        _error = error;
+        this.error = error;
         return KeyResult.consumed;
       }
     }
 
-    _error = null;
+    error = null;
     _value = chosen;
     _isDone = true;
     return KeyResult.done;
@@ -96,24 +82,27 @@ class ConfirmInput extends InteractiveWidget<bool> {
 
   @override
   String build(StringBuffer buf) {
-    final parts = [
-      // The prompt label
-      label.style(labelStyle),
+    // The prompt label
+    buf.writeln(label.style(theme.label));
 
-      // Optional help text
-      if (help != null) help!.style(helpStyle),
+    // Optional help text
+    if (help != null) buf.writeln(help!.style(theme.body));
 
-      // The input / result line
-      if (isDone)
-        '${Icon.check} ${_value ? 'Yes' : 'No'}'.success
-      else
-        '${Icon.cursor} ($_hint)'.style(hintStyle),
+    // The input / result line
+    if (isDone) {
+      buf.writeln('  ${Icon.check} ${_value ? 'Yes' : 'No'}'.success);
+    } else {
+      buf.writeln(
+        '  ${Icon.cursor} ($_hint)'.style(theme.defaultValue),
+      );
+    }
 
-      // Reserve a line for the error, regardless of whether it exists
-      hasError ? '${Icon.error} $_error'.style(errorStyle) : '',
-    ];
-
-    buf.writeAll(parts, '\n');
+    // Reserve a line for the error, regardless of whether it exists
+    if (isStandalone) {
+      buf.write(
+        hasError ? '${Icon.error} $error'.style(theme.error) : '',
+      );
+    }
     return buf.toString();
   }
 
