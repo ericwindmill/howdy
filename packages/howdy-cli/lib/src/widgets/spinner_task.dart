@@ -14,10 +14,9 @@ import 'package:howdy/howdy.dart';
 ///   },
 /// ).render();
 /// ```
-class SpinnerTask<T> extends InputWidget<T> {
-  SpinnerTask({required this.label, required this.task});
+class SpinnerTask<T> extends InteractiveWidget<T> {
+  SpinnerTask({required super.label, required this.task});
 
-  final String label;
   final Future<T> Function() task;
 
   T? _value;
@@ -27,7 +26,7 @@ class SpinnerTask<T> extends InputWidget<T> {
     required String label,
     required Future<T> Function() task,
   }) {
-    return SpinnerTask<T>(this.label: label, task: task).write();
+    return SpinnerTask<T>(label: label, task: task).write();
   }
 
   @override

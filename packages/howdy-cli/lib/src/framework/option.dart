@@ -1,4 +1,4 @@
-import 'package:howdy/src/terminal/text_style.dart';
+import 'package:howdy/howdy.dart';
 
 /// A selectable option for use with [Select] and [Multiselect] primitives.
 class Option<T> {

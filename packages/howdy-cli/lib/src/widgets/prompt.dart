@@ -17,7 +17,7 @@ import 'package:howdy/src/terminal/theme.dart';
 /// ```dart
 /// final name = Prompt.send('Project name', defaultValue: 'my_app');
 /// ```
-class Prompt extends InputWidget<String> {
+class Prompt extends InteractiveWidget<String> {
   Prompt({
     required super.label,
     super.help,

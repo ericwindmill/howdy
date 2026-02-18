@@ -3,13 +3,13 @@ import 'package:howdy/src/terminal/extensions.dart';
 
 class Text extends DisplayWidget {
   Text(
-    this.input, {
+    this.label, {
     this.leading = '',
     this.style = const TextStyle(),
     this.newline = true,
   });
 
-  final String input;
+  final String label;
   final String leading;
   final TextStyle style;
   final bool newline;
@@ -47,13 +47,12 @@ class Text extends DisplayWidget {
     final buffer = StringBuffer();
     final spans = [
       if (leading.isNotEmpty) StyledText(leading, style: style),
-      StyledText(input, style: style),
+      StyledText(label, style: style),
     ];
     newline ? buffer.writeSpansLn(spans) : buffer.writeSpans(spans);
     return buffer.toString();
   }
 
-  @override
   bool get isDone => true;
 
   @override

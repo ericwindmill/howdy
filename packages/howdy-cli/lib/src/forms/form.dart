@@ -1,4 +1,5 @@
 import 'package:howdy/howdy.dart';
+import 'package:howdy/src/terminal/theme.dart';
 
 /// A multi-page form composed of [Group]s.
 ///
@@ -21,7 +22,7 @@ import 'package:howdy/howdy.dart';
 /// // results[0] -> [name, language]  (page 1)
 /// // results[1] -> [features, git]   (page 2)
 /// ```
-class Form extends InputWidget<List<List<Object?>>> {
+class Form extends InteractiveWidget<List<List<Object?>>> {
   Form(this.groups, {this.title});
 
   /// The groups (pages) in this form.
@@ -40,19 +41,10 @@ class Form extends InputWidget<List<List<Object?>>> {
 
   @override
   String build(StringBuffer buf) {
-    final buf = StringBuffer();
-
     // Show title with page indicator
     if (title != null) {
       buf.write(
-        renderSpans([
-          StyledText('? ', style: TextStyle(foreground: Color.green)),
-          StyledText(title!, style: TextStyle(bold: true)),
-          StyledText(
-            '  (page ${_pageIndex + 1}/${groups.length})',
-            style: TextStyle(dim: true),
-          ),
-        ]),
+        '${title!.style(Theme.current.title)}  ${'(page ${_pageIndex + 1}/${groups.length})'.dim}',
       );
       buf.writeln();
     }
@@ -94,9 +86,8 @@ class Form extends InputWidget<List<List<Object?>>> {
 
   @override
   List<List<Object?>> write() {
-    final buffer = ScreenBuffer();
     terminal.cursorHide();
-    buffer.update(render());
+    terminal.updateScreen(render());
 
     final result = terminal.runRawModeSync(() {
       while (true) {
@@ -104,8 +95,7 @@ class Form extends InputWidget<List<List<Object?>>> {
         final keyResult = handleKey(event);
 
         if (keyResult == KeyResult.consumed || keyResult == KeyResult.done) {
-          // Clear previous page output and render new state
-          buffer.update(render());
+          terminal.updateScreen(render());
         }
 
         if (keyResult == KeyResult.done) {
@@ -114,6 +104,8 @@ class Form extends InputWidget<List<List<Object?>>> {
       }
     });
 
+    terminal.clearScreen();
+    terminal.write(render());
     terminal.cursorShow();
     return result;
   }
@@ -121,8 +113,8 @@ class Form extends InputWidget<List<List<Object?>>> {
   @override
   String renderCompact() {
     if (title != null) {
-      return '${renderSpans([StyledText(title!, style: TextStyle(bold: true)), StyledText('  (${groups.length} pages)', style: TextStyle(dim: true))])}\n';
+      return '${title!.style(Theme.current.title)}  ${'(${groups.length} pages)'.dim}\n';
     }
-    return '${renderSpans([StyledText('Form', style: TextStyle(bold: true)), StyledText('  (${groups.length} pages)', style: TextStyle(dim: true))])}\n';
+    return '${'Form'.style(Theme.current.title)}  ${'(${groups.length} pages)'.dim}\n';
   }
 }

@@ -12,29 +12,24 @@ import 'package:howdy/src/terminal/theme.dart';
 /// ```dart
 /// final ok = ConfirmInput.send('Delete everything?', defaultValue: false);
 /// ```
-class ConfirmInput extends InputWidget<bool> {
+class ConfirmInput extends InteractiveWidget<bool> {
   ConfirmInput({
     required super.label,
     super.help,
-    bool defaultValue = false,
-    Validator<bool>? validator,
+    super.defaultValue = false,
+    super.validator,
     TextStyle? labelStyle,
     TextStyle? helpStyle,
     TextStyle? hintStyle,
     TextStyle? successStyle,
     TextStyle? errorStyle,
     TextStyle? valueStyle,
-  }) : _defaultValue = defaultValue,
-       _validator = validator,
-       labelStyle = labelStyle ?? Theme.current.title,
+  }) : labelStyle = labelStyle ?? Theme.current.title,
        helpStyle = helpStyle ?? Theme.current.label,
        hintStyle = hintStyle ?? Theme.current.label,
        successStyle = successStyle ?? Theme.current.success,
        errorStyle = errorStyle ?? Theme.current.error,
        valueStyle = valueStyle ?? Theme.current.body;
-
-  final bool _defaultValue;
-  final Validator<bool>? _validator;
 
   final TextStyle labelStyle;
   final TextStyle helpStyle;
@@ -62,7 +57,7 @@ class ConfirmInput extends InputWidget<bool> {
     ).write();
   }
 
-  String get _hint => _defaultValue ? 'Y/n' : 'y/N';
+  String get _hint => (defaultValue ?? false) ? 'Y/n' : 'y/N';
 
   @override
   KeyResult handleKey(KeyEvent event) {
@@ -73,14 +68,14 @@ class ConfirmInput extends InputWidget<bool> {
       case CharKey(char: 'n' || 'N'):
         chosen = false;
       case SpecialKey(key: Key.enter):
-        chosen = _defaultValue;
+        chosen = defaultValue ?? false;
       default:
         return KeyResult.ignored;
     }
 
     // Run validator before completing
-    if (_validator != null) {
-      final error = _validator(chosen);
+    if (validator != null) {
+      final error = validator!(chosen);
       if (error != null) {
         _error = error;
         return KeyResult.consumed;
@@ -94,7 +89,7 @@ class ConfirmInput extends InputWidget<bool> {
   }
 
   @override
-  bool get value => _isDone ? _value : _defaultValue;
+  bool get value => _isDone ? _value : (defaultValue ?? false);
 
   @override
   bool get isDone => _isDone;

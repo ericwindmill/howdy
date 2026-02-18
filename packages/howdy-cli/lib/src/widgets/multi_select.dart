@@ -1,28 +1,28 @@
 import 'package:howdy/howdy.dart';
 import 'package:howdy/src/terminal/theme.dart';
 
-/// A single-choice select list.
+/// A multi-choice select list.
 ///
-/// Arrow keys navigate, Enter confirms.
+/// Arrow keys navigate, Space toggles, Enter confirms.
 ///
 ///```txt
-/// Pick a language
-///   ❯ Dart
-///     Go
-///     Rust
+/// Pick features  (space to toggle, enter to confirm)
+///   ❯ ◉ Linting
+///     ◯ Testing
+///     ◯ CI/CD
 ///```
 ///
 /// ```dart
-/// final lang = Select.send<String>(
-///   label: 'Pick a language',
+/// final features = Multiselect.send<String>(
+///   label: 'Pick features',
 ///   options: [
-///     Option(label: 'Dart', value: 'dart'),
-///     Option(label: 'Go',   value: 'go'),
+///     Option(label: 'Linting', value: 'lint'),
+///     Option(label: 'Testing', value: 'test'),
 ///   ],
 /// );
 /// ```
-class Select<T> extends InteractiveWidget<T> {
-  Select({
+class Multiselect<T> extends InteractiveWidget<List<T>> {
+  Multiselect({
     required super.label,
     required this.options,
     super.help,
@@ -38,9 +38,12 @@ class Select<T> extends InteractiveWidget<T> {
        selectedStyle = selectedStyle ?? const TextStyle(foreground: Color.cyan),
        optionStyle = optionStyle ?? Theme.current.body,
        successStyle = successStyle ?? Theme.current.success,
-       errorStyle = errorStyle ?? Theme.current.error;
+       errorStyle = errorStyle ?? Theme.current.error {
+    selected = List<bool>.filled(options.length, false);
+  }
 
   final List<Option<T>> options;
+  late final List<bool> selected;
 
   final TextStyle labelStyle;
   final TextStyle helpStyle;
@@ -54,13 +57,13 @@ class Select<T> extends InteractiveWidget<T> {
   String? _error;
 
   /// Convenience factory, uses active theme values.
-  static T send<T>({
+  static List<T> send<T>({
     required String label,
     required List<Option<T>> options,
     String? description,
-    Validator<T>? validator,
+    Validator<List<T>>? validator,
   }) {
-    return Select<T>(
+    return Multiselect<T>(
       label: label,
       options: options,
       help: description,
@@ -72,14 +75,17 @@ class Select<T> extends InteractiveWidget<T> {
   String renderOptionsString() {
     final buf = StringBuffer();
     for (var i = 0; i < options.length; i++) {
-      final isSelected = i == selectedIndex;
-      final option = options[i];
-      final style = option.textStyle.hasStyle ? option.textStyle : optionStyle;
+      final isCursor = i == selectedIndex;
+      final isChecked = selected[i];
+      final marker = isChecked ? Icon.optionFilled : Icon.optionEmpty;
+      final prefix = isCursor ? '${Icon.cursor} ' : '  ';
 
-      if (isSelected) {
-        buf.writeln('  ${Icon.cursor} ${option.label}'.style(selectedStyle));
+      if (isCursor) {
+        buf.writeln(
+          '  $prefix$marker ${options[i].label}'.style(selectedStyle),
+        );
       } else {
-        buf.writeln('    ${option.label}'.style(style));
+        buf.writeln('  $prefix$marker ${options[i].label}'.style(optionStyle));
       }
     }
     return buf.toString();
@@ -95,15 +101,15 @@ class Select<T> extends InteractiveWidget<T> {
   @override
   String build(StringBuffer buf) {
     final parts = [
-      // The prompt label
-      label.style(labelStyle),
+      // The prompt label (with hint for multiselect)
+      '${label.style(labelStyle)}  ${'(space to toggle, enter to confirm)'.dim}',
 
       // Optional help text
       if (help != null) help!.style(helpStyle),
 
       // The result / option list
       if (isDone)
-        '${Icon.check} ${options[selectedIndex].label}'.success
+        '${Icon.check} $_selectedLabels'.success
       else
         renderOptionsString(),
 
@@ -113,6 +119,14 @@ class Select<T> extends InteractiveWidget<T> {
 
     buf.writeAll(parts, '\n');
     return buf.toString();
+  }
+
+  String get _selectedLabels {
+    final labels = <String>[];
+    for (var i = 0; i < options.length; i++) {
+      if (selected[i]) labels.add(options[i].label);
+    }
+    return labels.isEmpty ? '(none)' : labels.join(', ');
   }
 
   @override
@@ -130,6 +144,9 @@ class Select<T> extends InteractiveWidget<T> {
           return KeyResult.consumed;
         }
         return KeyResult.ignored;
+      case SpecialKey(key: Key.space):
+        selected[selectedIndex] = !selected[selectedIndex];
+        return KeyResult.consumed;
       case SpecialKey(key: Key.enter):
         if (validator != null) {
           final error = validator!(value);
@@ -147,13 +164,19 @@ class Select<T> extends InteractiveWidget<T> {
   }
 
   @override
-  T get value => options[selectedIndex].value;
+  List<T> get value {
+    final results = <T>[];
+    for (var i = 0; i < options.length; i++) {
+      if (selected[i]) results.add(options[i].value);
+    }
+    return results;
+  }
 
   @override
   bool get isDone => _isDone;
 
   @override
-  T write() {
+  List<T> write() {
     terminal.cursorHide();
     terminal.updateScreen(render());
 

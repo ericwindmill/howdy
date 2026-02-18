@@ -19,11 +19,11 @@ import 'package:howdy/howdy.dart';
 /// ```
 ///
 /// Use Tab/Enter to advance to the next field, Shift+Tab to go back.
-class Group extends InputWidget<List<Object?>> {
+class Group extends InteractiveWidget<List<Object?>> {
   Group(this.widgets);
 
   /// The widgets in this group, rendered top-to-bottom.
-  final List<Widget> widgets;
+  final List<InteractiveWidget> widgets;
 
   /// Index of the currently focused widget.
   int _focusIndex = 0;
@@ -31,13 +31,12 @@ class Group extends InputWidget<List<Object?>> {
   bool _isDone = false;
 
   /// Convenience to run a group and return results.
-  static List<Object?> send(List<Widget> widgets) {
+  static List<Object?> send(List<InteractiveWidget> widgets) {
     return Group(widgets).write();
   }
 
   @override
   String build(StringBuffer buf) {
-    final buf = StringBuffer();
     for (var i = 0; i < widgets.length; i++) {
       final widget = widgets[i];
       if (widget.isDone) {
@@ -97,16 +96,15 @@ class Group extends InputWidget<List<Object?>> {
 
   @override
   List<Object?> write() {
-    final buffer = ScreenBuffer();
     terminal.cursorHide();
-    buffer.update(render());
+    terminal.updateScreen(render());
 
-    final result = terminal.runRawModeSync(() {
+    terminal.runRawModeSync(() {
       while (true) {
         final event = terminal.readKeySync();
         final keyResult = handleKey(event);
         if (keyResult == KeyResult.consumed || keyResult == KeyResult.done) {
-          buffer.update(render());
+          terminal.updateScreen(render());
         }
         if (keyResult == KeyResult.done) {
           return value;
@@ -114,7 +112,9 @@ class Group extends InputWidget<List<Object?>> {
       }
     });
 
+    terminal.clearScreen();
+    terminal.write(render());
     terminal.cursorShow();
-    return result;
+    return value;
   }
 }

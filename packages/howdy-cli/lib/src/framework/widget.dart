@@ -1,6 +1,10 @@
 import 'dart:async';
 
-import 'package:howdy/src/terminal/key_event.dart';
+import 'package:howdy/howdy.dart';
+
+part 'multi_widget.dart';
+part 'display_widget.dart';
+part 'interactive_widget.dart';
 
 /// How a widget responded to a key event.
 enum KeyResult {
@@ -29,6 +33,10 @@ typedef Validator<T> = String? Function(T value);
 /// [render] + [handleKey] are the composable building blocks
 /// that Form/Group use.
 sealed class Widget<T> {
+  String? key;
+
+  Widget({String? key});
+
   /// Render current visual state as a string. Does NOT write to output.
   /// Generally, you want to override `build` instead of render.
   String render() {
@@ -36,13 +44,6 @@ sealed class Widget<T> {
     final str = build(buf);
     return str;
   }
-
-  /// Render a compact version for unfocused display within a Group.
-  ///
-  /// Override for widgets with long interactive displays (like Select)
-  /// to show just a one-line label when not focused.
-  /// Defaults to [render].
-  String renderCompact() => render();
 
   String build(StringBuffer buf);
 
@@ -57,39 +58,4 @@ sealed class Widget<T> {
   /// For input widgets, this may be a partial/default value until
   /// [isDone] is true. For output widgets, this returns immediately.
   T get value;
-}
-
-abstract class DisplayWidget extends Widget<void> {
-  @override
-  void get value {}
-}
-
-abstract class InputWidget<T> extends Widget<T> {
-  InputWidget({
-    required this.label,
-    this.help,
-    this.defaultValue,
-    this.validator,
-  });
-
-  final String label;
-  final String? help;
-  final String? defaultValue;
-  final Validator<String>? validator;
-
-  String? _error;
-
-  /// Whether the widget has finished collecting input.
-  bool get isDone;
-
-  bool get hasDefault => defaultValue != null;
-
-  bool get hasError => _error != null;
-
-  /// Process a key event. Override for interactive widgets.
-  ///
-  /// Returns [KeyResult.consumed] if the key changed widget state,
-  /// [KeyResult.ignored] if it wasn't relevant, or [KeyResult.done]
-  /// if the widget has finished collecting input.
-  KeyResult handleKey(KeyEvent event) => KeyResult.ignored;
 }
