@@ -20,7 +20,8 @@ class Theme {
     /// The style applied to usage strings inside widgets
     this.usage = const TextStyle(dim: true),
 
-    this.cursor = const TextStyle(),
+    /// The style applied to the ❯ prompt pointer icon
+    this.pointer = const TextStyle(),
 
     /// Applied to the currently selected/focused option in Select/Multiselect
     this.selected = const TextStyle(foreground: Color.cyan),
@@ -33,6 +34,9 @@ class Theme {
 
     /// Applied to warning strings by default
     this.warning = const TextStyle(foreground: Color.yellow),
+
+    /// The ❯ prompt pointer icon character. Override to change the glyph.
+    this.pointerIcon = Icon.pointer,
   });
 
   final TextStyle label;
@@ -42,8 +46,15 @@ class Theme {
   final TextStyle warning;
   final TextStyle defaultValue;
   final TextStyle usage;
-  final TextStyle cursor;
+
+  /// Style for the ❯ prompt pointer icon.
+  final TextStyle pointer;
+
+  /// Style for selected options in select widgets and y/n in confirm
   final TextStyle selected;
+
+  /// The ❯ prompt pointer icon character.
+  final String pointerIcon;
 }
 
 extension Theming on String {

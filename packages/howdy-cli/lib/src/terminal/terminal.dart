@@ -20,6 +20,37 @@ Terminal get terminal {
 /// ```dart
 /// Terminal.instance = Terminal(output: myCustomSink);
 /// ```
+/// Terminal cursor shape, controlled via ANSI escape sequences.
+///
+/// Each value carries its full escape sequence, including the
+/// `ESC[?12h` blink-enable prefix for blinking variants.
+/// Pass to [Terminal.setCursorShape].
+enum CursorShape {
+  /// Blinking block cursor (▋).
+  blinkingBlock('\x1B[?12h\x1B[1 q'),
+
+  /// Steady (non-blinking) block cursor (█).
+  steadyBlock('\x1B[2 q'),
+
+  /// Blinking underline cursor (_).
+  blinkingUnderline('\x1B[?12h\x1B[3 q'),
+
+  /// Steady underline cursor.
+  steadyUnderline('\x1B[4 q'),
+
+  /// Blinking bar cursor (|) — common IDE default.
+  blinkingBar('\x1B[?12h\x1B[5 q'),
+
+  /// Steady bar cursor.
+  steadyBar('\x1B[6 q')
+  ;
+
+  const CursorShape(this.sequence);
+
+  /// The full ANSI escape sequence for this cursor shape.
+  final String sequence;
+}
+
 class Terminal {
   /// The global terminal instance used by all widgets.
   static final Terminal _instance = Terminal._();
@@ -28,7 +59,22 @@ class Terminal {
     return _instance;
   }
 
-  Terminal._() : _output = stdout, _input = stdin;
+  Terminal._() : _output = stdout, _input = stdin {
+    // Restore the cursor whenever the process exits via a signal.
+    // This covers Ctrl+C (SIGINT) and normal termination (SIGTERM)
+    // without requiring every widget to clean up manually.
+    void restoreCursor(_) {
+      cursorShow();
+      resetCursorShape();
+      exit(0);
+    }
+
+    ProcessSignal.sigint.watch().listen(restoreCursor);
+    // SIGTERM is not supported on Windows, guard with try/catch.
+    try {
+      ProcessSignal.sigterm.watch().listen(restoreCursor);
+    } catch (_) {}
+  }
 
   /// The output sink. Defaults to [stdout].
   IOSink _output;
@@ -176,6 +222,15 @@ class Terminal {
 
   /// Show the cursor.
   void cursorShow() => write('\x1B[?25h');
+
+  /// Set the terminal cursor shape.
+  ///
+  /// Takes effect immediately. Pair with [resetCursorShape] to restore
+  /// the terminal's default on exit.
+  void setCursorShape(CursorShape shape) => write(shape.sequence);
+
+  /// Reset the cursor shape to the terminal's default.
+  void resetCursorShape() => write('\x1B[?12l\x1B[0 q');
 
   // ---------------------------------------------------------------------------
   // Cursor escape sequence strings (for composition / testing)

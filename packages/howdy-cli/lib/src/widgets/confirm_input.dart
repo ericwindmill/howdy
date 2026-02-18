@@ -94,7 +94,7 @@ class ConfirmInput extends InteractiveWidget<bool> {
       buf.writeln('${Icon.check} ${_value ? 'Yes' : 'No'}'.success);
     } else {
       buf.writeln(
-        '${Icon.cursor} ($_hint)'.style(theme.defaultValue),
+        '${Icon.pointer} ($_hint)'.style(theme.defaultValue),
       );
     }
 

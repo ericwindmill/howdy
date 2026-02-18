@@ -62,7 +62,7 @@ class Select<T> extends InteractiveWidget<T> {
 
       if (isSelected && !isDone) {
         buf.writeln(
-          '${Icon.cursor} ${option.label}'.style(theme.selected),
+          '${Icon.pointer} ${option.label}'.style(theme.selected),
         );
       } else if (isSelected && isDone) {
         buf.writeln(

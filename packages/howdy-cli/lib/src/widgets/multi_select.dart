@@ -60,12 +60,12 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   /// Build the option list string.
   String renderOptionsString(IndentedStringBuffer buf) {
     for (var i = 0; i < options.length; i++) {
-      final isCursor = i == selectedIndex;
+      final isPointer = i == selectedIndex;
       final isChecked = selected[i];
       final label = options[i].label;
 
       if (!isDone) {
-        final prefix = isCursor ? '${Icon.cursor} ' : '  ';
+        final prefix = isPointer ? '${Icon.pointer} ' : '  ';
         final marker = isChecked
             ? Icon.optionFilled.selected
             : Icon.optionEmpty.body;

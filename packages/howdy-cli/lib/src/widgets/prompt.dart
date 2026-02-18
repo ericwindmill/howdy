@@ -110,12 +110,12 @@ class Prompt extends InteractiveWidget<String> {
       // When awaiting, and user hasn't typed yet (show default)
       case (false, true):
         buf.writeln(
-          '${Icon.cursor.style(theme.cursor)} ${(defaultValue ?? '').style(theme.defaultValue)}',
+          '${Icon.pointer.style(theme.pointer)} ${(defaultValue ?? '').style(theme.defaultValue)}',
         );
       // When awaiting more input, and user hasn't pressed enter
       case (false, false):
         buf.writeln(
-          '${Icon.cursor.style(theme.cursor)} $_input'.style(
+          '${Icon.pointer.style(theme.pointer)} $_input'.style(
             theme.body,
           ),
         );
@@ -134,8 +134,11 @@ class Prompt extends InteractiveWidget<String> {
 
   @override
   String write() {
-    terminal.cursorHide();
-    terminal.updateScreen(render());
+    // Use a blinking block cursor during text input so the insertion
+    // point is clearly visible. Show the cursor (don't hide it).
+    terminal.setCursorShape(CursorShape.blinkingBlock);
+    terminal.cursorShow();
+    _renderAndPosition();
 
     terminal.runRawModeSync<void>(() {
       while (true) {
@@ -147,17 +150,54 @@ class Prompt extends InteractiveWidget<String> {
         }
 
         if (keyResult == KeyResult.consumed) {
-          terminal.updateScreen(render());
+          // Restore cursor to end of output before updateScreen erases lines.
+          _restoreCursorToBottom();
+          _renderAndPosition();
         }
       }
     });
+
+    // Restore to bottom so clearScreen erases from the right place.
+    _restoreCursorToBottom();
 
     // Show done state — render() handles isDone, use clearScreen + write
     // so the completed line persists (isn't erased by the next widget).
     terminal.clearScreen();
     terminal.write(render());
-    terminal.cursorShow();
+
+    // Restore default cursor shape and hide it for subsequent widgets.
+    terminal.resetCursorShape();
+    terminal.cursorHide();
 
     return value;
+  }
+
+  // How many lines below the input line were rendered last time.
+  int _linesBelow = 0;
+
+  /// Render and reposition the real cursor at the end of the typed input.
+  void _renderAndPosition() {
+    terminal.updateScreen(render());
+
+    // Lines rendered after the input line when standalone:
+    //   writeln()        → blank line
+    //   writeln(usage)   → usage line
+    //   writeln(error)?  → error line (only when hasError)
+    //   writeln()        → blank line
+    // +1 because the input line itself ends with \n, putting the cursor
+    // one line below the input line before we start counting chrome lines.
+    _linesBelow = isStandalone ? (hasError ? 4 : 3) : 0;
+    terminal.cursorUp(_linesBelow + 1);
+
+    // Column: 1-indexed. indent=2, pointer=1, space=1, then input chars.
+    final col = 2 + 1 + 1 + _input.length + 1;
+    terminal.cursorToColumn(col);
+  }
+
+  /// Move cursor back to the end of the rendered output so that
+  /// [updateScreen]'s erase logic works from the correct position.
+  void _restoreCursorToBottom() {
+    terminal.cursorDown(_linesBelow + 1);
+    terminal.cursorToColumn(1);
   }
 }
