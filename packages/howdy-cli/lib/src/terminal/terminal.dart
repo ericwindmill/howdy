@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:howdy/src/terminal/key_event.dart';
 import 'package:howdy/src/terminal/styled_text.dart';
@@ -60,20 +62,29 @@ class Terminal {
   }
 
   Terminal._() : _output = stdout, _input = stdin {
-    // Restore the cursor whenever the process exits via a signal.
-    // This covers Ctrl+C (SIGINT) and normal termination (SIGTERM)
-    // without requiring every widget to clean up manually.
-    void restoreCursor(_) {
+    // Restore the cursor on SIGTERM (fires when the event loop is running).
+    ProcessSignal.sigterm.watch().listen((_) {
       cursorShow();
       resetCursorShape();
       exit(0);
-    }
+    });
 
-    ProcessSignal.sigint.watch().listen(restoreCursor);
-    // SIGTERM is not supported on Windows, guard with try/catch.
-    try {
-      ProcessSignal.sigterm.watch().listen(restoreCursor);
-    } catch (_) {}
+    // SIGINT (Ctrl+C) is tricky: when inside runRawModeSync the main isolate's
+    // event loop is blocked in readByteSync(), so an async signal listener here
+    // can never fire. Spawn a background isolate whose event loop runs freely —
+    // Dart delivers signals to ALL isolates that are watching them, so the
+    // background isolate will receive SIGINT even when the main is blocked.
+    Isolate.spawn(_sigintWatcher, null);
+  }
+
+  /// Watches SIGINT in a background isolate so it fires even when the main
+  /// isolate is blocked in a synchronous read loop.
+  static void _sigintWatcher(dynamic _) {
+    ProcessSignal.sigint.watch().listen((_) {
+      stdout.write('\x1B[?25h'); // show cursor
+      stdout.write('\x1B[?12l\x1B[0 q'); // reset cursor shape
+      exit(0);
+    });
   }
 
   /// The output sink. Defaults to [stdout].
@@ -136,9 +147,9 @@ class Terminal {
 
     if (byte >= 32 && byte < 127) return CharKey(String.fromCharCode(byte));
 
-    // Multi-byte UTF-8
+    // Multi-byte UTF-8: reassemble the bytes and decode as UTF-8.
     if (byte >= 0xC0) {
-      final codeUnits = [byte];
+      final bytes = [byte];
       final remaining = byte < 0xE0
           ? 1
           : byte < 0xF0
@@ -147,10 +158,10 @@ class Terminal {
       for (var i = 0; i < remaining; i++) {
         final next = _input.readByteSync();
         if (next == -1) break;
-        codeUnits.add(next);
+        bytes.add(next);
       }
       try {
-        return CharKey(String.fromCharCodes(codeUnits));
+        return CharKey(utf8.decode(bytes));
       } catch (_) {
         return const SpecialKey(Key.escape);
       }
@@ -335,23 +346,12 @@ class Terminal {
     _previousEchoMode = _input.echoMode;
     _input.lineMode = false;
     _input.echoMode = false;
-    // Dart's lineMode=false only clears ICANON, not ISIG. That means the OS
-    // still converts Ctrl+C into SIGINT instead of byte 3. The async SIGINT
-    // handler can never fire because the Dart event loop is blocked inside
-    // readByteSync(). Disabling ISIG via stty makes Ctrl+C deliver byte 3
-    // directly to our sync read loop, where we handle it explicitly.
-    if (!Platform.isWindows) {
-      Process.runSync('stty', ['-isig']);
-    }
   }
 
   /// Restore the terminal to its previous mode.
   void disableRawMode() {
     _input.lineMode = _previousLineMode;
     _input.echoMode = _previousEchoMode;
-    if (!Platform.isWindows) {
-      Process.runSync('stty', ['isig']);
-    }
   }
 
   /// Run [fn] with raw mode enabled, restoring on exit.
