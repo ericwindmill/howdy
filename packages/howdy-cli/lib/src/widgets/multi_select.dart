@@ -48,7 +48,7 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   }
 
   final List<Option<T>> options;
-  late final List<bool> selected;
+  late List<bool> selected;
 
   int selectedIndex = 0;
   bool _isDone = false;

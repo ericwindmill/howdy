@@ -162,8 +162,11 @@ class Prompt extends InteractiveWidget<String> {
     final lines = rendered.split('\n');
     if (lines.isNotEmpty && lines.last.isEmpty) lines.removeLast();
 
-    // Find the row containing the pointer (the input row).
-    final inputLineIndex = lines.indexWhere((l) => l.contains(Icon.pointer));
+    // Find the row where the cursor should sit.
+    // Single-line: the ❯ pointer row.  Textarea: the *last* │ pipe row.
+    final inputLineIndex = _isTextarea
+        ? lines.lastIndexWhere((l) => l.contains(Icon.pipe))
+        : lines.indexWhere((l) => l.contains(Icon.pointer));
 
     if (inputLineIndex != -1) {
       _linesBelow = lines.length - 1 - inputLineIndex;

@@ -57,6 +57,39 @@ enum Color {
   cyanLight(77, 208, 225),
   cyan(0, 188, 212),
   cyanDark(0, 131, 143),
+
+  // ── Dracula palette ──────────────────────────────
+  draculaBackground(40, 42, 54),
+  draculaSelection(68, 71, 90),
+  draculaForeground(248, 248, 242),
+  draculaComment(98, 114, 164),
+  draculaGreen(80, 250, 123),
+  draculaPurple(189, 147, 249),
+  draculaRed(255, 85, 85),
+  draculaYellow(241, 250, 140),
+
+  // ── Catppuccin Mocha palette ─────────────────────
+  catBase(30, 30, 46),
+  catText(205, 214, 244),
+  catSubtext1(186, 194, 222),
+  catSubtext0(166, 173, 200),
+  catOverlay1(147, 153, 178),
+  catOverlay0(108, 112, 134),
+  catGreen(166, 227, 161),
+  catRed(243, 139, 168),
+  catPink(245, 194, 231),
+  catMauve(203, 166, 247),
+  catRosewater(245, 224, 220),
+
+  // ── Base16 (standard 16-color ANSI approximations) ──
+  ansi0(0, 0, 0),
+  ansi2(0, 205, 0),
+  ansi3(205, 205, 0),
+  ansi5(205, 0, 205),
+  ansi6(0, 205, 205),
+  ansi7(229, 229, 229),
+  ansi8(127, 127, 127),
+  ansi9(255, 0, 0),
   ;
 
   final int r;

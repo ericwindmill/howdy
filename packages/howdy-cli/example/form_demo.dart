@@ -4,6 +4,8 @@ import 'package:howdy/howdy.dart';
 ///
 /// Run: dart run example/form_demo.dart
 void main() {
+  Theme.current = Theme.standard();
+
   Text(
     '\n🧙 Project Wizard (Form Demo)\n',
     style: TextStyle(bold: true, foreground: Color.magenta),

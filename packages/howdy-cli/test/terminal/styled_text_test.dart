@@ -1,0 +1,65 @@
+import 'package:howdy/howdy.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('StyledText', () {
+    test('render applies style', () {
+      final span = StyledText('hi', style: TextStyle(bold: true));
+      expect(span.render(), '\x1B[1mhi\x1B[0m');
+    });
+
+    test('render with no style returns plain text', () {
+      const span = StyledText('hello');
+      expect(span.render(), 'hello');
+    });
+
+    test('length returns raw text length, ignoring style', () {
+      const span = StyledText('hello', style: TextStyle(bold: true));
+      expect(span.length, 5);
+    });
+
+    test('toString delegates to render', () {
+      const span = StyledText('x');
+      expect(span.toString(), span.render());
+    });
+  });
+
+  group('renderSpans', () {
+    test('concatenates styled spans', () {
+      final spans = [
+        StyledText('a', style: TextStyle(bold: true)),
+        StyledText('b'),
+      ];
+      final result = renderSpans(spans);
+      expect(result, contains('a'));
+      expect(result, contains('b'));
+    });
+
+    test('empty list returns empty string', () {
+      expect(renderSpans([]), '');
+    });
+  });
+
+  group('StyledString extension', () {
+    test('.dim applies dim', () {
+      final result = 'hi'.dim;
+      expect(result, contains('\x1B['));
+      expect(result, contains('2'));
+    });
+
+    test('.red applies red foreground', () {
+      final result = 'hi'.red;
+      expect(result, contains(Color.red.fgCode));
+    });
+
+    test('.green applies green foreground', () {
+      final result = 'hi'.green;
+      expect(result, contains(Color.green.fgCode));
+    });
+
+    test('.style applies arbitrary TextStyle', () {
+      final result = 'hi'.style(TextStyle(italic: true));
+      expect(result, contains('3')); // italic code
+    });
+  });
+}
