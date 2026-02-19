@@ -48,7 +48,7 @@ class Theme {
     this.unfocusedBorder = const TextStyle(dim: true),
 
     /// Optional maximum width for the terminal output. If set, content will wrap at this point.
-    this.maxWidth,
+    this.maxWidth = 60,
   });
 
   /// Optional maximum width for the terminal output.

@@ -16,4 +16,6 @@ A sample command-line application providing basic argument parsing with an entry
 - [ ] Add tests
 - [ ] add example file for each widget
 - [ ] TextInput widget that's like prompt but pre-set with multiple lines to encourage a user to type more
+- [ ] confirm styling
+
 
