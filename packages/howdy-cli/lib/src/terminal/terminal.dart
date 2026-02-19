@@ -106,6 +106,10 @@ class Terminal {
     // Dart delivers signals to ALL isolates that are watching them, so the
     // background isolate will receive SIGINT even when the main is blocked.
     Isolate.spawn(_sigintWatcher, null).then((isolate) {
+      if (_activeFeatureCount == 0) {
+        isolate.kill();
+        return;
+      }
       _sigintIsolate = isolate;
     });
   }
@@ -461,30 +465,15 @@ class Terminal {
   // Terminal Info
   // ---------------------------------------------------------------------------
 
-  /// Optional maximum column width for all widget layout.
-  ///
-  /// When set, [columns] returns `min(maxColumns, actualTerminalWidth)` so
-  /// every widget that reads `terminal.columns` automatically respects the cap.
-  ///
-  /// Set to `null` (the default) to use the real terminal width.
-  ///
-  /// ```dart
-  /// terminal.maxColumns = 80; // cap everything at 80 chars wide
-  /// terminal.maxColumns = null; // restore full terminal width
-  /// ```
-  int? maxColumns = 60;
-
   /// The current terminal width in columns, capped at [maxColumns] if set.
   ///
   /// Returns a default of 80 if the terminal width cannot be determined.
   int get columns {
-    int raw;
     try {
-      raw = stdout.terminalColumns;
+      return stdout.terminalColumns;
     } on StdoutException {
-      raw = 80;
+      return 80;
     }
-    return maxColumns != null ? raw.clamp(1, maxColumns!) : raw;
   }
 
   /// The current terminal height in rows.

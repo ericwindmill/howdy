@@ -1,6 +1,5 @@
 import 'package:howdy/howdy.dart';
 
-
 class Theme {
   /// The active theme. Override to customize.
   static const Theme current = Theme();
@@ -47,7 +46,13 @@ class Theme {
 
     /// Left border style for unfocused widgets in a Form.
     this.unfocusedBorder = const TextStyle(dim: true),
+
+    /// Optional maximum width for the terminal output. If set, content will wrap at this point.
+    this.maxWidth,
   });
+
+  /// Optional maximum width for the terminal output.
+  final int? maxWidth;
 
   final TextStyle label;
   final TextStyle body;

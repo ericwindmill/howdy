@@ -73,7 +73,9 @@ sealed class Widget<T> {
   /// Render current visual state as a string. Does NOT write to output.
   /// Usually you want to override [build] instead of [render].
   String render() {
-    final buf = IndentedStringBuffer(maxWidth: terminal.columns);
+    final buf = IndentedStringBuffer(
+      maxWidth: theme.maxWidth ?? terminal.columns,
+    );
     final str = build(buf);
     return str;
   }
