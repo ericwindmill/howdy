@@ -170,7 +170,7 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
 
     // The result / option list
-    buf.indent();
+
     renderOptionsString(buf);
 
     if (isStandalone) {

@@ -108,7 +108,6 @@ class Select<T> extends InteractiveWidget<T> {
           '${Icon.check} ${option.label}'.success,
         );
       } else {
-        buf.indent();
         buf.writeln(option.label.style(style));
         buf.dedent();
       }
@@ -135,7 +134,7 @@ class Select<T> extends InteractiveWidget<T> {
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
 
     // The result / option list
-    buf.indent();
+
     renderOptionsString(buf);
 
     if (isStandalone) {

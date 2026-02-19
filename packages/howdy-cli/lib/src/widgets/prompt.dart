@@ -159,7 +159,10 @@ class Prompt extends InteractiveWidget<String> {
     terminal.updateScreen(rendered);
 
     // Track rows to handle manual wrapping correctly.
-    final lines = rendered.split('\n');
+    // The rendered string is wrapped by updateScreen, so we must
+    // wrap it here to calculate the correct physical lines.
+    final wrapped = rendered.wrapAnsi(terminal.columns);
+    final lines = wrapped.split('\n');
     if (lines.isNotEmpty && lines.last.isEmpty) lines.removeLast();
 
     // Find the row where the cursor should sit.
@@ -202,7 +205,6 @@ class Prompt extends InteractiveWidget<String> {
     // Help / description
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
 
-    buf.indent();
     if (isDone) {
       // ── Completed state (same for both modes) ───────────────────
       buf.writeln('${Icon.check} $value'.success);

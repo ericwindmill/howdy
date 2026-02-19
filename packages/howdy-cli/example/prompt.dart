@@ -4,17 +4,20 @@ void main() {
   Text.body('Prompt demo');
   Text.body('');
 
-  Prompt(
-    label: 'What is your favorite animal?',
-    help: 'This is important information for our database.',
-    defaultValue: 'cat',
+  terminal.maxWidth = 40;
+
+  Prompt.send(
+    '1. What is your name?',
+    help:
+        'Please enter your full name as it appears on your birth certificate or driver\'s license. This helps us verify your identity securely and accurately.',
+    defaultValue: 'John Doe',
     validator: (value) {
       if (value != 'cat') {
         return "Are you sure it isn't cat?";
       }
       return null;
     },
-  ).write();
+  );
 
   Text.body('');
 

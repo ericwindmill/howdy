@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:howdy/src/terminal/extensions.dart';
 import 'package:howdy/src/terminal/key_event.dart';
 import 'package:howdy/src/terminal/styled_text.dart';
 
@@ -62,6 +63,13 @@ class Terminal {
   }
 
   Terminal._() : _output = stdout, _input = stdin;
+
+  /// Optional maximum width for rendering text in columns.
+  ///
+  /// When set, widget text content will automatically wrap
+  /// at [maxWidth]. It will not exceed the physical width
+  /// if the terminal is smaller than [maxWidth].
+  int? maxWidth;
 
   // ---------------------------------------------------------------------------
   // Signal Handling & Cleanup
@@ -473,11 +481,13 @@ class Terminal {
   /// Erase previously rendered lines and write [content].
   void updateScreen(String content) {
     _eraseScreen();
-    write(content);
+    // Wrap the string to the terminal's column width BEFORE printing and counting lines.
+    final wrapped = content.wrapAnsi(columns);
+    write(wrapped);
 
     // Track how many physical lines were rendered.
     // split('\n') gives an extra empty string if content ends in \n.
-    final lines = content.split('\n');
+    final lines = wrapped.split('\n');
     _lastLineCount = (lines.isNotEmpty && lines.last.isEmpty)
         ? lines.length - 1
         : lines.length;
@@ -507,11 +517,16 @@ class Terminal {
   ///
   /// Returns a default of 80 if the terminal width cannot be determined.
   int get columns {
+    int w = 80;
     try {
-      return stdout.terminalColumns;
+      w = stdout.terminalColumns;
     } on StdoutException {
-      return 80;
+      w = 80;
     }
+    if (maxWidth != null) {
+      return maxWidth! < w ? maxWidth! : w;
+    }
+    return w;
   }
 
   /// The current terminal height in rows.

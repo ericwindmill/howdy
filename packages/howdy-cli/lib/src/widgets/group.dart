@@ -23,7 +23,7 @@ class Group extends MultiWidget {
   Group(super.widgets);
 
   /// Convenience to run a group and return results.
-  static MultiWidgetResults send(List<InteractiveWidget> widgets) {
+  static MultiWidgetResults send(List<Widget> widgets) {
     return Group(widgets).write();
   }
 

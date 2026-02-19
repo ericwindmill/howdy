@@ -15,8 +15,8 @@ A sample command-line application providing basic argument parsing with an entry
 - [x] Support full themeing. This means that everying in the existing widgets is mapped to one of the theme values
 - [ ] Add tests
 - [x] add example file for each widget
-- [ ] TextInput widget that's like prompt but pre-set with multiple lines to encourage a user to type more
-- [ ] confirm styling
+- [x] TextInput widget that's like prompt but pre-set with multiple lines to encourage a user to type more
+- [x] confirm styling
 
 
 - constructor

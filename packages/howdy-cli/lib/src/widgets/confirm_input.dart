@@ -95,7 +95,7 @@ class ConfirmInput extends InteractiveWidget<bool> {
     buf.writeln(label.style(fieldStyle.title));
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
     buf.writeln();
-    buf.indent();
+
     if (isDone) {
       buf.writeln('${Icon.check} ${_isYes ? 'Yes' : 'No'}'.success);
     } else {
@@ -109,7 +109,7 @@ class ConfirmInput extends InteractiveWidget<bool> {
 
       final yes = ' Yes '.style(yesStyle);
       final no = ' No '.style(noStyle);
-      buf.writeln('$yes    $no');
+      buf.writeln('$yes $no');
     }
 
     if (isStandalone) {
@@ -120,7 +120,6 @@ class ConfirmInput extends InteractiveWidget<bool> {
       }
       buf.writeln();
     }
-    buf.dedent();
     return buf.toString();
   }
 
