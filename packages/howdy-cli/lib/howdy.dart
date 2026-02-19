@@ -6,13 +6,12 @@ export 'src/terminal/edge_insets.dart';
 export 'src/terminal/indented_string_buffer.dart';
 export 'src/terminal/key_event.dart';
 export 'src/terminal/screen_buffer.dart';
-export 'src/terminal/sign_style.dart';
+export 'src/terminal/border_type.dart';
 export 'src/terminal/styled_text.dart';
 export 'src/terminal/table_style.dart';
 export 'src/terminal/terminal.dart';
 export 'src/terminal/text_style.dart';
 export 'src/terminal/theme.dart';
-export 'src/terminal/word_wrap.dart';
 
 // Framework - base classes for widgets
 export 'src/framework/option.dart';

@@ -45,7 +45,7 @@ void main() {
         'no enclosing box.',
       ),
     ],
-    style: SignStyle.leftOnly,
+    borderType: BorderType.leftOnly,
     padding: const EdgeInsets.only(left: 1),
     margin: const EdgeInsets.only(left: 2),
     width: 40,
@@ -62,7 +62,7 @@ void main() {
         'The text wraps automatically to fit.',
       ),
     ],
-    style: SignStyle.sharp,
+    borderType: BorderType.sharp,
     padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
     margin: const EdgeInsets.symmetric(horizontal: 2),
   ).write();

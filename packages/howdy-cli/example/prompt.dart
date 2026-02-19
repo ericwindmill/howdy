@@ -5,10 +5,8 @@ void main() {
   Text.body('');
 
   Prompt(
-    label:
-        'What is your favorite animal? What is your favorite animal? What is your favorite animal? What is your favorite animal?',
-    help:
-        'This is important information for our database. This is important information for our database. This is important information for our database. This is important information for our database. This is important information for our database.',
+    label: 'What is your favorite animal?',
+    help: 'This is important information for our database.',
     defaultValue: 'cat',
     validator: (value) {
       if (value != 'cat') {
@@ -16,5 +14,13 @@ void main() {
       }
       return null;
     },
+  ).write();
+
+  Text.body('');
+
+  Prompt.textarea(
+    label: 'Describe your project',
+    help: 'A brief summary — press Enter for new lines, Ctrl+D to submit.',
+    defaultValue: 'My awesome project...',
   ).write();
 }

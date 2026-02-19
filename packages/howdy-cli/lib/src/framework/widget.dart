@@ -48,7 +48,7 @@ sealed class Widget<T> {
   /// Used for easy retrieval of results in [MultiWidgetResults]
   String? key;
 
-  Widget({this.key, this.theme = Theme.current});
+  Widget({this.key, Theme? theme}) : theme = theme ?? Theme.current;
 
   /// Optional theme override for this widget.
   /// Falls back to [Theme.current] if not provided.
@@ -73,9 +73,7 @@ sealed class Widget<T> {
   /// Render current visual state as a string. Does NOT write to output.
   /// Usually you want to override [build] instead of [render].
   String render() {
-    final buf = IndentedStringBuffer(
-      maxWidth: theme.maxWidth ?? terminal.columns,
-    );
+    final buf = IndentedStringBuffer();
     final str = build(buf);
     return str;
   }

@@ -9,8 +9,8 @@
 ///   style: SignStyle.rounded,
 /// ).write();
 /// ```
-class SignStyle {
-  const SignStyle({
+class BorderType {
+  const BorderType({
     required this.topLeft,
     required this.topRight,
     required this.bottomLeft,
@@ -54,13 +54,13 @@ class SignStyle {
   final bool left;
 
   /// Returns a copy of this style with the given sides overridden.
-  SignStyle copyWith({
+  BorderType copyWith({
     bool? top,
     bool? right,
     bool? bottom,
     bool? left,
   }) {
-    return SignStyle(
+    return BorderType(
       topLeft: topLeft,
       topRight: topRight,
       bottomLeft: bottomLeft,
@@ -81,7 +81,7 @@ class SignStyle {
   /// │ content │
   /// ╰─────────╯
   /// ```
-  static const rounded = SignStyle(
+  static const rounded = BorderType(
     topLeft: '╭',
     topRight: '╮',
     bottomLeft: '╰',
@@ -97,7 +97,7 @@ class SignStyle {
   /// │ content │
   /// └─────────┘
   /// ```
-  static const sharp = SignStyle(
+  static const sharp = BorderType(
     topLeft: '┌',
     topRight: '┐',
     bottomLeft: '└',
@@ -113,7 +113,7 @@ class SignStyle {
   /// | content |
   /// +---------+
   /// ```
-  static const ascii = SignStyle(
+  static const ascii = BorderType(
     topLeft: '+',
     topRight: '+',
     bottomLeft: '+',
@@ -128,7 +128,7 @@ class SignStyle {
   /// │ content
   /// │ more
   /// ```
-  static const leftOnly = SignStyle(
+  static const leftOnly = BorderType(
     topLeft: '',
     topRight: '',
     bottomLeft: '',

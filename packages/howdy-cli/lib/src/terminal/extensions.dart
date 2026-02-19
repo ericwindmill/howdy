@@ -2,28 +2,6 @@ import 'dart:math';
 
 import 'package:howdy/howdy.dart';
 
-extension Spans on StringBuffer {
-  void writeSpan(StyledText span) {
-    final rendered = renderSpans([span]);
-    write(rendered);
-  }
-
-  void writeSpanLn(StyledText span) {
-    final rendered = renderSpans([span]);
-    writeln(rendered);
-  }
-
-  void writeSpans(List<StyledText> spans) {
-    final rendered = renderSpans(spans);
-    write(rendered);
-  }
-
-  void writeSpansLn(List<StyledText> spans) {
-    final rendered = renderSpans(spans);
-    writeln(rendered);
-  }
-}
-
 // Matches any ANSI escape sequence: ESC [ ... m
 final _ansiEscape = RegExp(r'\x1B\[[0-9;]*m');
 
@@ -36,9 +14,9 @@ extension StringBorderExtension on String {
 
   /// Wraps this rendered string in a border.
   ///
-  /// Which edges are drawn is controlled by the [SignStyle] flags
-  /// ([SignStyle.top], [SignStyle.right], [SignStyle.bottom], [SignStyle.left]).
-  /// Use [SignStyle.copyWith] to draw only specific sides:
+  /// Which edges are drawn is controlled by the [BorderType] flags
+  /// ([BorderType.top], [BorderType.right], [BorderType.bottom], [BorderType.left]).
+  /// Use [BorderType.copyWith] to draw only specific sides:
   ///
   /// ```dart
   /// // Full box (default)
@@ -56,7 +34,7 @@ extension StringBorderExtension on String {
   /// The string may contain ANSI escape sequences — width is measured on
   /// the stripped text so styling doesn't affect layout.
   String withBorder({
-    SignStyle style = SignStyle.rounded,
+    BorderType borderType = BorderType.rounded,
     EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 1),
     TextStyle? borderStyle,
   }) {
@@ -82,46 +60,46 @@ extension StringBorderExtension on String {
     }
 
     // Left/right edge characters for content rows.
-    final leftEdge = style.left ? b(style.vertical) : '';
-    final rightEdge = style.right ? b(style.vertical) : '';
+    final leftEdge = borderType.left ? b(borderType.vertical) : '';
+    final rightEdge = borderType.right ? b(borderType.vertical) : '';
 
     // Corner characters — fall back to the horizontal/vertical char when the
     // adjacent side isn't drawn, so partial borders look clean.
     String topLeftChar() {
-      if (!style.top && !style.left) return '';
-      if (!style.top) return leftEdge;
-      if (!style.left) return b(style.horizontal);
-      return b(style.topLeft);
+      if (!borderType.top && !borderType.left) return '';
+      if (!borderType.top) return leftEdge;
+      if (!borderType.left) return b(borderType.horizontal);
+      return b(borderType.topLeft);
     }
 
     String topRightChar() {
-      if (!style.top && !style.right) return '';
-      if (!style.top) return rightEdge;
-      if (!style.right) return b(style.horizontal);
-      return b(style.topRight);
+      if (!borderType.top && !borderType.right) return '';
+      if (!borderType.top) return rightEdge;
+      if (!borderType.right) return b(borderType.horizontal);
+      return b(borderType.topRight);
     }
 
     String bottomLeftChar() {
-      if (!style.bottom && !style.left) return '';
-      if (!style.bottom) return leftEdge;
-      if (!style.left) return b(style.horizontal);
-      return b(style.bottomLeft);
+      if (!borderType.bottom && !borderType.left) return '';
+      if (!borderType.bottom) return leftEdge;
+      if (!borderType.left) return b(borderType.horizontal);
+      return b(borderType.bottomLeft);
     }
 
     String bottomRightChar() {
-      if (!style.bottom && !style.right) return '';
-      if (!style.bottom) return rightEdge;
-      if (!style.right) return b(style.horizontal);
-      return b(style.bottomRight);
+      if (!borderType.bottom && !borderType.right) return '';
+      if (!borderType.bottom) return rightEdge;
+      if (!borderType.right) return b(borderType.horizontal);
+      return b(borderType.bottomRight);
     }
 
     final buf = StringBuffer();
 
     // Top border.
-    if (style.top) {
+    if (borderType.top) {
       buf.writeln(
         '${topLeftChar()}'
-        '${b(style.horizontal) * outerWidth}'
+        '${b(borderType.horizontal) * outerWidth}'
         '${topRightChar()}',
       );
     }
@@ -151,10 +129,10 @@ extension StringBorderExtension on String {
     }
 
     // Bottom border.
-    if (style.bottom) {
+    if (borderType.bottom) {
       buf.writeln(
         '${bottomLeftChar()}'
-        '${b(style.horizontal) * outerWidth}'
+        '${b(borderType.horizontal) * outerWidth}'
         '${bottomRightChar()}',
       );
     }

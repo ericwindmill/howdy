@@ -15,6 +15,15 @@ abstract class InteractiveWidget<T> extends Widget<T> {
   final T? defaultValue;
   final Validator<T>? validator;
 
+  /// Whether this widget is currently focused in a group or form.
+  bool isFocused = true;
+
+  /// The active style based on focus state.
+  FieldStyles get fieldStyle => isFocused ? theme.focused : theme.blurred;
+
+  @override
+  T get value;
+
   /// The current validation error, if any. Null means valid.
   ///
   /// Subclasses set this in [handleKey] when validation fails.

@@ -17,20 +17,26 @@ import 'package:howdy/howdy.dart';
 class SpinnerTask<T> extends InteractiveWidget<T> {
   SpinnerTask({required super.label, required this.task});
 
-  final Future<T> Function() task;
-
-  T? _value;
-  bool _isDone = false;
-
-  @override
-  String get usage => '';
-
   static Future<T> send<T>({
     required String label,
     required Future<T> Function() task,
   }) {
     return SpinnerTask<T>(label: label, task: task).write();
   }
+
+  final Future<T> Function() task;
+
+  T? _value;
+  bool _isDone = false;
+
+  @override
+  bool get isDone => _isDone;
+
+  @override
+  String get usage => '';
+
+  @override
+  T get value => _value as T;
 
   @override
   String build(IndentedStringBuffer buf) {
@@ -40,12 +46,6 @@ class SpinnerTask<T> extends InteractiveWidget<T> {
     // While running, the spinner handles its own animation frames.
     return label;
   }
-
-  @override
-  T get value => _value as T;
-
-  @override
-  bool get isDone => _isDone;
 
   @override
   Future<T> write() async {

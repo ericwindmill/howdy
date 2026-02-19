@@ -14,8 +14,15 @@ A sample command-line application providing basic argument parsing with an entry
 - [x] in Form only - ability to go back
 - [x] Support full themeing. This means that everying in the existing widgets is mapped to one of the theme values
 - [ ] Add tests
-- [ ] add example file for each widget
+- [x] add example file for each widget
 - [ ] TextInput widget that's like prompt but pre-set with multiple lines to encourage a user to type more
 - [ ] confirm styling
 
 
+- constructor
+- factories / static wrappers
+- properties, getters and setters (alphabeticaly)
+- "optional overrides" and bespoke methods methods (alphabetically)
+- value
+- build
+- write

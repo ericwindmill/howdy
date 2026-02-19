@@ -1,5 +1,4 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/extensions.dart';
 
 class Text extends DisplayWidget {
   Text(
@@ -9,13 +8,16 @@ class Text extends DisplayWidget {
     this.newline = true,
   });
 
-  final String label;
-  final String leading;
-  final TextStyle style;
-  final bool newline;
-
   static void body(String input) {
     Text(input).write();
+  }
+
+  static void error(String input) {
+    Text(
+      input,
+      leading: Icon.error + ' ',
+      style: Theme.current.focused.errorMessage,
+    ).write();
   }
 
   /// Convenience factory — renders a [Text] with a custom [style] and optional [leading].
@@ -28,29 +30,29 @@ class Text extends DisplayWidget {
     Text(input, leading: leading, style: style, newline: newline).write();
   }
 
-  static void warning(String input) {
-    Text(
-      input,
-      leading: Icon.warning + ' ',
-      style: Theme.current.warning,
-    ).write();
-  }
-
-  static void error(String input) {
-    Text(
-      input,
-      leading: Icon.error + ' ',
-      style: Theme.current.error,
-    ).write();
-  }
-
   static void success(String input) {
     Text(
       input,
       leading: Icon.check + ' ',
-      style: Theme.current.success,
+      style: Theme.current.focused.successMessage,
     ).write();
   }
+
+  static void warning(String input) {
+    Text(
+      input,
+      leading: Icon.warning + ' ',
+      style: Theme.current.focused.warningMessage,
+    ).write();
+  }
+
+  final String label;
+  final String leading;
+  final bool newline;
+  final TextStyle style;
+
+  @override
+  bool get isDone => true;
 
   @override
   String build(IndentedStringBuffer buf) {
@@ -59,12 +61,11 @@ class Text extends DisplayWidget {
       if (leading.isNotEmpty) StyledText(leading, style: style),
       StyledText(label, style: style),
     ];
-    newline ? buffer.writeSpansLn(spans) : buffer.writeSpans(spans);
+    newline
+        ? buffer.writeln(renderSpans(spans))
+        : buffer.write(renderSpans(spans));
     return buffer.toString();
   }
-
-  @override
-  bool get isDone => true;
 
   @override
   void write() {

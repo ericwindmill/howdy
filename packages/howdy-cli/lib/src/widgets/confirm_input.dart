@@ -24,22 +24,6 @@ class ConfirmInput extends InteractiveWidget<bool> {
     _isYes = defaultValue ?? false;
   }
 
-  late bool _isYes;
-  bool _isDone = false;
-
-  @override
-  String get usage => usageHint([
-    (keys: '${Icon.arrowLeft} / ${Icon.arrowRight}', action: 'choose'),
-    (keys: 'enter', action: 'submit'),
-  ]);
-
-  @override
-  void reset() {
-    super.reset();
-    _isYes = defaultValue ?? false;
-    _isDone = false;
-  }
-
   /// Convenience factory, uses active theme values.
   static bool send(
     String label, {
@@ -54,6 +38,18 @@ class ConfirmInput extends InteractiveWidget<bool> {
       validator: validator,
     ).write();
   }
+
+  late bool _isYes;
+  bool _isDone = false;
+
+  @override
+  bool get isDone => _isDone;
+
+  @override
+  String get usage => usageHint([
+    (keys: '${Icon.arrowLeft} / ${Icon.arrowRight}', action: 'choose'),
+    (keys: 'enter', action: 'submit'),
+  ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {
@@ -85,34 +81,43 @@ class ConfirmInput extends InteractiveWidget<bool> {
   }
 
   @override
+  void reset() {
+    super.reset();
+    _isYes = defaultValue ?? false;
+    _isDone = false;
+  }
+
+  @override
   bool get value => _isYes;
 
   @override
-  bool get isDone => _isDone;
-
-  @override
   String build(IndentedStringBuffer buf) {
-    buf.writeln(label.style(theme.label));
-    if (help != null) buf.writeln(help!.style(theme.body));
-
+    buf.writeln(label.style(fieldStyle.title));
+    if (help != null) buf.writeln(help!.style(fieldStyle.description));
+    buf.writeln();
     buf.indent();
     if (isDone) {
       buf.writeln('${Icon.check} ${_isYes ? 'Yes' : 'No'}'.success);
     } else {
       // Render both options inline; highlight the active one.
-      final yes = _isYes
-          ? 'Yes'.style(theme.selected)
-          : 'Yes'.style(theme.body.copyWith(dim: true));
-      final no = !_isYes
-          ? 'No'.style(theme.selected)
-          : 'No'.style(theme.body.copyWith(dim: true));
+      final yesStyle = _isYes
+          ? fieldStyle.confirm.focusedButton
+          : fieldStyle.confirm.blurredButton;
+      final noStyle = !_isYes
+          ? fieldStyle.confirm.focusedButton
+          : fieldStyle.confirm.blurredButton;
+
+      final yes = ' Yes '.style(yesStyle);
+      final no = ' No '.style(noStyle);
       buf.writeln('$yes    $no');
     }
 
     if (isStandalone) {
       buf.writeln();
-      buf.writeln(usage);
-      if (hasError) buf.writeln('${Icon.error} $error'.style(theme.error));
+      buf.writeln(usage.style(theme.help.shortDesc));
+      if (hasError) {
+        buf.writeln('${Icon.error} $error'.style(fieldStyle.errorMessage));
+      }
       buf.writeln();
     }
     buf.dedent();

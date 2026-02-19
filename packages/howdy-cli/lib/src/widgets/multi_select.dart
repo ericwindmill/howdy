@@ -32,27 +32,6 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     selected = List<bool>.filled(options.length, false);
   }
 
-  final List<Option<T>> options;
-  late final List<bool> selected;
-
-  int selectedIndex = 0;
-  bool _isDone = false;
-
-  @override
-  String get usage => usageHint([
-    (keys: '${Icon.arrowUp} / ${Icon.arrowDown}', action: 'navigate'),
-    (keys: 'space', action: 'toggle'),
-    (keys: 'enter', action: 'submit'),
-  ]);
-
-  @override
-  void reset() {
-    super.reset();
-    selected = List<bool>.filled(options.length, false);
-    selectedIndex = 0;
-    _isDone = false;
-  }
-
   /// Convenience factory, uses active theme values.
   static List<T> send<T>({
     required String label,
@@ -68,54 +47,14 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     ).write();
   }
 
-  /// Build the option list string.
-  String renderOptionsString(IndentedStringBuffer buf) {
-    for (var i = 0; i < options.length; i++) {
-      final isPointer = i == selectedIndex;
-      final isChecked = selected[i];
-      final label = options[i].label;
+  final List<Option<T>> options;
+  late final List<bool> selected;
 
-      if (!isDone) {
-        final prefix = isPointer ? '${Icon.pointer} ' : '  ';
-        final marker = isChecked
-            ? Icon.optionFilled.selected
-            : Icon.optionEmpty.body;
-        buf.write(prefix);
-        buf.write(marker);
-        buf.writeln(' ${label.style(isChecked ? theme.selected : theme.body)}');
-      } else {
-        final prefix = '  ';
-        final marker = isChecked ? Icon.check.success : Icon.optionEmpty.body;
-        buf.write(prefix);
-        buf.write(marker);
-        buf.writeln(' ${label.style(isChecked ? theme.success : theme.body)}');
-      }
-    }
-    buf.dedent();
-    return buf.toString();
-  }
+  int selectedIndex = 0;
+  bool _isDone = false;
 
   @override
-  String build(IndentedStringBuffer buf) {
-    // The prompt label (with hint for multiselect)
-    buf.writeln(label.style(theme.label));
-
-    // Optional help text
-    if (help != null) buf.writeln(help!.style(theme.body));
-
-    // The result / option list
-    buf.indent();
-    renderOptionsString(buf);
-
-    if (isStandalone) {
-      buf.writeln();
-      buf.writeln(usage.dim);
-      hasError ? buf.writeln('${Icon.error} $error'.style(theme.error)) : '';
-      buf.writeln();
-    }
-    buf.dedent();
-    return buf.toString();
-  }
+  bool get isDone => _isDone;
 
   String get selectedLabels {
     final labels = <String>[];
@@ -124,6 +63,13 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     }
     return labels.isEmpty ? '(none)' : labels.join(', ');
   }
+
+  @override
+  String get usage => usageHint([
+    (keys: '${Icon.arrowUp} / ${Icon.arrowDown}', action: 'navigate'),
+    (keys: 'space', action: 'toggle'),
+    (keys: 'enter', action: 'submit'),
+  ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {
@@ -159,6 +105,53 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     }
   }
 
+  /// Build the option list string.
+  String renderOptionsString(IndentedStringBuffer buf) {
+    for (var i = 0; i < options.length; i++) {
+      final isPointer = i == selectedIndex;
+      final isChecked = selected[i];
+      final label = options[i].label;
+
+      if (!isDone) {
+        final prefix = isPointer
+            ? '${Icon.pointer.style(fieldStyle.multiSelect.selector)} '
+            : '  ';
+        final marker = isChecked
+            ? Icon.optionFilled.style(fieldStyle.multiSelect.selectedPrefix)
+            : Icon.optionEmpty.style(fieldStyle.multiSelect.unselectedPrefix);
+        buf.write(prefix);
+        buf.write(marker);
+        buf.write(' ');
+        buf.writeln(
+          label.style(
+            isChecked ? fieldStyle.multiSelect.selectedOption : fieldStyle.base,
+          ),
+        );
+      } else {
+        final prefix = '  ';
+        final marker = isChecked ? Icon.check.success : Icon.optionEmpty.body;
+        buf.write(prefix);
+        buf.write(marker);
+        buf.write(' ');
+        buf.writeln(
+          label.style(
+            isChecked ? fieldStyle.multiSelect.selectedOption : fieldStyle.base,
+          ),
+        );
+      }
+    }
+    buf.dedent();
+    return buf.toString();
+  }
+
+  @override
+  void reset() {
+    super.reset();
+    selected = List<bool>.filled(options.length, false);
+    selectedIndex = 0;
+    _isDone = false;
+  }
+
   @override
   List<T> get value {
     final results = <T>[];
@@ -169,7 +162,30 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   }
 
   @override
-  bool get isDone => _isDone;
+  String build(IndentedStringBuffer buf) {
+    // The prompt label (with hint for multiselect)
+    buf.writeln(label.style(fieldStyle.title));
+
+    // Optional help text
+    if (help != null) buf.writeln(help!.style(fieldStyle.description));
+
+    // The result / option list
+    buf.indent();
+    renderOptionsString(buf);
+
+    if (isStandalone) {
+      buf.writeln();
+      buf.writeln(usage.style(theme.help.shortDesc));
+      hasError
+          ? buf.writeln(
+              '${Icon.error} $error'.style(fieldStyle.errorMessage),
+            )
+          : '';
+      buf.writeln();
+    }
+    buf.dedent();
+    return buf.toString();
+  }
 
   @override
   List<T> write() {

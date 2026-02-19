@@ -8,9 +8,9 @@
 enum Color {
   // Greyscale
   white(255, 255, 255),
-  greyLight(180, 180, 180),
-  grey(128, 128, 128),
-  greyDark(64, 64, 64),
+  greyLight(200, 200, 200),
+  grey(160, 160, 160),
+  greyDark(96, 96, 96),
   black(0, 0, 0),
 
   // Red

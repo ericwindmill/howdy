@@ -22,8 +22,12 @@ import 'package:howdy/howdy.dart';
 class Group extends MultiWidget {
   Group(super.widgets);
 
-  bool _isDone = false;
+  /// Convenience to run a group and return results.
+  static MultiWidgetResults send(List<InteractiveWidget> widgets) {
+    return Group(widgets).write();
+  }
 
+  bool _isDone = false;
   int _focusIndex = 0;
 
   @override
@@ -31,20 +35,6 @@ class Group extends MultiWidget {
 
   @override
   bool get isDone => _isDone;
-
-  /// Convenience to run a group and return results.
-  static MultiWidgetResults send(List<InteractiveWidget> widgets) {
-    return Group(widgets).write();
-  }
-
-  @override
-  void reset() {
-    _isDone = false;
-    _focusIndex = 0;
-    for (final w in widgets) {
-      w.reset();
-    }
-  }
 
   @override
   KeyResult handleKey(KeyEvent event) {
@@ -83,6 +73,15 @@ class Group extends MultiWidget {
     return result;
   }
 
+  @override
+  void reset() {
+    _isDone = false;
+    _focusIndex = 0;
+    for (final w in widgets) {
+      w.reset();
+    }
+  }
+
   KeyResult _handleKeyDisplayWidget(KeyEvent event) {
     return KeyResult.done;
   }
@@ -98,7 +97,11 @@ class Group extends MultiWidget {
   @override
   String build(IndentedStringBuffer buf) {
     for (var i = 0; i < widgets.length; i++) {
-      buf.writeln(widgets[i].render());
+      final widget = widgets[i];
+      if (widget is InteractiveWidget) {
+        widget.isFocused = i == _focusIndex;
+      }
+      buf.writeln(widget.render());
     }
     return buf.toString();
   }

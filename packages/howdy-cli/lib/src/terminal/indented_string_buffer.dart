@@ -1,34 +1,22 @@
 import 'dart:math';
 
-import 'package:howdy/src/terminal/word_wrap.dart';
-
 /// A [StringBuffer] that automatically prepends indentation.
 ///
 /// Use [indent] and [dedent] to adjust the current level.
 /// All [writeln] calls prepend the current indentation prefix.
 ///
-/// Optionally set [maxWidth] to automatically word-wrap content so that
-/// `indent + content` never exceeds that many characters per line.
-///
 /// ```dart
-/// final buf = IndentedStringBuffer(maxWidth: 40);
+/// final buf = IndentedStringBuffer();
 /// buf.writeln('Title');
 /// buf.indent();
-/// buf.writeln('A long line that will be wrapped automatically');
+/// buf.writeln('A long line of text');
 /// buf.dedent();
 /// ```
 class IndentedStringBuffer extends StringBuffer {
-  IndentedStringBuffer({this.indentUnit = '  ', this.maxWidth});
+  IndentedStringBuffer({this.indentUnit = '  '});
 
   /// The string used for one indent level (default: two spaces).
   final String indentUnit;
-
-  /// Optional maximum line width (including indent prefix).
-  ///
-  /// When set, content passed to [write] and [writeln] is word-wrapped
-  /// so that no line exceeds this width. The indent prefix width is
-  /// subtracted from the available content width automatically.
-  final int? maxWidth;
 
   /// Current indent depth.
   int _level = 0;
@@ -48,36 +36,11 @@ class IndentedStringBuffer extends StringBuffer {
 
   String get _prefix => indentUnit * _level;
 
-  /// The number of characters available for content on the current line,
-  /// accounting for the indent prefix. Returns `null` if [maxWidth] is unset.
-  int? get _availableWidth {
-    final max = maxWidth;
-    if (max == null) return null;
-    return (max - _prefix.length).clamp(1, max);
-  }
-
   @override
   void write(Object? object) {
     final str = object.toString();
     if (str.isEmpty) return;
-
-    final available = _availableWidth;
-
-    // If no maxWidth, write lines directly with indent prefix.
-    if (available == null) {
-      _writeLines(str.split('\n'));
-      return;
-    }
-
-    // Word-wrap each hard-newline segment to the available width.
-    final segments = str.split('\n');
-    final wrapped = <String>[];
-    for (var i = 0; i < segments.length; i++) {
-      if (i > 0) wrapped.add(''); // preserve hard newline boundary
-      if (segments[i].isEmpty) continue;
-      wrapped.addAll(wordWrap(segments[i], available));
-    }
-    _writeLines(wrapped);
+    _writeLines(str.split('\n'));
   }
 
   void _writeLines(List<String> lines) {

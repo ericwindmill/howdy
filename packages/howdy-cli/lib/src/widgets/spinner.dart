@@ -28,39 +28,10 @@ class Spinner extends DisplayWidget {
   bool _success = true;
 
   @override
-  String build(IndentedStringBuffer buf) {
-    if (_stopped) {
-      if (_success) {
-        return renderSpans([
-          StyledText('✔ ', style: TextStyle(foreground: Color.green)),
-        ]);
-      } else {
-        return renderSpans([
-          StyledText('✘ ', style: TextStyle(foreground: Color.red)),
-        ]);
-      }
-    }
-    return renderSpans([
-      StyledText('${Icon.spinnerFrames[_frameIndex]} ', style: style),
-    ]);
-  }
+  bool get isDone => _stopped;
 
   @override
   void get value {}
-
-  @override
-  bool get isDone => _stopped;
-
-  /// Starts the spinner animation.
-  @override
-  void write() {
-    terminal.cursorHide();
-    _renderFrame();
-    _timer = Timer.periodic(Duration(milliseconds: 80), (_) {
-      _frameIndex = (_frameIndex + 1) % Icon.spinnerFrames.length;
-      _renderFrame();
-    });
-  }
 
   /// Stops the spinner and replaces it with a result icon.
   ///
@@ -93,5 +64,34 @@ class Spinner extends DisplayWidget {
     terminal.writeSpans([
       StyledText('${Icon.spinnerFrames[_frameIndex]} ', style: style),
     ]);
+  }
+
+  @override
+  String build(IndentedStringBuffer buf) {
+    if (_stopped) {
+      if (_success) {
+        return renderSpans([
+          StyledText('✔ ', style: TextStyle(foreground: Color.green)),
+        ]);
+      } else {
+        return renderSpans([
+          StyledText('✘ ', style: TextStyle(foreground: Color.red)),
+        ]);
+      }
+    }
+    return renderSpans([
+      StyledText('${Icon.spinnerFrames[_frameIndex]} ', style: style),
+    ]);
+  }
+
+  /// Starts the spinner animation.
+  @override
+  void write() {
+    terminal.cursorHide();
+    _renderFrame();
+    _timer = Timer.periodic(Duration(milliseconds: 80), (_) {
+      _frameIndex = (_frameIndex + 1) % Icon.spinnerFrames.length;
+      _renderFrame();
+    });
   }
 }

@@ -63,55 +63,78 @@ class Terminal {
 
   Terminal._() : _output = stdout, _input = stdin;
 
-  /// Subscription to SIGTERM in the main isolate.
-  StreamSubscription<ProcessSignal>? _sigtermSub;
+  // ---------------------------------------------------------------------------
+  // Signal Handling & Cleanup
+  // ---------------------------------------------------------------------------
+  //
+  // Features like raw mode and cursor hiding need cleanup on exit to leave the
+  // terminal in a usable state. Three exit paths must be handled:
+  //
+  //   1. Normal exit          — features call _release() which tears down
+  //                             handlers when the last feature is done.
+  //   2. SIGTERM               — async signal; handled by a listener on the
+  //                             main isolate.
+  //   3. SIGINT (Ctrl+C)       — two sub-cases:
+  //        a. Event loop free  — the main-isolate listener fires.
+  //        b. Blocked in       — main can't process async events, so a
+  //           readByteSync()    background isolate catches it instead.
+  //        c. Raw mode active  — byte 3 is delivered to readKeySync()
+  //                             instead of becoming a signal at all.
+  //
+  // A retain/release reference count tracks active features and starts or
+  // stops the signal handlers automatically.
+  // ---------------------------------------------------------------------------
 
-  /// Background isolate that watches SIGINT.
+  StreamSubscription<ProcessSignal>? _sigtermSub;
   Isolate? _sigintIsolate;
 
-  /// Reference count for how many features (raw mode, hidden cursor) are active
-  /// and require signal handlers/cleanup protection.
+  /// Reference count of active features needing cleanup protection.
   int _activeFeatureCount = 0;
 
-  /// Registers interest in terminal cleanup. Starts signal handlers if this is
-  /// the first active feature.
+  /// Whether raw mode is currently enabled.
+  bool _rawModeActive = false;
+
+  /// Whether the cursor is currently hidden.
+  bool _cursorHidden = false;
+
+  /// Registers interest in terminal cleanup. Starts signal handlers on the
+  /// first registration.
   void _retain() {
     _activeFeatureCount++;
-    if (_activeFeatureCount == 1) {
-      _startSignalHandlers();
-    }
+    if (_activeFeatureCount == 1) _startSignalHandlers();
   }
 
-  /// Releases interest in terminal cleanup. Stops signal handlers if this was
-  /// the last active feature.
+  /// Releases interest in terminal cleanup. Stops signal handlers when the
+  /// last feature releases.
   void _release() {
     if (_activeFeatureCount <= 0) return;
     _activeFeatureCount--;
-    if (_activeFeatureCount == 0) {
-      _stopSignalHandlers();
-    }
+    if (_activeFeatureCount == 0) _stopSignalHandlers();
   }
 
-  void _startSignalHandlers() {
-    // Restore the cursor on SIGTERM (fires when the event loop is running).
+  /// Restores every terminal feature and exits. Used by signal handlers and
+  /// the raw-mode Ctrl+C path so cleanup logic lives in one place.
+  ///
+  /// The background-isolate SIGINT watcher ([_sigintWatcher]) can't call this
+  /// because it runs in a separate isolate without access to the singleton.
+  /// It writes raw ANSI escape sequences directly instead.
+  Never _cleanupAndExit() {
+    if (_rawModeActive) disableRawMode();
+    if (_cursorHidden) cursorShow();
+    resetCursorShape();
+    _stopSignalHandlers();
+    exit(0);
+  }
+
+  Future<void> _startSignalHandlers() async {
     _sigtermSub = ProcessSignal.sigterm.watch().listen((_) {
-      cursorShow();
-      resetCursorShape();
-      exit(0);
+      _cleanupAndExit();
     });
 
-    // SIGINT (Ctrl+C) is tricky: when inside runRawModeSync the main isolate's
-    // event loop is blocked in readByteSync(), so an async signal listener here
-    // can never fire. Spawn a background isolate whose event loop runs freely —
-    // Dart delivers signals to ALL isolates that are watching them, so the
-    // background isolate will receive SIGINT even when the main is blocked.
-    Isolate.spawn(_sigintWatcher, null).then((isolate) {
-      if (_activeFeatureCount == 0) {
-        isolate.kill();
-        return;
-      }
-      _sigintIsolate = isolate;
-    });
+    // SIGINT is tricky: when the main isolate is blocked in readByteSync(),
+    // its event loop can't deliver async signals. A background isolate whose
+    // loop runs freely will still receive the signal from the OS.
+    _sigintIsolate = await Isolate.spawn(_sigintWatcher, null);
   }
 
   void _stopSignalHandlers() {
@@ -121,9 +144,11 @@ class Terminal {
     _sigintIsolate = null;
   }
 
-  /// Watches SIGINT in a background isolate so it fires even when the main
-  /// isolate is blocked in a synchronous read loop.
-  static void _sigintWatcher(dynamic _) {
+  /// Entry point for the background SIGINT-watcher isolate.
+  ///
+  /// Uses raw escape strings because the [Terminal] singleton is unreachable
+  /// from a spawned isolate.
+  static void _sigintWatcher(dynamic message) {
     ProcessSignal.sigint.watch().listen((_) {
       stdout.write('\x1B[?25h'); // show cursor
       stdout.write('\x1B[?12l\x1B[0 q'); // reset cursor shape
@@ -178,14 +203,12 @@ class Terminal {
     if (byte == 127 || byte == 8) return const SpecialKey(Key.backspace);
     if (byte == 32) return const SpecialKey(Key.space);
 
-    // Ctrl+C (ETX, byte 3): raw mode prevents the OS from converting this to
-    // SIGINT, so the ProcessSignal handler never fires. Clean up and exit here.
-    if (byte == 3) {
-      disableRawMode();
-      cursorShow();
-      resetCursorShape();
-      exit(0);
-    }
+    // Ctrl+D (EOT, byte 4): used by textarea prompts to submit.
+    if (byte == 4) return const SpecialKey(Key.ctrlD);
+
+    // Ctrl+C (ETX, byte 3): in raw mode the OS doesn't convert this to
+    // SIGINT, so we handle cleanup and exit directly.
+    if (byte == 3) _cleanupAndExit();
 
     if (byte == 27) return _parseEscapeSequence();
 
@@ -282,13 +305,21 @@ class Terminal {
   void cursorRestore() => write('\x1B8');
 
   /// Hide the cursor.
+  ///
+  /// Idempotent — calling this when the cursor is already hidden is a no-op.
   void cursorHide() {
+    if (_cursorHidden) return;
+    _cursorHidden = true;
     _retain();
     write('\x1B[?25l');
   }
 
   /// Show the cursor.
+  ///
+  /// Idempotent — calling this when the cursor is already visible is a no-op.
   void cursorShow() {
+    if (!_cursorHidden) return;
+    _cursorHidden = false;
     write('\x1B[?25h');
     _release();
   }
@@ -389,9 +420,12 @@ class Terminal {
   /// Disables line buffering and echo so that individual keypresses
   /// can be read without waiting for Enter.
   ///
+  /// Idempotent — calling this when raw mode is already active is a no-op.
   /// Always pair with [disableRawMode] or use [runRawMode] for
   /// automatic cleanup.
   void enableRawMode() {
+    if (_rawModeActive) return;
+    _rawModeActive = true;
     _retain();
     _previousLineMode = _input.lineMode;
     _previousEchoMode = _input.echoMode;
@@ -400,7 +434,11 @@ class Terminal {
   }
 
   /// Restore the terminal to its previous mode.
+  ///
+  /// Idempotent — calling this when raw mode is already disabled is a no-op.
   void disableRawMode() {
+    if (!_rawModeActive) return;
+    _rawModeActive = false;
     _input.lineMode = _previousLineMode;
     _input.echoMode = _previousEchoMode;
     _release();

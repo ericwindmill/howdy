@@ -30,7 +30,7 @@ import 'package:howdy/src/terminal/extensions.dart';
 class Sign extends DisplayWidget {
   Sign({
     required this.content,
-    this.style = SignStyle.rounded,
+    this.borderType = BorderType.rounded,
     this.padding = const EdgeInsets.symmetric(horizontal: 1),
     this.margin = EdgeInsets.zero,
     this.width,
@@ -39,34 +39,10 @@ class Sign extends DisplayWidget {
     super.theme,
   });
 
-  /// The content to display inside the sign.
-  final List<StyledText> content;
-
-  /// Border character set. Defaults to [SignStyle.rounded].
-  final SignStyle style;
-
-  /// Inner padding between the border and the content.
-  final EdgeInsets padding;
-
-  /// Outer margin around the entire sign.
-  ///
-  /// Left/right margin reduces the sign width. Top/bottom margin
-  /// adds blank lines above and below.
-  final EdgeInsets margin;
-
-  /// Explicit inner content width in characters.
-  ///
-  /// If null, the width is derived from the terminal width minus
-  /// margin, border, and padding.
-  final int? width;
-
-  /// Optional style applied to border characters.
-  final TextStyle? borderStyle;
-
   /// Convenience method — renders and writes a Sign immediately.
   static void send(
     List<StyledText> content, {
-    SignStyle style = SignStyle.rounded,
+    BorderType borderType = BorderType.rounded,
     EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 1),
     EdgeInsets margin = EdgeInsets.zero,
     int? width,
@@ -74,7 +50,7 @@ class Sign extends DisplayWidget {
   }) {
     Sign(
       content: content,
-      style: style,
+      borderType: borderType,
       padding: padding,
       margin: margin,
       width: width,
@@ -82,29 +58,51 @@ class Sign extends DisplayWidget {
     ).write();
   }
 
+  /// Border character set. Defaults to [BorderType.rounded].
+  final BorderType borderType;
+
+  /// Optional style applied to border characters.
+  final TextStyle? borderStyle;
+
+  /// The content to display inside the sign.
+  final List<StyledText> content;
+
+  /// Outer margin around the entire sign.
+  ///
+  /// Left/right margin reduces the sign width. Top/bottom margin
+  /// adds blank lines above and below.
+  final EdgeInsets margin;
+
+  /// Inner padding between the border and the content.
+  final EdgeInsets padding;
+
+  /// Explicit inner content width in characters.
+  ///
+  /// If null, the width is derived from the terminal width minus
+  /// margin, border, and padding.
+  final int? width;
+
   @override
   String build(IndentedStringBuffer buf) {
-    final innerWidth = _resolveInnerWidth();
-
     // Top margin.
     for (var i = 0; i < margin.top; i++) {
       buf.writeln();
     }
 
-    // Render each StyledText span with word-wrap into a plain string,
+    // Render each StyledText span into a plain string,
     // then delegate all border drawing to withBorder.
     final contentBuf = StringBuffer();
     for (final span in content) {
-      for (final line in wordWrap(span.text, innerWidth)) {
+      for (final line in span.text.split('\n')) {
         contentBuf.writeln(StyledText(line, style: span.style).render());
       }
     }
 
     final leftMarginStr = ' ' * margin.left;
     final bordered = contentBuf.toString().withBorder(
-      style: style,
-      padding: padding,
       borderStyle: borderStyle,
+      padding: padding,
+      borderType: borderType,
     );
 
     // Prepend left margin to every line.
@@ -119,15 +117,6 @@ class Sign extends DisplayWidget {
     }
 
     return buf.toString();
-  }
-
-  /// Compute the inner content width (excluding padding and border).
-  int _resolveInnerWidth() {
-    if (width != null) return width!;
-    final borderWidth = style.hasBox ? 2 : 1; // left + right border chars
-    final available =
-        terminal.columns - margin.horizontal - borderWidth - padding.horizontal;
-    return available.clamp(1, terminal.columns);
   }
 
   @override

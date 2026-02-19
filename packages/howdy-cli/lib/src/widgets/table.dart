@@ -40,36 +40,6 @@ class Table extends DisplayWidget {
     this.totalWidth,
   });
 
-  /// Column header labels.
-  final List<String> headers;
-
-  /// Table data rows. Each cell can be a [String] or [StyledText].
-  final List<List<Object>> rows;
-
-  /// Border style to use. Defaults to [TableStyle.rounded].
-  final TableStyle style;
-
-  /// Style applied to header cells. Defaults to bold.
-  final TextStyle headerStyle;
-
-  /// Per-column alignment. If `null` or shorter than the number
-  /// of columns, missing columns default to [ColumnAlignment.left].
-  final List<ColumnAlignment>? columnAlignments;
-
-  /// Explicit per-column character widths (content padding only — no border).
-  ///
-  /// Each entry overrides the auto-measured minimum for that column.
-  /// Omit or set to `null` to auto-size. Shorter lists leave trailing
-  /// columns auto-sized.
-  final List<int>? columnWidths;
-
-  /// Target total character width of the entire table (borders included).
-  ///
-  /// When set, extra space beyond the content minimum is distributed evenly
-  /// across all columns. Ignored if [columnWidths] already satisfies the
-  /// total.
-  final int? totalWidth;
-
   /// Convenience method for quick table output.
   static void send({
     required List<String> headers,
@@ -91,64 +61,73 @@ class Table extends DisplayWidget {
     ).write();
   }
 
-  @override
-  String build(IndentedStringBuffer _) {
-    final colCount = headers.length;
-    final resolvedRows = _resolveRows(colCount);
-    final widths = _computeWidths(colCount, resolvedRows);
-    final buf = StringBuffer();
+  /// Per-column alignment. If `null` or shorter than the number
+  /// of columns, missing columns default to [ColumnAlignment.left].
+  final List<ColumnAlignment>? columnAlignments;
 
-    if (style.hasBorders) {
-      buf.writeln(
-        _buildLine(style.topLeft, style.topT, style.topRight, widths),
-      );
-    }
+  /// Explicit per-column character widths (content padding only — no border).
+  ///
+  /// Each entry overrides the auto-measured minimum for that column.
+  /// Omit or set to `null` to auto-size. Shorter lists leave trailing
+  /// columns auto-sized.
+  final List<int>? columnWidths;
 
-    buf.writeln(
-      _buildRow([
-        for (final h in headers) StyledText(h, style: headerStyle),
-      ], widths),
-    );
+  /// Column header labels.
+  final List<String> headers;
 
-    if (style.hasBorders) {
-      buf.writeln(_buildLine(style.leftT, style.cross, style.rightT, widths));
-    }
+  /// Style applied to header cells. Defaults to bold.
+  final TextStyle headerStyle;
 
-    for (final row in resolvedRows) {
-      buf.writeln(_buildRow(row, widths));
-    }
+  /// Table data rows. Each cell can be a [String] or [StyledText].
+  final List<List<Object>> rows;
 
-    if (style.hasBorders) {
-      buf.writeln(
-        _buildLine(style.bottomLeft, style.bottomT, style.bottomRight, widths),
-      );
-    }
+  /// Border style to use. Defaults to [TableStyle.rounded].
+  final TableStyle style;
 
-    return buf.toString();
-  }
+  /// Target total character width of the entire table (borders included).
+  ///
+  /// When set, extra space beyond the content minimum is distributed evenly
+  /// across all columns. Ignored if [columnWidths] already satisfies the
+  /// total.
+  final int? totalWidth;
 
-  @override
-  void get value {}
-
-  @override
   @override
   bool get isDone => true;
 
   @override
-  void write() {
-    terminal.write(render());
+  void get value {}
+
+  /// Get the alignment for column [index].
+  ColumnAlignment _alignmentFor(int index) {
+    if (columnAlignments == null || index >= columnAlignments!.length) {
+      return ColumnAlignment.left;
+    }
+    return columnAlignments![index];
   }
 
-  /// Normalize all cells to [StyledText] and pad rows to [colCount].
-  List<List<StyledText>> _resolveRows(int colCount) {
-    return rows.map((row) {
-      return List.generate(colCount, (i) {
-        if (i >= row.length) return const StyledText('');
-        final cell = row[i];
-        if (cell is StyledText) return cell;
-        return StyledText(cell.toString());
-      });
-    }).toList();
+  /// Build a horizontal border line string.
+  String _buildLine(String left, String mid, String right, List<int> widths) {
+    final segments = widths.map((w) => style.horizontal * (w + 2));
+    return '$left${segments.join(mid)}$right';
+  }
+
+  /// Build a data row string with cell padding and alignment.
+  String _buildRow(List<StyledText> cells, List<int> widths) {
+    final parts = <String>[];
+    for (var i = 0; i < cells.length; i++) {
+      final align = _alignmentFor(i);
+      parts.add(' ${_padCell(cells[i], widths[i], align)} ');
+    }
+    return '${style.vertical}${parts.join(style.vertical)}${style.vertical}';
+  }
+
+  /// Center a string within [width].
+  static String _centerPad(String text, int width) {
+    final totalPad = width - text.length;
+    if (totalPad <= 0) return text;
+    final left = totalPad ~/ 2;
+    final right = totalPad - left;
+    return '${' ' * left}$text${' ' * right}';
   }
 
   /// Compute final column widths, respecting [columnWidths] and [totalWidth].
@@ -199,30 +178,6 @@ class Table extends DisplayWidget {
     return widths;
   }
 
-  /// Build a horizontal border line string.
-  String _buildLine(String left, String mid, String right, List<int> widths) {
-    final segments = widths.map((w) => style.horizontal * (w + 2));
-    return '$left${segments.join(mid)}$right';
-  }
-
-  /// Build a data row string with cell padding and alignment.
-  String _buildRow(List<StyledText> cells, List<int> widths) {
-    final parts = <String>[];
-    for (var i = 0; i < cells.length; i++) {
-      final align = _alignmentFor(i);
-      parts.add(' ${_padCell(cells[i], widths[i], align)} ');
-    }
-    return '${style.vertical}${parts.join(style.vertical)}${style.vertical}';
-  }
-
-  /// Get the alignment for column [index].
-  ColumnAlignment _alignmentFor(int index) {
-    if (columnAlignments == null || index >= columnAlignments!.length) {
-      return ColumnAlignment.left;
-    }
-    return columnAlignments![index];
-  }
-
   /// Pad a cell's text to [width] preserving ANSI styling.
   String _padCell(StyledText cell, int width, ColumnAlignment alignment) {
     final raw = cell.text;
@@ -234,12 +189,56 @@ class Table extends DisplayWidget {
     return cell.style.apply(padded);
   }
 
-  /// Center a string within [width].
-  static String _centerPad(String text, int width) {
-    final totalPad = width - text.length;
-    if (totalPad <= 0) return text;
-    final left = totalPad ~/ 2;
-    final right = totalPad - left;
-    return '${' ' * left}$text${' ' * right}';
+  /// Normalize all cells to [StyledText] and pad rows to [colCount].
+  List<List<StyledText>> _resolveRows(int colCount) {
+    return rows.map((row) {
+      return List.generate(colCount, (i) {
+        if (i >= row.length) return const StyledText('');
+        final cell = row[i];
+        if (cell is StyledText) return cell;
+        return StyledText(cell.toString());
+      });
+    }).toList();
+  }
+
+  @override
+  String build(IndentedStringBuffer _) {
+    final colCount = headers.length;
+    final resolvedRows = _resolveRows(colCount);
+    final widths = _computeWidths(colCount, resolvedRows);
+    final buf = StringBuffer();
+
+    if (style.hasBorders) {
+      buf.writeln(
+        _buildLine(style.topLeft, style.topT, style.topRight, widths),
+      );
+    }
+
+    buf.writeln(
+      _buildRow([
+        for (final h in headers) StyledText(h, style: headerStyle),
+      ], widths),
+    );
+
+    if (style.hasBorders) {
+      buf.writeln(_buildLine(style.leftT, style.cross, style.rightT, widths));
+    }
+
+    for (final row in resolvedRows) {
+      buf.writeln(_buildRow(row, widths));
+    }
+
+    if (style.hasBorders) {
+      buf.writeln(
+        _buildLine(style.bottomLeft, style.bottomT, style.bottomRight, widths),
+      );
+    }
+
+    return buf.toString();
+  }
+
+  @override
+  void write() {
+    terminal.write(render());
   }
 }

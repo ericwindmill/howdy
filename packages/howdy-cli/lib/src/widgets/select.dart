@@ -30,24 +30,6 @@ class Select<T> extends InteractiveWidget<T> {
     super.theme,
   });
 
-  final List<Option<T>> options;
-
-  int selectedIndex = 0;
-  bool _isDone = false;
-
-  @override
-  String get usage => usageHint([
-    (keys: '${Icon.arrowUp} / ${Icon.arrowDown}', action: 'select'),
-    (keys: 'enter', action: 'submit'),
-  ]);
-
-  @override
-  void reset() {
-    super.reset();
-    selectedIndex = 0;
-    _isDone = false;
-  }
-
   /// Convenience factory, uses active theme values.
   static T send<T>({
     required String label,
@@ -63,52 +45,19 @@ class Select<T> extends InteractiveWidget<T> {
     ).write();
   }
 
-  /// Build the option list string.
-  String renderOptionsString(IndentedStringBuffer buf) {
-    for (var i = 0; i < options.length; i++) {
-      final isSelected = i == selectedIndex;
-      final option = options[i];
-      final style = option.textStyle.hasStyle ? option.textStyle : theme.body;
+  final List<Option<T>> options;
 
-      if (isSelected && !isDone) {
-        buf.writeln(
-          '${Icon.pointer} ${option.label}'.style(theme.selected),
-        );
-      } else if (isSelected && isDone) {
-        buf.writeln(
-          '${Icon.check} ${option.label}'.style(theme.success),
-        );
-      } else {
-        buf.indent();
-        buf.writeln(option.label.style(style));
-        buf.dedent();
-      }
-    }
-    return buf.toString();
-  }
+  int selectedIndex = 0;
+  bool _isDone = false;
 
   @override
-  String build(IndentedStringBuffer buf) {
-    // The prompt label
-    buf.writeln(label.style(theme.label));
+  bool get isDone => _isDone;
 
-    // Optional help text
-    if (help != null) buf.writeln(help!.style(theme.body));
-
-    // The result / option list
-    buf.indent();
-    renderOptionsString(buf);
-
-    if (isStandalone) {
-      buf.writeln();
-      buf.writeln(usage.dim);
-      hasError ? buf.writeln('${Icon.error} $error'.style(theme.error)) : '';
-      buf.writeln();
-    }
-    buf.dedent();
-
-    return buf.toString();
-  }
+  @override
+  String get usage => usageHint([
+    (keys: '${Icon.arrowUp} / ${Icon.arrowDown}', action: 'select'),
+    (keys: 'enter', action: 'submit'),
+  ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {
@@ -141,11 +90,68 @@ class Select<T> extends InteractiveWidget<T> {
     }
   }
 
+  /// Build the option list string.
+  String renderOptionsString(IndentedStringBuffer buf) {
+    for (var i = 0; i < options.length; i++) {
+      final isSelected = i == selectedIndex;
+      final option = options[i];
+      final style = option.textStyle.hasStyle
+          ? option.textStyle
+          : fieldStyle.base;
+
+      if (isSelected && !isDone) {
+        buf.writeln(
+          '${Icon.pointer.style(fieldStyle.select.selector)} ${option.label.style(fieldStyle.select.option)}',
+        );
+      } else if (isSelected && isDone) {
+        buf.writeln(
+          '${Icon.check} ${option.label}'.success,
+        );
+      } else {
+        buf.indent();
+        buf.writeln(option.label.style(style));
+        buf.dedent();
+      }
+    }
+    return buf.toString();
+  }
+
+  @override
+  void reset() {
+    super.reset();
+    selectedIndex = 0;
+    _isDone = false;
+  }
+
   @override
   T get value => options[selectedIndex].value;
 
   @override
-  bool get isDone => _isDone;
+  String build(IndentedStringBuffer buf) {
+    // The prompt label
+    buf.writeln(label.style(fieldStyle.title));
+
+    // Optional help text
+    if (help != null) buf.writeln(help!.style(fieldStyle.description));
+
+    // The result / option list
+    buf.indent();
+    renderOptionsString(buf);
+
+    if (isStandalone) {
+      buf.writeln();
+      buf.writeln(usage.style(theme.help.shortDesc));
+      hasError
+          ? buf.writeln(
+              '${Icon.error} $error'.style(fieldStyle.errorMessage),
+            )
+          : '';
+      buf.writeln();
+    }
+    buf.dedent();
+
+    return buf.toString();
+  }
 
   @override
   T write() {

@@ -54,4 +54,5 @@ enum Key {
   arrowRight,
   home,
   end,
+  ctrlD,
 }

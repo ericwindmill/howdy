@@ -68,8 +68,8 @@ class Form extends MultiWidget {
     buf.indent();
     if (title != null) {
       buf.writeln(
-        '${title!.style(t.formTitle)} '
-        '${'(page ${_pageIndex + 1}/${widgets.length})'.style(t.unfocusedBorder)}',
+        '${title!.style(t.group.title)} '
+        '${'(page ${_pageIndex + 1}/${widgets.length})'.style(t.group.description)}',
       );
       buf.writeln();
     }
@@ -82,7 +82,10 @@ class Form extends MultiWidget {
     for (var i = 0; i < pageWidgets.length; i++) {
       final isFocused = i == focusIdx;
       final widget = pageWidgets[i];
-      final borderStyle = isFocused ? t.focusedBorder : t.unfocusedBorder;
+      if (widget is InteractiveWidget) {
+        widget.isFocused = isFocused;
+      }
+      final style = isFocused ? t.focused : t.blurred;
 
       // Inject a red asterisk on the first content line when the widget
       // has an error, so the error is visible at a glance even when unfocused.
@@ -94,9 +97,9 @@ class Form extends MultiWidget {
 
       buf.writeln(
         rendered.withBorder(
-          style: SignStyle.leftOnly,
+          borderType: BorderType.leftOnly,
           padding: EdgeInsets.only(left: 1),
-          borderStyle: borderStyle,
+          borderStyle: style.base,
         ),
       );
     }
@@ -106,7 +109,9 @@ class Form extends MultiWidget {
 
     // ── Error line (from the focused widget) ──
     buf.writeln(
-      errorText != null ? '${Icon.error} $errorText'.style(t.error) : '',
+      errorText != null
+          ? '${Icon.error} $errorText'.style(t.focused.errorMessage)
+          : '',
     );
 
     return buf.toString();
@@ -117,7 +122,8 @@ class Form extends MultiWidget {
     final lines = rendered.split('\n');
     for (var i = 0; i < lines.length; i++) {
       if (stripAnsi(lines[i]).trim().isNotEmpty) {
-        lines[i] = '${lines[i]} ${Icon.asterisk.style(t.error)}';
+        lines[i] =
+            '${lines[i]} ${Icon.asterisk.style(t.focused.errorIndicator)}';
         break;
       }
     }
@@ -130,9 +136,9 @@ class Form extends MultiWidget {
     final base = focused?.usage ?? '';
     if (_pageIndex > 0) {
       final t = Theme.current;
-      final dot = Icon.dot.style(t.usageAction);
+      final dot = Icon.dot.style(t.help.shortSeparator);
       final backHint =
-          '${'b'.style(t.usageKey)} ${'back'.style(t.usageAction)}';
+          '${'b'.style(t.help.shortKey)} ${'back'.style(t.help.shortDesc)}';
       return base.isEmpty ? backHint : '$base  $dot  $backHint';
     }
     return base;
