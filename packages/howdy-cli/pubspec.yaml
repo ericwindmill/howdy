@@ -1,5 +1,5 @@
 name: howdy
-description: A sample command-line application with basic argument parsing.
+description: A pleasant Dart CLI library.
 version: 0.0.1
 repository: https://github.com/ericwindmill/howdy
 
