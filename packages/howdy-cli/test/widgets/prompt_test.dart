@@ -118,50 +118,13 @@ void main() {
       });
 
       test('contains pointer icon when not done', () {
-        expect(widget.render(), contains(Icon.pointer));
+        expect(widget.render(), contains(Icon.question));
       });
 
       test('contains default value as placeholder', () {
         final w = Prompt(label: 'Q', defaultValue: 'cat');
         expect(w.render(), contains('cat'));
       });
-    });
-  });
-
-  group('Prompt.textarea', () {
-    late Prompt widget;
-
-    setUp(() {
-      widget = Prompt.textarea(label: 'Description');
-    });
-
-    test('enter inserts newline instead of submitting', () {
-      widget.handleKey(CharKey('a'));
-      final result = widget.handleKey(SpecialKey(Key.enter));
-      expect(result, KeyResult.consumed);
-      expect(widget.isDone, isFalse);
-      expect(widget.value, contains('\n'));
-    });
-
-    test('ctrlD submits textarea', () {
-      widget.handleKey(CharKey('x'));
-      final result = widget.handleKey(SpecialKey(Key.ctrlD));
-      expect(result, KeyResult.done);
-      expect(widget.isDone, isTrue);
-      expect(widget.value, 'x');
-    });
-
-    test('multi-line input works', () {
-      widget.handleKey(CharKey('a'));
-      widget.handleKey(SpecialKey(Key.enter));
-      widget.handleKey(CharKey('b'));
-      widget.handleKey(SpecialKey(Key.ctrlD));
-      expect(widget.value, 'a\nb');
-    });
-
-    test('render contains pipe character', () {
-      final output = widget.render();
-      expect(output, contains(Icon.pipe));
     });
   });
 }

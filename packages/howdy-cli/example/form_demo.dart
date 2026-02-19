@@ -70,4 +70,34 @@ void main() {
 
   print('');
   Text.success('Project "$name" created successfully!');
+
+  terminal.writeln();
+  terminal.eraseScreen();
+
+  // 2. A single-page form
+  Text(
+    '\n🧙 Quick Survey (Form Demo 2)\n',
+    style: TextStyle(bold: true, foreground: Color.magenta),
+  ).write();
+
+  final surveyResults = Form.send(title: 'Survey', [
+    Group([
+      Prompt(
+        label: 'How did you hear about us?',
+        key: 'source',
+      ),
+      ConfirmInput(
+        label: 'Subscribe to newsletter?',
+        defaultValue: false,
+        key: 'newsletter',
+      ),
+    ]),
+  ]);
+
+  print('');
+  if (surveyResults['newsletter'] == true) {
+    Text.success('Thanks for subscribing!');
+  } else {
+    Text.success('Survey completed.');
+  }
 }

@@ -1,31 +1,27 @@
 import 'package:howdy/howdy.dart';
 import 'package:howdy/src/terminal/extensions.dart';
 
-/// A text input prompt.
+/// A multi-line text input prompt.
 ///
-/// Use the default constructor for single-line questions, or [Prompt.textarea]
-/// to indicate intent for longer-form input (e.g. descriptions, logs).
-///
-/// Uses character-by-character input in raw mode so it can participate
-/// in the [handleKey] protocol for form composition.
+/// Visually renders with a `│` left-border on each line and uses
+/// Enter to insert newlines. Press **Ctrl+D** to submit.
 ///
 ///```txt
 /// Title
 /// HelperText
-/// ❯ [default] OR ❯ current input
+/// │ [default] OR │ current input line 1
+/// │ current input line 2
 /// <error if any>
 ///```
 ///
 /// ```dart
-/// final name = Prompt.send('Project name', defaultValue: 'my_app');
-///
-/// final desc = Prompt.textarea(
-///   label: 'Description',
+/// final desc = Textarea.send(
+///   'Description',
 ///   help: 'A brief summary of your project',
-/// ).write();
+/// );
 /// ```
-class Prompt extends InteractiveWidget<String> {
-  Prompt({
+class Textarea extends InteractiveWidget<String> {
+  Textarea({
     required super.label,
     super.help,
     super.defaultValue,
@@ -34,14 +30,14 @@ class Prompt extends InteractiveWidget<String> {
     super.theme,
   });
 
-  /// Convenience factory for single-line prompts.
+  /// Convenience factory for textareas.
   static String send(
     String label, {
     String? help,
     String? defaultValue,
     Validator<String>? validator,
   }) {
-    return Prompt(
+    return Textarea(
       label: label,
       help: help,
       defaultValue: defaultValue,
@@ -52,6 +48,9 @@ class Prompt extends InteractiveWidget<String> {
   /// The text buffer being built character by character.
   final StringBuffer _input = StringBuffer();
   bool _isDone = false;
+
+  // How many trailing pipes were added (to offset cursor calculations).
+  int _trailingPipesCounter = 0;
 
   // How many lines below the input line were rendered last time.
   int _linesBelow = 0;
@@ -64,14 +63,15 @@ class Prompt extends InteractiveWidget<String> {
   @override
   String get usage => usageHint([
     (keys: 'type your answer', action: ''),
-    (keys: 'enter', action: 'submit'),
+    (keys: 'enter', action: 'newline'),
+    (keys: 'tab', action: 'submit'),
   ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {
     switch (event) {
       // ── Submit ─────────────────────────────────────────────────────
-      case SpecialKey(key: Key.enter):
+      case SpecialKey(key: Key.tab):
         if (validator != null) {
           final error = validator!(value);
           if (error != null) {
@@ -82,6 +82,12 @@ class Prompt extends InteractiveWidget<String> {
         error = null;
         _isDone = true;
         return KeyResult.done;
+
+      // ── Newline ────────────────────────────────────────────────────
+      case SpecialKey(key: Key.enter):
+        error = null;
+        _input.write('\n');
+        return KeyResult.consumed;
 
       case SpecialKey(key: Key.backspace):
         error = null;
@@ -124,17 +130,26 @@ class Prompt extends InteractiveWidget<String> {
     final lines = wrapped.split('\n');
     if (lines.isNotEmpty && lines.last.isEmpty) lines.removeLast();
 
-    // Find the row where the cursor should sit.
-    // The ❯ pointer row.
-    final inputLineIndex = lines.indexWhere((l) => l.contains(Icon.pointer));
+    int inputLineIndex;
+    if (_input.isEmpty) {
+      // If empty, the cursor is placed on the first pipe line (the placeholder).
+      inputLineIndex = lines.indexWhere((l) => l.contains(Icon.pipe));
+    } else {
+      // We added trailing pipes at the bottom of the input. Each trailing pipe is 1 wrap line.
+      // So the last user input line is exactly _trailingPipesCounter lines above the last pipe.
+      inputLineIndex =
+          lines.lastIndexWhere((l) => l.contains(Icon.pipe)) -
+          _trailingPipesCounter;
+    }
 
     if (inputLineIndex != -1) {
       _linesBelow = lines.length - 1 - inputLineIndex;
       terminal.cursorUp(_linesBelow + 1);
 
-      // Extract the line and find where the cursor should be.
-      // The cursor should be at the end of the visible text.
-      final col = lines[inputLineIndex].visibleLength + 1;
+      // The cursor should be at the end of the visible text, or start of placeholder.
+      final col = _input.isEmpty
+          ? Icon.pipe.visibleLength + 2
+          : lines[inputLineIndex].visibleLength + 1;
       terminal.cursorToColumn(col);
     } else {
       _linesBelow = 0;
@@ -146,6 +161,23 @@ class Prompt extends InteractiveWidget<String> {
   void _restoreCursorToBottom() {
     terminal.cursorDown(_linesBelow + 1);
     terminal.cursorToColumn(1);
+  }
+
+  void _applyTrailingPipes(IndentedStringBuffer buf, [int? physicalLineCount]) {
+    final lineCount =
+        physicalLineCount ??
+        (_input.isEmpty ? 1 : _input.toString().split('\n').length);
+    final pipe = Icon.pipe.style(fieldStyle.text.prompt);
+
+    if (lineCount < 3) {
+      _trailingPipesCounter = 3 - lineCount;
+    } else {
+      _trailingPipesCounter = 1;
+    }
+
+    for (int i = 0; i < _trailingPipesCounter; i++) {
+      buf.writeln('$pipe ');
+    }
   }
 
   @override
@@ -162,22 +194,35 @@ class Prompt extends InteractiveWidget<String> {
     // Help / description
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
 
+    // If no max width, give it one so long text areas don't span the whole terminal.
+    int? currentMaxWidth = terminal.maxWidth;
+    terminal.maxWidth ??= 60;
     if (isDone) {
-      // ── Completed state ───────────────────────────────────────────
       buf.writeln('${Icon.check} $value'.success);
     } else {
-      // ── Single-line: original ❯ pointer ─────────────────────────
+      final pipe = Icon.pipe.style(fieldStyle.text.prompt);
       if (_input.isEmpty) {
         buf.writeln(
-          '${Icon.question.style(fieldStyle.text.prompt)} '
-          '${(defaultValue ?? '').style(fieldStyle.text.placeholder)}',
+          '$pipe ${(defaultValue ?? '').style(fieldStyle.text.placeholder)}',
         );
+        _applyTrailingPipes(buf, 1);
       } else {
-        buf.writeln(
-          '${Icon.question.style(fieldStyle.text.prompt)} '
-                  '$_input'
-              .style(fieldStyle.text.text),
-        );
+        final wrapWidth = terminal.maxWidth! - 2; // Subtract pipe prefix width
+        final lines = _input.toString().split('\n');
+        int physicalLineCount = 0;
+
+        for (int i = 0; i < lines.length; i++) {
+          final line = lines[i];
+          final wrappedLine = line.wrapAnsi(wrapWidth);
+          final wrappedSublines = wrappedLine.split('\n');
+          for (final subline in wrappedSublines) {
+            physicalLineCount++;
+            buf.writeln('$pipe ${subline.style(fieldStyle.text.text)}');
+          }
+        }
+
+        terminal.maxWidth = currentMaxWidth;
+        _applyTrailingPipes(buf, physicalLineCount);
       }
     }
 

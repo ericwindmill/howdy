@@ -27,6 +27,7 @@ export 'src/widgets/spinner_task.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
 export 'src/widgets/prompt.dart';
+export 'src/widgets/textarea.dart';
 export 'src/widgets/sign.dart';
 
 // Forms

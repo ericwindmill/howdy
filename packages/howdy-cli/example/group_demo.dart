@@ -73,5 +73,31 @@ void main() {
   );
 
   print('');
+  print('');
   Text.success('Done!');
+
+  terminal.writeln();
+  terminal.eraseScreen();
+
+  // 2. A simpler group without validation
+  Text(
+    '\n📋 Simple Options (Group Demo 2)\n',
+    style: TextStyle(bold: true, foreground: Color.cyan),
+  ).write();
+
+  final results2 = Group.send([
+    Prompt(label: 'Nickname', key: 'nick'),
+    Select<String>(
+      label: 'Role',
+      options: [
+        Option(label: 'Admin', value: 'admin'),
+        Option(label: 'Editor', value: 'editor'),
+        Option(label: 'Viewer', value: 'viewer'),
+      ],
+      key: 'role',
+    ),
+  ]);
+
+  terminal.writeln();
+  Text.success('Created ${results2['nick']} as ${results2['role']}');
 }

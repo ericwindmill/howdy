@@ -20,7 +20,12 @@ import 'package:howdy/howdy.dart';
 ///
 /// Use Tab/Enter to advance to the next field, Shift+Tab to go back.
 class Group extends MultiWidget {
-  Group(super.widgets);
+  Group(super.widgets) {
+    _focusIndex = _nextFocusableIndex(-1);
+    if (_focusIndex == widgets.length) {
+      _isDone = true;
+    }
+  }
 
   /// Convenience to run a group and return results.
   static MultiWidgetResults send(List<Widget> widgets) {
@@ -28,13 +33,27 @@ class Group extends MultiWidget {
   }
 
   bool _isDone = false;
-  int _focusIndex = 0;
+  late int _focusIndex;
 
   @override
   int get focusIndex => _focusIndex;
 
   @override
   bool get isDone => _isDone;
+
+  int _nextFocusableIndex(int startIndex) {
+    for (var i = startIndex + 1; i < widgets.length; i++) {
+      if (widgets[i] is! DisplayWidget) return i;
+    }
+    return widgets.length;
+  }
+
+  int _prevFocusableIndex(int startIndex) {
+    for (var i = startIndex - 1; i >= 0; i--) {
+      if (widgets[i] is! DisplayWidget) return i;
+    }
+    return -1;
+  }
 
   @override
   KeyResult handleKey(KeyEvent event) {
@@ -43,8 +62,9 @@ class Group extends MultiWidget {
 
     // Check for group-level navigation first
     if (event case SpecialKey(key: Key.shiftTab)) {
-      if (focusIndex > 0) {
-        _focusIndex--;
+      final prev = _prevFocusableIndex(focusIndex);
+      if (prev != -1) {
+        _focusIndex = prev;
         return KeyResult.consumed;
       }
       return KeyResult.ignored;
@@ -52,7 +72,7 @@ class Group extends MultiWidget {
 
     // delegate to widget
     var result = switch (focused) {
-      DisplayWidget _ => _handleKeyDisplayWidget(event),
+      DisplayWidget _ => KeyResult.done, // Should unreachable now
       InteractiveWidget w => _handleKeyInputWidget(event, w),
       MultiWidget w => _handleKeyMultiWidget(event, w),
     };
@@ -60,8 +80,9 @@ class Group extends MultiWidget {
     // handle navigation
     if (result == KeyResult.done) {
       // Widget completed — advance focus
-      if (focusIndex < widgets.length - 1) {
-        _focusIndex++;
+      final next = _nextFocusableIndex(focusIndex);
+      if (next < widgets.length) {
+        _focusIndex = next;
         return KeyResult.consumed;
       } else {
         // All widgets done
@@ -76,14 +97,13 @@ class Group extends MultiWidget {
   @override
   void reset() {
     _isDone = false;
-    _focusIndex = 0;
+    _focusIndex = _nextFocusableIndex(-1);
+    if (_focusIndex == widgets.length) {
+      _isDone = true;
+    }
     for (final w in widgets) {
       w.reset();
     }
-  }
-
-  KeyResult _handleKeyDisplayWidget(KeyEvent event) {
-    return KeyResult.done;
   }
 
   KeyResult _handleKeyInputWidget(KeyEvent event, InteractiveWidget widget) {
