@@ -108,6 +108,7 @@ class Table extends DisplayWidget {
   @override
   void get value {}
 
+  @override
   bool get isDone => true;
 
   @override

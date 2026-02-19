@@ -1,5 +1,4 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/theme.dart';
 
 /// A multi-choice select list.
 ///
@@ -40,7 +39,19 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   bool _isDone = false;
 
   @override
-  String get usage => 'space to toggle, enter to submit';
+  String get usage => usageHint([
+    (keys: '${Icon.arrowUp} / ${Icon.arrowDown}', action: 'navigate'),
+    (keys: 'space', action: 'toggle'),
+    (keys: 'enter', action: 'submit'),
+  ]);
+
+  @override
+  void reset() {
+    super.reset();
+    selected = List<bool>.filled(options.length, false);
+    selectedIndex = 0;
+    _isDone = false;
+  }
 
   /// Convenience factory, uses active theme values.
   static List<T> send<T>({

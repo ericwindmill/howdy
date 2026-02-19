@@ -38,6 +38,15 @@ class Group extends MultiWidget {
   }
 
   @override
+  void reset() {
+    _isDone = false;
+    _focusIndex = 0;
+    for (final w in widgets) {
+      w.reset();
+    }
+  }
+
+  @override
   KeyResult handleKey(KeyEvent event) {
     if (isDone) return KeyResult.ignored;
     final focused = widgets[focusIndex];

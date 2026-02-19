@@ -1,6 +1,5 @@
 import 'package:howdy/howdy.dart';
 import 'package:howdy/src/terminal/extensions.dart';
-import 'package:howdy/src/terminal/theme.dart';
 
 class Text extends DisplayWidget {
   Text(
@@ -54,6 +53,7 @@ class Text extends DisplayWidget {
     return buffer.toString();
   }
 
+  @override
   bool get isDone => true;
 
   @override

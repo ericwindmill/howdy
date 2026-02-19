@@ -48,6 +48,7 @@ class Spinner extends DisplayWidget {
   @override
   void get value {}
 
+  @override
   bool get isDone => _stopped;
 
   /// Starts the spinner animation.

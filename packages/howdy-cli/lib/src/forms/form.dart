@@ -1,12 +1,16 @@
 import 'package:howdy/howdy.dart';
 import 'package:howdy/src/terminal/extensions.dart';
-import 'package:howdy/src/terminal/theme.dart';
 
 /// A multi-page form container.
 ///
 /// Each page can be a [Group] (multiple widgets) or a single
 /// [InteractiveWidget]. When a page completes, the form advances
 /// to the next one. After all pages are done, returns [MultiWidgetResults].
+///
+/// Navigation:
+/// - Enter / Tab: advance within a page or to the next page.
+/// - ← (left-arrow), when not consumed by the focused widget: go back
+///   one page (resets the previous page so it can be re-edited).
 ///
 /// ```dart
 /// final results = Form([
@@ -58,29 +62,38 @@ class Form extends MultiWidget {
   String build(IndentedStringBuffer buf) {
     final focused = _focusedWidget;
     final errorText = focused?.error;
+    final t = Theme.current;
 
-    // Show title with page indicator
+    // ── Title ──
     buf.indent();
     if (title != null) {
       buf.writeln(
-        '${title!.style(TextStyle(foreground: Color.greyLight))} '
-        '${'(page ${_pageIndex + 1}/${widgets.length})'.dim}',
+        '${title!.style(t.formTitle)} '
+        '${'(page ${_pageIndex + 1}/${widgets.length})'.style(t.unfocusedBorder)}',
       );
       buf.writeln();
     }
 
-    // Render each widget individually with a focus-aware left border.
+    // ── Page widgets with focus-aware left border ──
     final page = _currentPage;
     final pageWidgets = page is MultiWidget ? page.widgets : [page];
     final focusIdx = page is MultiWidget ? page.focusIndex : 0;
 
     for (var i = 0; i < pageWidgets.length; i++) {
       final isFocused = i == focusIdx;
-      final borderStyle = isFocused
-          ? TextStyle(foreground: Color.white)
-          : TextStyle(dim: true);
+      final widget = pageWidgets[i];
+      final borderStyle = isFocused ? t.focusedBorder : t.unfocusedBorder;
+
+      // Inject a red asterisk on the first content line when the widget
+      // has an error, so the error is visible at a glance even when unfocused.
+      var rendered = widget.render();
+      final hasWidgetError = widget is InteractiveWidget && widget.hasError;
+      if (hasWidgetError) {
+        rendered = _injectErrorMarker(rendered, t);
+      }
+
       buf.writeln(
-        pageWidgets[i].render().withBorder(
+        rendered.withBorder(
           style: SignStyle.leftOnly,
           padding: EdgeInsets.only(left: 1),
           borderStyle: borderStyle,
@@ -89,31 +102,57 @@ class Form extends MultiWidget {
     }
 
     // ── Guide line ──
-    buf.writeln(_guideTextFor(focused).dim);
+    buf.writeln(_guideTextFor(focused));
 
     // ── Error line (from the focused widget) ──
     buf.writeln(
-      errorText != null
-          ? '${Icon.error} $errorText'.style(Theme.current.error)
-          : '',
+      errorText != null ? '${Icon.error} $errorText'.style(t.error) : '',
     );
 
     return buf.toString();
   }
 
-  /// Returns context-appropriate guide text for the focused widget.
+  /// Appends a red asterisk to the first non-blank visible line.
+  String _injectErrorMarker(String rendered, Theme t) {
+    final lines = rendered.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      if (stripAnsi(lines[i]).trim().isNotEmpty) {
+        lines[i] = '${lines[i]} ${Icon.asterisk.style(t.error)}';
+        break;
+      }
+    }
+    return lines.join('\n');
+  }
+
+  /// Returns the styled usage text for the focused widget, with a back hint
+  /// appended when the user can go back.
   String _guideTextFor(InteractiveWidget? focused) {
-    return focused?.usage ?? '';
+    final base = focused?.usage ?? '';
+    if (_pageIndex > 0) {
+      final t = Theme.current;
+      final dot = Icon.dot.style(t.usageAction);
+      final backHint =
+          '${'b'.style(t.usageKey)} ${'back'.style(t.usageAction)}';
+      return base.isEmpty ? backHint : '$base  $dot  $backHint';
+    }
+    return base;
   }
 
   @override
   KeyResult handleKey(KeyEvent event) {
     if (_isDone) return KeyResult.ignored;
 
+    // ── Back navigation ──
+    // 'b' goes back one page and resets it for re-editing.
+    if (event case CharKey(char: 'b') when _pageIndex > 0) {
+      _pageIndex--;
+      _currentPage.reset();
+      return KeyResult.consumed;
+    }
+
     final result = _currentPage.handleKey(event);
 
     if (result == KeyResult.done) {
-      // Page completed — advance to next
       if (_pageIndex < widgets.length - 1) {
         _pageIndex++;
         return KeyResult.consumed;

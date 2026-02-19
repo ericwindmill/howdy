@@ -43,6 +43,11 @@ abstract class InteractiveWidget<T> extends Widget<T> {
   /// Whether this widget is rendering standalone (i.e. owns its chrome).
   bool get isStandalone => renderContext == RenderContext.standalone;
 
+  @override
+  void reset() {
+    error = null;
+  }
+
   /// Process a key event. Override for interactive widgets.
   ///
   /// Returns [KeyResult.consumed] if the key changed widget state,

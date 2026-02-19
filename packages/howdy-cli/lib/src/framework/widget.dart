@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/theme.dart';
 
 part 'multi_widget.dart';
 part 'display_widget.dart';
@@ -65,6 +64,11 @@ sealed class Widget<T> {
   bool get isDone => false;
 
   KeyResult handleKey(KeyEvent event) => KeyResult.done;
+
+  /// Reset the widget to its initial (unfilled) state.
+  ///
+  /// Called by [Form] when the user navigates back to a previous page.
+  void reset() {}
 
   /// Render current visual state as a string. Does NOT write to output.
   /// Usually you want to override [build] instead of [render].

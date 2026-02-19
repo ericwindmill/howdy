@@ -36,7 +36,17 @@ class Select<T> extends InteractiveWidget<T> {
   bool _isDone = false;
 
   @override
-  String get usage => 'up/down to select, enter to submit';
+  String get usage => usageHint([
+    (keys: '${Icon.arrowUp} / ${Icon.arrowDown}', action: 'select'),
+    (keys: 'enter', action: 'submit'),
+  ]);
+
+  @override
+  void reset() {
+    super.reset();
+    selectedIndex = 0;
+    _isDone = false;
+  }
 
   /// Convenience factory, uses active theme values.
   static T send<T>({

@@ -1,5 +1,4 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/theme.dart';
 
 /// A single-line text input prompt.
 ///
@@ -49,7 +48,17 @@ class Prompt extends InteractiveWidget<String> {
   bool get hasInput => _input.isNotEmpty;
 
   @override
-  String get usage => 'type your answer, enter to submit';
+  String get usage => usageHint([
+    (keys: 'type your answer', action: ''),
+    (keys: 'enter', action: 'submit'),
+  ]);
+
+  @override
+  void reset() {
+    super.reset();
+    _input.clear();
+    _isDone = false;
+  }
 
   @override
   KeyResult handleKey(KeyEvent event) {
