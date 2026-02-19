@@ -1,3 +1,5 @@
+import 'package:howdy/src/terminal/extensions.dart';
+
 /// Splits [text] into lines of at most [maxWidth] characters,
 /// breaking only at whitespace boundaries.
 ///
@@ -28,7 +30,8 @@ List<String> wordWrap(String text, int maxWidth) {
       if (current.isEmpty) {
         // First word on this line — always place it, even if over limit.
         current.write(word);
-      } else if (current.length + 1 + word.length <= maxWidth) {
+      } else if (current.toString().visibleLength + 1 + word.visibleLength <=
+          maxWidth) {
         // Word fits on the current line.
         current.write(' $word');
       } else {

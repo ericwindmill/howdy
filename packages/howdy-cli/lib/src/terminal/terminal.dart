@@ -61,9 +61,40 @@ class Terminal {
     return _instance;
   }
 
-  Terminal._() : _output = stdout, _input = stdin {
+  Terminal._() : _output = stdout, _input = stdin;
+
+  /// Subscription to SIGTERM in the main isolate.
+  StreamSubscription<ProcessSignal>? _sigtermSub;
+
+  /// Background isolate that watches SIGINT.
+  Isolate? _sigintIsolate;
+
+  /// Reference count for how many features (raw mode, hidden cursor) are active
+  /// and require signal handlers/cleanup protection.
+  int _activeFeatureCount = 0;
+
+  /// Registers interest in terminal cleanup. Starts signal handlers if this is
+  /// the first active feature.
+  void _retain() {
+    _activeFeatureCount++;
+    if (_activeFeatureCount == 1) {
+      _startSignalHandlers();
+    }
+  }
+
+  /// Releases interest in terminal cleanup. Stops signal handlers if this was
+  /// the last active feature.
+  void _release() {
+    if (_activeFeatureCount <= 0) return;
+    _activeFeatureCount--;
+    if (_activeFeatureCount == 0) {
+      _stopSignalHandlers();
+    }
+  }
+
+  void _startSignalHandlers() {
     // Restore the cursor on SIGTERM (fires when the event loop is running).
-    ProcessSignal.sigterm.watch().listen((_) {
+    _sigtermSub = ProcessSignal.sigterm.watch().listen((_) {
       cursorShow();
       resetCursorShape();
       exit(0);
@@ -74,7 +105,16 @@ class Terminal {
     // can never fire. Spawn a background isolate whose event loop runs freely —
     // Dart delivers signals to ALL isolates that are watching them, so the
     // background isolate will receive SIGINT even when the main is blocked.
-    Isolate.spawn(_sigintWatcher, null);
+    Isolate.spawn(_sigintWatcher, null).then((isolate) {
+      _sigintIsolate = isolate;
+    });
+  }
+
+  void _stopSignalHandlers() {
+    _sigtermSub?.cancel();
+    _sigtermSub = null;
+    _sigintIsolate?.kill();
+    _sigintIsolate = null;
   }
 
   /// Watches SIGINT in a background isolate so it fires even when the main
@@ -238,10 +278,16 @@ class Terminal {
   void cursorRestore() => write('\x1B8');
 
   /// Hide the cursor.
-  void cursorHide() => write('\x1B[?25l');
+  void cursorHide() {
+    _retain();
+    write('\x1B[?25l');
+  }
 
   /// Show the cursor.
-  void cursorShow() => write('\x1B[?25h');
+  void cursorShow() {
+    write('\x1B[?25h');
+    _release();
+  }
 
   /// Set the terminal cursor shape.
   ///
@@ -342,6 +388,7 @@ class Terminal {
   /// Always pair with [disableRawMode] or use [runRawMode] for
   /// automatic cleanup.
   void enableRawMode() {
+    _retain();
     _previousLineMode = _input.lineMode;
     _previousEchoMode = _input.echoMode;
     _input.lineMode = false;
@@ -352,6 +399,7 @@ class Terminal {
   void disableRawMode() {
     _input.lineMode = _previousLineMode;
     _input.echoMode = _previousEchoMode;
+    _release();
   }
 
   /// Run [fn] with raw mode enabled, restoring on exit.
@@ -384,7 +432,13 @@ class Terminal {
   void updateScreen(String content) {
     _eraseScreen();
     write(content);
-    _lastLineCount = '\n'.allMatches(content).length;
+
+    // Track how many physical lines were rendered.
+    // split('\n') gives an extra empty string if content ends in \n.
+    final lines = content.split('\n');
+    _lastLineCount = (lines.isNotEmpty && lines.last.isEmpty)
+        ? lines.length - 1
+        : lines.length;
   }
 
   /// Clear all tracked lines without writing new content.
@@ -407,15 +461,30 @@ class Terminal {
   // Terminal Info
   // ---------------------------------------------------------------------------
 
-  /// The current terminal width in columns.
+  /// Optional maximum column width for all widget layout.
+  ///
+  /// When set, [columns] returns `min(maxColumns, actualTerminalWidth)` so
+  /// every widget that reads `terminal.columns` automatically respects the cap.
+  ///
+  /// Set to `null` (the default) to use the real terminal width.
+  ///
+  /// ```dart
+  /// terminal.maxColumns = 80; // cap everything at 80 chars wide
+  /// terminal.maxColumns = null; // restore full terminal width
+  /// ```
+  int? maxColumns = 60;
+
+  /// The current terminal width in columns, capped at [maxColumns] if set.
   ///
   /// Returns a default of 80 if the terminal width cannot be determined.
   int get columns {
+    int raw;
     try {
-      return stdout.terminalColumns;
+      raw = stdout.terminalColumns;
     } on StdoutException {
-      return 80;
+      raw = 80;
     }
+    return maxColumns != null ? raw.clamp(1, maxColumns!) : raw;
   }
 
   /// The current terminal height in rows.

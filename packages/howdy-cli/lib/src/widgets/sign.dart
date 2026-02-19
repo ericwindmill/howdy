@@ -63,6 +63,25 @@ class Sign extends DisplayWidget {
   /// Optional style applied to border characters.
   final TextStyle? borderStyle;
 
+  /// Convenience method — renders and writes a Sign immediately.
+  static void send(
+    List<StyledText> content, {
+    SignStyle style = SignStyle.rounded,
+    EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 1),
+    EdgeInsets margin = EdgeInsets.zero,
+    int? width,
+    TextStyle? borderStyle,
+  }) {
+    Sign(
+      content: content,
+      style: style,
+      padding: padding,
+      margin: margin,
+      width: width,
+      borderStyle: borderStyle,
+    ).write();
+  }
+
   @override
   String build(IndentedStringBuffer buf) {
     final innerWidth = _resolveInnerWidth();

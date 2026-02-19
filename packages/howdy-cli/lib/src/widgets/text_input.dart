@@ -17,8 +17,8 @@ import 'package:howdy/src/terminal/extensions.dart';
 /// ```dart
 /// final name = Prompt.send('Project name', defaultValue: 'my_app');
 /// ```
-class Prompt extends InteractiveWidget<String> {
-  Prompt({
+class TextInput extends InteractiveWidget<String> {
+  TextInput({
     required super.label,
     super.help,
     super.defaultValue,
@@ -34,7 +34,7 @@ class Prompt extends InteractiveWidget<String> {
     String? defaultValue,
     Validator<String>? validator,
   }) {
-    return Prompt(
+    return TextInput(
       label: label,
       help: help,
       defaultValue: defaultValue,

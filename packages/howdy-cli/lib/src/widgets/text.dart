@@ -18,6 +18,16 @@ class Text extends DisplayWidget {
     Text(input).write();
   }
 
+  /// Convenience factory — renders a [Text] with a custom [style] and optional [leading].
+  static void send(
+    String input, {
+    String leading = '',
+    TextStyle style = const TextStyle(),
+    bool newline = true,
+  }) {
+    Text(input, leading: leading, style: style, newline: newline).write();
+  }
+
   static void warning(String input) {
     Text(
       input,

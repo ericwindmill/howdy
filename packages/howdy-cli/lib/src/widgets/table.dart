@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:howdy/howdy.dart';
 
 /// A formatted table for terminal output.
@@ -5,27 +7,27 @@ import 'package:howdy/howdy.dart';
 /// Renders tabular data with configurable borders, column alignment,
 /// and per-cell styling.
 ///
-/// Cells can be plain [String]s or [StyledText] for colored output:
+/// **Column widths** can be controlled two ways:
+///
+/// 1. **Per-column**: `columnWidths: [12, 20]` — explicit character widths
+///    (content is still padded to at least the measured minimum so nothing
+///    is clipped).
+/// 2. **Total width**: `totalWidth: 60` — the table fills exactly [totalWidth]
+///    columns, distributing any surplus evenly across all columns.
+///
+/// Both parameters are optional; omitting both auto-sizes from content.
 ///
 /// ```dart
-/// Table(
-///   headers: ['Name', 'Status'],
-///   rows: [
-///     ['auth-service', StyledText('running', style: TextStyle(foreground: AnsiColor.green))],
-///     ['db-worker', StyledText('stopped', style: TextStyle(foreground: AnsiColor.red))],
-///   ],
-///   style: TableStyle.rounded,
-/// ).render();
-/// ```
+/// // Auto-sized (default)
+/// Table(headers: ['Name', 'Status'], rows: [...]).render();
 ///
-/// Output:
-/// ```
-/// ╭──────────────┬─────────╮
-/// │ Name         │ Status  │
-/// ├──────────────┼─────────┤
-/// │ auth-service │ running │
-/// │ db-worker    │ stopped │
-/// ╰──────────────┴─────────╯
+/// // Per-column widths
+/// Table(headers: ['Name', 'Status'], rows: [...],
+///       columnWidths: [20, 10]).render();
+///
+/// // Fixed total width (columns share evenly)
+/// Table(headers: ['Name', 'Status'], rows: [...],
+///       totalWidth: 50).render();
 /// ```
 class Table extends DisplayWidget {
   Table({
@@ -34,6 +36,8 @@ class Table extends DisplayWidget {
     this.style = TableStyle.rounded,
     this.headerStyle = const TextStyle(bold: true),
     this.columnAlignments,
+    this.columnWidths,
+    this.totalWidth,
   });
 
   /// Column header labels.
@@ -52,6 +56,20 @@ class Table extends DisplayWidget {
   /// of columns, missing columns default to [ColumnAlignment.left].
   final List<ColumnAlignment>? columnAlignments;
 
+  /// Explicit per-column character widths (content padding only — no border).
+  ///
+  /// Each entry overrides the auto-measured minimum for that column.
+  /// Omit or set to `null` to auto-size. Shorter lists leave trailing
+  /// columns auto-sized.
+  final List<int>? columnWidths;
+
+  /// Target total character width of the entire table (borders included).
+  ///
+  /// When set, extra space beyond the content minimum is distributed evenly
+  /// across all columns. Ignored if [columnWidths] already satisfies the
+  /// total.
+  final int? totalWidth;
+
   /// Convenience method for quick table output.
   static void send({
     required List<String> headers,
@@ -59,6 +77,8 @@ class Table extends DisplayWidget {
     TableStyle style = TableStyle.rounded,
     TextStyle headerStyle = const TextStyle(bold: true),
     List<ColumnAlignment>? columnAlignments,
+    List<int>? columnWidths,
+    int? totalWidth,
   }) {
     Table(
       headers: headers,
@@ -66,14 +86,16 @@ class Table extends DisplayWidget {
       style: style,
       headerStyle: headerStyle,
       columnAlignments: columnAlignments,
+      columnWidths: columnWidths,
+      totalWidth: totalWidth,
     ).write();
   }
 
   @override
-  String build(IndentedStringBuffer buf) {
+  String build(IndentedStringBuffer _) {
     final colCount = headers.length;
     final resolvedRows = _resolveRows(colCount);
-    final widths = _measureWidths(colCount, resolvedRows);
+    final widths = _computeWidths(colCount, resolvedRows);
     final buf = StringBuffer();
 
     if (style.hasBorders) {
@@ -109,6 +131,7 @@ class Table extends DisplayWidget {
   void get value {}
 
   @override
+  @override
   bool get isDone => true;
 
   @override
@@ -128,7 +151,42 @@ class Table extends DisplayWidget {
     }).toList();
   }
 
-  /// Compute the display width of each column.
+  /// Compute final column widths, respecting [columnWidths] and [totalWidth].
+  List<int> _computeWidths(int colCount, List<List<StyledText>> resolved) {
+    // Step 1: content-measured minimums.
+    final minimums = _measureWidths(colCount, resolved);
+
+    // Step 2: apply explicit per-column overrides (must be >= minimum).
+    final widths = List<int>.generate(colCount, (i) {
+      final explicit = (columnWidths != null && i < columnWidths!.length)
+          ? columnWidths![i]
+          : null;
+      return explicit != null ? max(explicit, minimums[i]) : minimums[i];
+    });
+
+    // Step 3: if totalWidth is set, distribute surplus evenly.
+    if (totalWidth != null) {
+      // Current rendered width: borders + padding (2 per cell) + widths.
+      // Border chars: 1 left + (colCount-1) middles + 1 right = colCount+1.
+      final borderChars = style.hasBorders ? colCount + 1 : 0;
+      final paddingChars = colCount * 2; // 1 space each side per cell
+      final contentTotal = widths.fold(0, (a, b) => a + b);
+      final currentTotal = borderChars + paddingChars + contentTotal;
+      final surplus = totalWidth! - currentTotal;
+      if (surplus > 0) {
+        // Distribute surplus, one extra char per column round-robin.
+        final perCol = surplus ~/ colCount;
+        final remainder = surplus % colCount;
+        for (var i = 0; i < colCount; i++) {
+          widths[i] += perCol + (i < remainder ? 1 : 0);
+        }
+      }
+    }
+
+    return widths;
+  }
+
+  /// Compute the display width of each column from content only.
   List<int> _measureWidths(int colCount, List<List<StyledText>> resolved) {
     final widths = List.generate(colCount, (i) => headers[i].length);
     for (final row in resolved) {

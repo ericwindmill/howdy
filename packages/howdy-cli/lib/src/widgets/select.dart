@@ -52,13 +52,13 @@ class Select<T> extends InteractiveWidget<T> {
   static T send<T>({
     required String label,
     required List<Option<T>> options,
-    String? description,
+    String? help,
     Validator<T>? validator,
   }) {
     return Select<T>(
       label: label,
       options: options,
-      help: description,
+      help: help,
       validator: validator,
     ).write();
   }
