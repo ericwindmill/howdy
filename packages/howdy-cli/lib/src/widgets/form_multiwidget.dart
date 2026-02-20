@@ -120,7 +120,7 @@ class Form extends MultiWidget {
       final dot = Icon.dot.style(t.help.shortSeparator);
       final backHint =
           '${'b'.style(t.help.shortKey)} ${'back'.style(t.help.shortDesc)}';
-      return base.isEmpty ? backHint : '$base  $dot  $backHint';
+      return base.isEmpty ? backHint : '$base $dot $backHint';
     }
     return base;
   }
@@ -131,7 +131,7 @@ class Form extends MultiWidget {
 
     // ── Back navigation ──
     // 'b' goes back one page and resets it for re-editing.
-    if (event case CharKey(char: 'b') when _pageIndex > 0) {
+    if (defaultKeyMap.form.back.matches(event) && _pageIndex > 0) {
       _pageIndex--;
       _currentPage.reset();
       return KeyResult.consumed;

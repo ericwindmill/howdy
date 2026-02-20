@@ -17,9 +17,9 @@ void main() {
       expect(widget.value, contains('\n'));
     });
 
-    test('tab submits textarea', () {
+    test('ctrlD submits textarea', () {
       widget.handleKey(CharKey('x'));
-      final result = widget.handleKey(SpecialKey(Key.tab));
+      final result = widget.handleKey(SpecialKey(Key.ctrlD));
       expect(result, KeyResult.done);
       expect(widget.isDone, isTrue);
       expect(widget.value, 'x');
@@ -29,7 +29,7 @@ void main() {
       widget.handleKey(CharKey('a'));
       widget.handleKey(SpecialKey(Key.enter));
       widget.handleKey(CharKey('b'));
-      widget.handleKey(SpecialKey(Key.tab));
+      widget.handleKey(SpecialKey(Key.ctrlD));
       expect(widget.value, 'a\nb');
     });
 

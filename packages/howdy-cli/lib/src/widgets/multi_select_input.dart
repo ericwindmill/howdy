@@ -83,36 +83,34 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    switch (event) {
-      case SpecialKey(key: Key.arrowUp):
-        if (selectedIndex > 0) {
-          selectedIndex--;
-          return KeyResult.consumed;
-        }
-        return KeyResult.ignored;
-      case SpecialKey(key: Key.arrowDown):
-        if (selectedIndex < options.length - 1) {
-          selectedIndex++;
-          return KeyResult.consumed;
-        }
-        return KeyResult.ignored;
-      case SpecialKey(key: Key.space):
-        selected[selectedIndex] = !selected[selectedIndex];
+    if (defaultKeyMap.multiSelect.prev.matches(event)) {
+      if (selectedIndex > 0) {
+        selectedIndex--;
         return KeyResult.consumed;
-      case SpecialKey(key: Key.enter):
-        if (validator != null) {
-          final error = validator!(value);
-          if (error != null) {
-            this.error = error;
-            return KeyResult.consumed;
-          }
+      }
+      return KeyResult.ignored;
+    } else if (defaultKeyMap.multiSelect.next.matches(event)) {
+      if (selectedIndex < options.length - 1) {
+        selectedIndex++;
+        return KeyResult.consumed;
+      }
+      return KeyResult.ignored;
+    } else if (defaultKeyMap.multiSelect.toggle.matches(event)) {
+      selected[selectedIndex] = !selected[selectedIndex];
+      return KeyResult.consumed;
+    } else if (defaultKeyMap.multiSelect.submit.matches(event)) {
+      if (validator != null) {
+        final error = validator!(value);
+        if (error != null) {
+          this.error = error;
+          return KeyResult.consumed;
         }
-        error = null;
-        _isDone = true;
-        return KeyResult.done;
-      default:
-        return KeyResult.ignored;
+      }
+      error = null;
+      _isDone = true;
+      return KeyResult.done;
     }
+    return KeyResult.ignored;
   }
 
   /// Build the option list string.

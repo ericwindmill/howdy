@@ -71,33 +71,31 @@ class Select<T> extends InteractiveWidget<T> {
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    switch (event) {
-      case SpecialKey(key: Key.arrowUp):
-        if (selectedIndex > 0) {
-          selectedIndex--;
+    if (defaultKeyMap.select.prev.matches(event)) {
+      if (selectedIndex > 0) {
+        selectedIndex--;
+        return KeyResult.consumed;
+      }
+      return KeyResult.ignored;
+    } else if (defaultKeyMap.select.next.matches(event)) {
+      if (selectedIndex < options.length - 1) {
+        selectedIndex++;
+        return KeyResult.consumed;
+      }
+      return KeyResult.ignored;
+    } else if (defaultKeyMap.select.submit.matches(event)) {
+      if (validator != null) {
+        final error = validator!(value);
+        if (error != null) {
+          this.error = error;
           return KeyResult.consumed;
         }
-        return KeyResult.ignored;
-      case SpecialKey(key: Key.arrowDown):
-        if (selectedIndex < options.length - 1) {
-          selectedIndex++;
-          return KeyResult.consumed;
-        }
-        return KeyResult.ignored;
-      case SpecialKey(key: Key.enter):
-        if (validator != null) {
-          final error = validator!(value);
-          if (error != null) {
-            this.error = error;
-            return KeyResult.consumed;
-          }
-        }
-        error = null;
-        _isDone = true;
-        return KeyResult.done;
-      default:
-        return KeyResult.ignored;
+      }
+      error = null;
+      _isDone = true;
+      return KeyResult.done;
     }
+    return KeyResult.ignored;
   }
 
   /// Build the option list string.

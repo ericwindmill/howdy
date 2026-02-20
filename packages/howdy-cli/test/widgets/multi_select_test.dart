@@ -77,7 +77,7 @@ void main() {
       });
 
       test('unrelated key is ignored', () {
-        final result = widget.handleKey(CharKey('x'));
+        final result = widget.handleKey(CharKey('z'));
         expect(result, KeyResult.ignored);
       });
 

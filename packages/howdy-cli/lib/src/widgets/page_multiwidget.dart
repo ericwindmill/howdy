@@ -61,7 +61,7 @@ class Page extends MultiWidget {
     final focused = widgets[focusIndex];
 
     // Check for group-level navigation first
-    if (event case SpecialKey(key: Key.shiftTab)) {
+    if (defaultKeyMap.page.prev.matches(event)) {
       final prev = _prevFocusableIndex(focusIndex);
       if (prev != -1) {
         _focusIndex = prev;

@@ -69,40 +69,36 @@ class Prompt extends InteractiveWidget<String> {
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    switch (event) {
-      // ── Submit ─────────────────────────────────────────────────────
-      case SpecialKey(key: Key.enter):
-        if (validator != null) {
-          final error = validator!(value);
-          if (error != null) {
-            this.error = error;
-            return KeyResult.consumed;
-          }
-        }
-        error = null;
-        _isDone = true;
-        return KeyResult.done;
-
-      case SpecialKey(key: Key.backspace):
-        error = null;
-        if (_input.isNotEmpty) {
-          final current = _input.toString();
-          _input.clear();
-          _input.write(current.substring(0, current.length - 1));
+    if (defaultKeyMap.input.submit.matches(event)) {
+      if (validator != null) {
+        final error = validator!(value);
+        if (error != null) {
+          this.error = error;
           return KeyResult.consumed;
         }
-        return KeyResult.ignored;
-      case SpecialKey(key: Key.space):
-        error = null;
-        _input.write(' ');
+      }
+      error = null;
+      _isDone = true;
+      return KeyResult.done;
+    } else if (event == const SpecialKey(Key.backspace)) {
+      error = null;
+      if (_input.isNotEmpty) {
+        final current = _input.toString();
+        _input.clear();
+        _input.write(current.substring(0, current.length - 1));
         return KeyResult.consumed;
-      case CharKey(char: final c):
-        error = null;
-        _input.write(c);
-        return KeyResult.consumed;
-      default:
-        return KeyResult.ignored;
+      }
+      return KeyResult.ignored;
+    } else if (event == const SpecialKey(Key.space)) {
+      error = null;
+      _input.write(' ');
+      return KeyResult.consumed;
+    } else if (event is CharKey) {
+      error = null;
+      _input.write(event.char);
+      return KeyResult.consumed;
     }
+    return KeyResult.ignored;
   }
 
   @override

@@ -53,31 +53,29 @@ class ConfirmInput extends InteractiveWidget<bool> {
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    switch (event) {
-      // Arrow / y / n update the selection without submitting
-      case SpecialKey(key: Key.arrowLeft):
-      case CharKey(char: 'y' || 'Y'):
-        _isYes = true;
-        return KeyResult.consumed;
-      case SpecialKey(key: Key.arrowRight):
-      case CharKey(char: 'n' || 'N'):
-        _isYes = false;
-        return KeyResult.consumed;
-      case SpecialKey(key: Key.enter):
-        final chosen = _isYes;
-        if (validator != null) {
-          final err = validator!(chosen);
-          if (err != null) {
-            error = err;
-            return KeyResult.consumed;
-          }
+    if (defaultKeyMap.confirm.toggle.matches(event)) {
+      _isYes = !_isYes;
+      return KeyResult.consumed;
+    } else if (defaultKeyMap.confirm.accept.matches(event)) {
+      _isYes = true;
+      return KeyResult.consumed;
+    } else if (defaultKeyMap.confirm.reject.matches(event)) {
+      _isYes = false;
+      return KeyResult.consumed;
+    } else if (defaultKeyMap.confirm.submit.matches(event)) {
+      final chosen = _isYes;
+      if (validator != null) {
+        final err = validator!(chosen);
+        if (err != null) {
+          error = err;
+          return KeyResult.consumed;
         }
-        error = null;
-        _isDone = true;
-        return KeyResult.done;
-      default:
-        return KeyResult.ignored;
+      }
+      error = null;
+      _isDone = true;
+      return KeyResult.done;
     }
+    return KeyResult.ignored;
   }
 
   @override

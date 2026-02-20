@@ -5,6 +5,7 @@ export 'src/terminal/icons.dart';
 export 'src/terminal/edge_insets.dart';
 export 'src/terminal/indented_string_buffer.dart';
 export 'src/terminal/key_event.dart';
+export 'src/terminal/keymap.dart';
 export 'src/terminal/screen_buffer.dart';
 export 'src/terminal/border_type.dart';
 export 'src/terminal/styled_text.dart';

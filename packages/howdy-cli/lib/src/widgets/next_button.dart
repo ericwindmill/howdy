@@ -40,7 +40,7 @@ class NextButton extends InteractiveWidget<void> {
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (event is SpecialKey && event.key == Key.enter) {
+    if (defaultKeyMap.page.next.matches(event)) {
       _isDone = true;
       return KeyResult.done;
     }
