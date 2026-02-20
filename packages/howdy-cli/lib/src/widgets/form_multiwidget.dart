@@ -1,5 +1,5 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/extensions.dart';
+import 'package:howdy/src/terminal/wrap.dart';
 
 /// A multi-page form container.
 ///
@@ -23,7 +23,8 @@ import 'package:howdy/src/terminal/extensions.dart';
 /// ]).write();
 /// ```
 class Form extends MultiWidget {
-  Form(super.widgets, {this.title}) {
+  Form(super.widgets, {this.title, FormKeyMap? keymap})
+    : keymap = keymap ?? defaultKeyMap.form {
     // Suppress inline error/chrome rendering — Form owns that display.
     for (final widget in widgets) {
       _setFormContext(widget);
@@ -32,13 +33,18 @@ class Form extends MultiWidget {
 
   /// Optional title shown above each page.
   final String? title;
+  final FormKeyMap keymap;
 
   int _pageIndex = 0;
   bool _isDone = false;
 
   /// Convenience to run a form and return results.
-  static MultiWidgetResults send(List<Widget> pages, {String? title}) {
-    return Form(pages, title: title).write();
+  static MultiWidgetResults send(
+    List<Widget> pages, {
+    String? title,
+    FormKeyMap? keymap,
+  }) {
+    return Form(pages, title: title, keymap: keymap).write();
   }
 
   /// The widget for the current page.
@@ -102,7 +108,7 @@ class Form extends MultiWidget {
   String _injectErrorMarker(String rendered, Theme t) {
     final lines = rendered.split('\n');
     for (var i = 0; i < lines.length; i++) {
-      if (stripAnsi(lines[i]).trim().isNotEmpty) {
+      if (lines[i].stripAnsi().trim().isNotEmpty) {
         lines[i] =
             '${lines[i]} ${Icon.asterisk.style(t.focused.errorIndicator)}';
         break;
@@ -119,7 +125,7 @@ class Form extends MultiWidget {
       final t = Theme.current;
       final dot = Icon.dot.style(t.help.shortSeparator);
       final backHint =
-          '${'b'.style(t.help.shortKey)} ${'back'.style(t.help.shortDesc)}';
+          '${keymap.back.helpKey.style(t.help.shortKey)} ${keymap.back.helpDesc.style(t.help.shortDesc)}';
       return base.isEmpty ? backHint : '$base $dot $backHint';
     }
     return base;
@@ -131,7 +137,7 @@ class Form extends MultiWidget {
 
     // ── Back navigation ──
     // 'b' goes back one page and resets it for re-editing.
-    if (defaultKeyMap.form.back.matches(event) && _pageIndex > 0) {
+    if (keymap.back.matches(event) && _pageIndex > 0) {
       _pageIndex--;
       _currentPage.reset();
       return KeyResult.consumed;
@@ -212,7 +218,8 @@ class Form extends MultiWidget {
       }
 
       buf.writeln(
-        rendered.withBorder(
+        Border.wrap(
+          rendered,
           borderType: BorderType.leftOnly,
           padding: EdgeInsets.only(left: 1),
           borderStyle: style.base,
@@ -236,7 +243,8 @@ class Form extends MultiWidget {
     }
 
     buf.writeln(
-      rendered.withBorder(
+      Border.wrap(
+        rendered,
         borderType: BorderType.leftOnly,
         padding: EdgeInsets.only(left: 1),
         borderStyle: Theme.current.focused.base,

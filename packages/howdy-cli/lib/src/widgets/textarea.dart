@@ -1,5 +1,5 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/extensions.dart';
+import 'package:howdy/src/terminal/wrap.dart';
 
 /// A multi-line text input prompt.
 ///
@@ -23,27 +23,32 @@ import 'package:howdy/src/terminal/extensions.dart';
 class Textarea extends InteractiveWidget<String> {
   Textarea({
     required super.label,
+    InputKeyMap? keymap,
     super.help,
     super.defaultValue,
     super.validator,
     super.key,
     super.theme,
-  });
+  }) : keymap = keymap ?? defaultKeyMap.input;
 
   /// Convenience factory for textareas.
   static String send(
     String label, {
+    InputKeyMap? keymap,
     String? help,
     String? defaultValue,
     Validator<String>? validator,
   }) {
     return Textarea(
       label: label,
+      keymap: keymap,
       help: help,
       defaultValue: defaultValue,
       validator: validator,
     ).write();
   }
+
+  final InputKeyMap keymap;
 
   /// The text buffer being built character by character.
   final StringBuffer _input = StringBuffer();
@@ -64,12 +69,15 @@ class Textarea extends InteractiveWidget<String> {
   String get usage => usageHint([
     (keys: 'type your answer', action: ''),
     (keys: 'enter', action: 'newline'),
-    (keys: 'tab', action: 'submit'),
+    (
+      keys: keymap.submitTextarea.helpKey,
+      action: keymap.submitTextarea.helpDesc,
+    ),
   ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (defaultKeyMap.input.submitTextarea.matches(event)) {
+    if (keymap.submitTextarea.matches(event)) {
       if (validator != null) {
         final error = validator!(value);
         if (error != null) {
@@ -120,7 +128,7 @@ class Textarea extends InteractiveWidget<String> {
     // Track rows to handle manual wrapping correctly.
     // The rendered string is wrapped by updateScreen, so we must
     // wrap it here to calculate the correct physical lines.
-    final wrapped = rendered.wrapAnsi(terminal.columns);
+    final wrapped = rendered.wordWrap(terminal.columns);
     final lines = wrapped.split('\n');
     if (lines.isNotEmpty && lines.last.isEmpty) lines.removeLast();
 
@@ -217,7 +225,7 @@ class Textarea extends InteractiveWidget<String> {
 
         for (int i = 0; i < lines.length; i++) {
           final line = lines[i];
-          final wrappedLine = line.wrapAnsi(wrapWidth);
+          final wrappedLine = line.wordWrap(wrapWidth);
           final wrappedSublines = wrappedLine.split('\n');
           for (final subline in wrappedSublines) {
             physicalLineCount++;

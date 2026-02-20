@@ -6,6 +6,7 @@ class KeyBinding {
     required this.keys,
     required this.helpKey,
     required this.helpDesc,
+    this.enabled = true,
   });
 
   /// The keys that trigger this binding.
@@ -16,6 +17,22 @@ class KeyBinding {
 
   /// The description of the action (e.g. "submit").
   final String helpDesc;
+
+  final bool enabled;
+
+  KeyBinding copyWith({
+    List<KeyEvent>? keys,
+    String? helpKey,
+    String? helpDesc,
+    bool? enabled,
+  }) {
+    return KeyBinding(
+      keys: keys ?? this.keys,
+      helpKey: helpKey ?? this.helpKey,
+      helpDesc: helpDesc ?? this.helpDesc,
+      enabled: enabled ?? this.enabled,
+    );
+  }
 
   /// Returns true if the given [event] matches any key in this binding.
   bool matches(KeyEvent event) => keys.contains(event);

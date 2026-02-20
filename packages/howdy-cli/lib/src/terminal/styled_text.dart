@@ -29,43 +29,18 @@ class StyledText {
 
   @override
   String toString() => render();
-}
 
-/// Render a list of [StyledText] spans into a single string.
-///
-/// Each span is styled independently, then concatenated.
-String renderSpans(List<StyledText> spans) {
-  return spans.map((s) => s.render()).join();
+  /// Render a list of [StyledText] spans into a single string.
+  ///
+  /// Each span is styled independently, then concatenated.
+  static String renderSpans(List<StyledText> spans) {
+    return spans.map((s) => s.render()).join();
+  }
 }
 
 extension StyledString on String {
   String style(TextStyle style) {
     final span = StyledText(this, style: style);
     return span.render();
-  }
-
-  String get dim {
-    return StyledText(this, style: TextStyle(dim: true)).render();
-  }
-
-  String get extraDim {
-    return StyledText(
-      this,
-      style: TextStyle(dim: true, foreground: Color.grey),
-    ).render();
-  }
-
-  String get red {
-    return StyledText(
-      this,
-      style: TextStyle(foreground: Color.red),
-    ).render();
-  }
-
-  String get green {
-    return StyledText(
-      this,
-      style: TextStyle(foreground: Color.green),
-    ).render();
   }
 }

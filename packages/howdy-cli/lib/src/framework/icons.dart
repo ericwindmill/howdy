@@ -11,6 +11,9 @@ abstract class Icon {
   static const String arrowUp = '↑';
   static const String arrowDown = '↓';
 
+  static const String branch = '├──';
+  static const String lastBranch = '└──';
+
   /// Middle dot — used as a separator in usage hint strings.
   static const String dot = '·';
   static const String asterisk = '*';

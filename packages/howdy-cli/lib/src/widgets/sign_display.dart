@@ -1,5 +1,5 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/extensions.dart';
+import 'package:howdy/src/terminal/wrap.dart';
 
 /// A widget that wraps [List<StyledText>] content in a configurable border.
 ///
@@ -107,13 +107,14 @@ class Sign extends DisplayWidget {
     for (final line in content.split('\n')) {
       String rendered = line;
       if (wrapWidth > 0) {
-        rendered = rendered.wrapAnsi(wrapWidth);
+        rendered = rendered.wordWrap(wrapWidth);
       }
       contentBuf.writeln(rendered);
     }
 
     final leftMarginStr = ' ' * margin.left;
-    final bordered = contentBuf.toString().withBorder(
+    final bordered = Border.wrap(
+      contentBuf.toString(),
       borderStyle: borderStyle,
       padding: padding,
       borderType: borderType,

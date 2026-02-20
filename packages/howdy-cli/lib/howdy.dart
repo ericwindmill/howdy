@@ -1,22 +1,22 @@
 // Organized low level -> high level
 
 // Terminal layer
-export 'src/terminal/icons.dart';
-export 'src/terminal/edge_insets.dart';
-export 'src/terminal/indented_string_buffer.dart';
+export 'src/framework/icons.dart';
+export 'src/framework/edge_insets.dart';
+export 'src/framework/indented_string_buffer.dart';
 export 'src/terminal/key_event.dart';
-export 'src/terminal/keymap.dart';
+export 'src/framework/keymap.dart';
 export 'src/terminal/screen_buffer.dart';
-export 'src/terminal/border_type.dart';
+export 'src/framework/border.dart';
 export 'src/terminal/styled_text.dart';
-export 'src/terminal/table_style.dart';
+export 'src/framework/table_style.dart';
 export 'src/terminal/terminal.dart';
 export 'src/terminal/text_style.dart';
-export 'src/terminal/theme.dart';
+export 'src/framework/theme.dart';
 
 // Framework - base classes for widgets
-export 'src/framework/option.dart';
-export 'src/framework/widget.dart';
+export 'src/framework/widget/option.dart';
+export 'src/framework/widget/widget.dart';
 
 // Widgets
 export 'src/widgets/confirm_button.dart';
@@ -33,3 +33,5 @@ export 'src/widgets/text.dart';
 export 'src/widgets/prompt_input.dart';
 export 'src/widgets/textarea.dart';
 export 'src/widgets/sign_display.dart';
+export 'src/widgets/file_tree.dart';
+export 'src/widgets/file_picker.dart';

@@ -41,7 +41,7 @@ class SpinnerTask<T> extends InteractiveWidget<T> {
   @override
   String build(IndentedStringBuffer buf) {
     if (_isDone) {
-      return '${renderSpans([StyledText('✔ '), StyledText(label)])}\n';
+      return '${StyledText.renderSpans([StyledText('✔ '), StyledText(label)])}\n';
     }
     // While running, the spinner handles its own animation frames.
     return label;

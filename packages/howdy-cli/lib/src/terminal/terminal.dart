@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:howdy/src/terminal/extensions.dart';
+import 'package:howdy/src/terminal/wrap.dart';
 import 'package:howdy/src/terminal/key_event.dart';
 import 'package:howdy/src/terminal/styled_text.dart';
 
@@ -189,10 +189,12 @@ class Terminal {
   void writeln([String s = '']) => _output.writeln(s);
 
   /// Render a list of [StyledText] spans and write to the output sink.
-  void writeSpans(List<StyledText> spans) => write(renderSpans(spans));
+  void writeSpans(List<StyledText> spans) =>
+      write(StyledText.renderSpans(spans));
 
   /// Render a list of [StyledText] spans and write with a trailing newline.
-  void writeSpansLn(List<StyledText> spans) => writeln(renderSpans(spans));
+  void writeSpansLn(List<StyledText> spans) =>
+      writeln(StyledText.renderSpans(spans));
 
   // ---------------------------------------------------------------------------
   // Read
@@ -494,7 +496,7 @@ class Terminal {
   void updateScreen(String content) {
     _eraseScreen();
     // Wrap the string to the terminal's column width BEFORE printing and counting lines.
-    final wrapped = content.wrapAnsi(columns);
+    final wrapped = content.wordWrap(columns);
     write(wrapped);
 
     // Track how many physical lines were rendered.

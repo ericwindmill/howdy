@@ -20,7 +20,8 @@ import 'package:howdy/howdy.dart';
 ///
 /// Use Tab/Enter to advance to the next field, Shift+Tab to go back.
 class Page extends MultiWidget {
-  Page(super.widgets) {
+  Page(super.widgets, {PageKeyMap? keymap})
+    : keymap = keymap ?? defaultKeyMap.page {
     _focusIndex = _nextFocusableIndex(-1);
     if (_focusIndex == widgets.length) {
       _isDone = true;
@@ -28,10 +29,11 @@ class Page extends MultiWidget {
   }
 
   /// Convenience to run a group and return results.
-  static MultiWidgetResults send(List<Widget> widgets) {
-    return Page(widgets).write();
+  static MultiWidgetResults send(List<Widget> widgets, {PageKeyMap? keymap}) {
+    return Page(widgets, keymap: keymap).write();
   }
 
+  final PageKeyMap keymap;
   bool _isDone = false;
   late int _focusIndex;
 
@@ -61,7 +63,7 @@ class Page extends MultiWidget {
     final focused = widgets[focusIndex];
 
     // Check for group-level navigation first
-    if (defaultKeyMap.page.prev.matches(event)) {
+    if (keymap.prev.matches(event)) {
       final prev = _prevFocusableIndex(focusIndex);
       if (prev != -1) {
         _focusIndex = prev;

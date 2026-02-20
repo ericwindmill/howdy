@@ -11,18 +11,21 @@ import 'package:howdy/howdy.dart';
 class NextButton extends InteractiveWidget<void> {
   NextButton({
     required super.label,
+    PageKeyMap? keymap,
     super.key,
     super.theme,
     this.next = true,
-  });
+  }) : keymap = keymap ?? defaultKeyMap.page;
 
   /// Convenience factory, uses active theme values.
-  static void send(String label) {
+  static void send(String label, {PageKeyMap? keymap}) {
     NextButton(
       label: label,
+      keymap: keymap,
     ).write();
   }
 
+  final PageKeyMap keymap;
   bool _isDone = false;
 
   final bool next;
@@ -32,7 +35,7 @@ class NextButton extends InteractiveWidget<void> {
 
   @override
   String get usage => usageHint([
-    (keys: 'enter', action: 'submit'),
+    (keys: keymap.next.helpKey, action: 'submit'),
   ]);
 
   @override
@@ -40,7 +43,7 @@ class NextButton extends InteractiveWidget<void> {
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (defaultKeyMap.page.next.matches(event)) {
+    if (keymap.next.matches(event)) {
       _isDone = true;
       return KeyResult.done;
     }

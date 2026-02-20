@@ -3,6 +3,24 @@ sealed class KeyEvent {
   const KeyEvent();
 }
 
+/// Known special keys.
+enum Key {
+  enter,
+  escape,
+  backspace,
+  delete,
+  tab,
+  shiftTab,
+  space,
+  arrowUp,
+  arrowDown,
+  arrowLeft,
+  arrowRight,
+  home,
+  end,
+  ctrlD,
+}
+
 /// A printable character key.
 class CharKey extends KeyEvent {
   /// The character that was typed.
@@ -37,22 +55,4 @@ class SpecialKey extends KeyEvent {
 
   @override
   String toString() => 'SpecialKey(${key.name})';
-}
-
-/// Known special keys.
-enum Key {
-  enter,
-  escape,
-  backspace,
-  delete,
-  tab,
-  shiftTab,
-  space,
-  arrowUp,
-  arrowDown,
-  arrowLeft,
-  arrowRight,
-  home,
-  end,
-  ctrlD,
 }

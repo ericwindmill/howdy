@@ -1,4 +1,7 @@
-import 'package:howdy/howdy.dart';
+import 'package:howdy/src/framework/keymap.dart';
+import 'package:howdy/src/framework/theme.dart' show usageHint;
+import 'package:howdy/src/framework/widget/widget.dart';
+import 'package:howdy/src/terminal/key_event.dart';
 
 /// A yes/no confirmation prompt.
 ///
@@ -15,30 +18,34 @@ import 'package:howdy/howdy.dart';
 class ConfirmInput extends InteractiveWidget<bool> {
   ConfirmInput({
     required super.label,
+    ConfirmKeyMap? keymap,
     super.key,
     super.help,
     super.defaultValue = false,
     super.validator,
     super.theme,
-  }) {
+  }) : keymap = keymap ?? defaultKeyMap.confirm {
     _isYes = defaultValue ?? false;
   }
 
   /// Convenience factory, uses active theme values.
   static bool send(
     String label, {
+    ConfirmKeyMap? keymap,
     String? description,
     bool defaultValue = false,
     Validator<bool>? validator,
   }) {
     return ConfirmInput(
       label: label,
+      keymap: keymap,
       help: description,
       defaultValue: defaultValue,
       validator: validator,
     ).write();
   }
 
+  final ConfirmKeyMap keymap;
   late bool _isYes;
   bool _isDone = false;
 
@@ -47,22 +54,22 @@ class ConfirmInput extends InteractiveWidget<bool> {
 
   @override
   String get usage => usageHint([
-    (keys: '${Icon.arrowLeft} / ${Icon.arrowRight}', action: 'choose'),
-    (keys: 'enter', action: 'submit'),
+    (keys: keymap.toggle.helpKey, action: 'choose'),
+    (keys: keymap.submit.helpKey, action: keymap.submit.helpDesc),
   ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (defaultKeyMap.confirm.toggle.matches(event)) {
+    if (keymap.toggle.matches(event)) {
       _isYes = !_isYes;
       return KeyResult.consumed;
-    } else if (defaultKeyMap.confirm.accept.matches(event)) {
+    } else if (keymap.accept.matches(event)) {
       _isYes = true;
       return KeyResult.consumed;
-    } else if (defaultKeyMap.confirm.reject.matches(event)) {
+    } else if (keymap.reject.matches(event)) {
       _isYes = false;
       return KeyResult.consumed;
-    } else if (defaultKeyMap.confirm.submit.matches(event)) {
+    } else if (keymap.submit.matches(event)) {
       final chosen = _isYes;
       if (validator != null) {
         final err = validator!(chosen);

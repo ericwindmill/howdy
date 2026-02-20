@@ -24,12 +24,13 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   Multiselect({
     required super.label,
     required this.options,
+    MultiSelectKeyMap? keymap,
     super.defaultValue,
     super.help,
     super.validator,
     super.key,
     super.theme,
-  }) {
+  }) : keymap = keymap ?? defaultKeyMap.multiSelect {
     selected = List<bool>.filled(options.length, false);
     if (defaultValue != null) {
       for (var i = 0; i < options.length; i++) {
@@ -44,6 +45,7 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   static List<T> send<T>({
     required String label,
     required List<Option<T>> options,
+    MultiSelectKeyMap? keymap,
     String? description,
     List<T>? defaultValue,
     Validator<List<T>>? validator,
@@ -51,6 +53,7 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     return Multiselect<T>(
       label: label,
       options: options,
+      keymap: keymap,
       help: description,
       defaultValue: defaultValue,
       validator: validator,
@@ -58,6 +61,7 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   }
 
   final List<Option<T>> options;
+  final MultiSelectKeyMap keymap;
   late List<bool> selected;
 
   int selectedIndex = 0;
@@ -76,29 +80,32 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
 
   @override
   String get usage => usageHint([
-    (keys: '${Icon.arrowUp} / ${Icon.arrowDown}', action: 'navigate'),
-    (keys: 'space', action: 'toggle'),
-    (keys: 'enter', action: 'submit'),
+    (
+      keys: '${keymap.prev.helpKey} / ${keymap.next.helpKey}',
+      action: 'navigate',
+    ),
+    (keys: keymap.toggle.helpKey, action: keymap.toggle.helpDesc),
+    (keys: keymap.submit.helpKey, action: keymap.submit.helpDesc),
   ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (defaultKeyMap.multiSelect.prev.matches(event)) {
+    if (keymap.prev.matches(event)) {
       if (selectedIndex > 0) {
         selectedIndex--;
         return KeyResult.consumed;
       }
       return KeyResult.ignored;
-    } else if (defaultKeyMap.multiSelect.next.matches(event)) {
+    } else if (keymap.next.matches(event)) {
       if (selectedIndex < options.length - 1) {
         selectedIndex++;
         return KeyResult.consumed;
       }
       return KeyResult.ignored;
-    } else if (defaultKeyMap.multiSelect.toggle.matches(event)) {
+    } else if (keymap.toggle.matches(event)) {
       selected[selectedIndex] = !selected[selectedIndex];
       return KeyResult.consumed;
-    } else if (defaultKeyMap.multiSelect.submit.matches(event)) {
+    } else if (keymap.submit.matches(event)) {
       if (validator != null) {
         final error = validator!(value);
         if (error != null) {

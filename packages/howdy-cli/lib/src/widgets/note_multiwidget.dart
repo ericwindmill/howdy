@@ -8,7 +8,11 @@ class Note extends MultiWidget<Widget> {
     List<DisplayWidget> notes, {
     this.next = false,
     this.nextLabel = 'Next',
-  }) : super([...notes, if (next) NextButton(label: nextLabel)]);
+    this.keymap,
+  }) : super([
+         ...notes,
+         if (next) NextButton(label: nextLabel, keymap: keymap),
+       ]);
 
   /// Whether this note should pause execution until the user continues.
   final bool next;
@@ -16,13 +20,17 @@ class Note extends MultiWidget<Widget> {
   /// The label for the continue button, if [next] is true.
   final String nextLabel;
 
+  /// The keymap to use for the continue button, if [next] is true.
+  final PageKeyMap? keymap;
+
   /// Convenience factory for standalone usage.
   static void send(
     List<DisplayWidget> widgets, {
     bool next = false,
     String nextLabel = 'Next',
+    PageKeyMap? keymap,
   }) {
-    Note(widgets, next: next, nextLabel: nextLabel).write();
+    Note(widgets, next: next, nextLabel: nextLabel, keymap: keymap).write();
   }
 
   @override

@@ -41,22 +41,6 @@ void main() {
   });
 
   group('StyledString extension', () {
-    test('.dim applies dim', () {
-      final result = 'hi'.dim;
-      expect(result, contains('\x1B['));
-      expect(result, contains('2'));
-    });
-
-    test('.red applies red foreground', () {
-      final result = 'hi'.red;
-      expect(result, contains(Color.red.fgCode));
-    });
-
-    test('.green applies green foreground', () {
-      final result = 'hi'.green;
-      expect(result, contains(Color.green.fgCode));
-    });
-
     test('.style applies arbitrary TextStyle', () {
       final result = 'hi'.style(TextStyle(italic: true));
       expect(result, contains('3')); // italic code

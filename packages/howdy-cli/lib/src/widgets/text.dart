@@ -62,8 +62,8 @@ class Text extends DisplayWidget {
       StyledText(label, style: style),
     ];
     newline
-        ? buffer.writeln(renderSpans(spans))
-        : buffer.write(renderSpans(spans));
+        ? buffer.writeln(StyledText.renderSpans(spans))
+        : buffer.write(StyledText.renderSpans(spans));
     return buffer.toString();
   }
 

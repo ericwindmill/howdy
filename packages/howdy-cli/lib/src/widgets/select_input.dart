@@ -24,12 +24,13 @@ class Select<T> extends InteractiveWidget<T> {
   Select({
     required super.label,
     required this.options,
+    SelectKeyMap? keymap,
     super.defaultValue,
     super.key,
     super.help,
     super.validator,
     super.theme,
-  }) {
+  }) : keymap = keymap ?? defaultKeyMap.select {
     if (defaultValue != null) {
       final idx = options.indexWhere((opt) => opt.value == defaultValue);
       if (idx != -1) {
@@ -42,6 +43,7 @@ class Select<T> extends InteractiveWidget<T> {
   static T send<T>({
     required String label,
     required List<Option<T>> options,
+    SelectKeyMap? keymap,
     String? help,
     T? defaultValue,
     Validator<T>? validator,
@@ -49,6 +51,7 @@ class Select<T> extends InteractiveWidget<T> {
     return Select<T>(
       label: label,
       options: options,
+      keymap: keymap,
       help: help,
       defaultValue: defaultValue,
       validator: validator,
@@ -56,6 +59,7 @@ class Select<T> extends InteractiveWidget<T> {
   }
 
   final List<Option<T>> options;
+  final SelectKeyMap keymap;
 
   int selectedIndex = 0;
   bool _isDone = false;
@@ -65,25 +69,25 @@ class Select<T> extends InteractiveWidget<T> {
 
   @override
   String get usage => usageHint([
-    (keys: '${Icon.arrowUp} / ${Icon.arrowDown}', action: 'select'),
-    (keys: 'enter', action: 'submit'),
+    (keys: '${keymap.prev.helpKey} / ${keymap.next.helpKey}', action: 'select'),
+    (keys: keymap.submit.helpKey, action: keymap.submit.helpDesc),
   ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (defaultKeyMap.select.prev.matches(event)) {
+    if (keymap.prev.matches(event)) {
       if (selectedIndex > 0) {
         selectedIndex--;
         return KeyResult.consumed;
       }
       return KeyResult.ignored;
-    } else if (defaultKeyMap.select.next.matches(event)) {
+    } else if (keymap.next.matches(event)) {
       if (selectedIndex < options.length - 1) {
         selectedIndex++;
         return KeyResult.consumed;
       }
       return KeyResult.ignored;
-    } else if (defaultKeyMap.select.submit.matches(event)) {
+    } else if (keymap.submit.matches(event)) {
       if (validator != null) {
         final error = validator!(value);
         if (error != null) {

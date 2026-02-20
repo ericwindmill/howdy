@@ -1,5 +1,5 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/extensions.dart';
+import 'package:howdy/src/terminal/wrap.dart';
 
 /// A text input prompt.
 ///
@@ -27,27 +27,32 @@ import 'package:howdy/src/terminal/extensions.dart';
 class Prompt extends InteractiveWidget<String> {
   Prompt({
     required super.label,
+    InputKeyMap? keymap,
     super.help,
     super.defaultValue,
     super.validator,
     super.key,
     super.theme,
-  });
+  }) : keymap = keymap ?? defaultKeyMap.input;
 
   /// Convenience factory for single-line prompts.
   static String send(
     String label, {
+    InputKeyMap? keymap,
     String? help,
     String? defaultValue,
     Validator<String>? validator,
   }) {
     return Prompt(
       label: label,
+      keymap: keymap,
       help: help,
       defaultValue: defaultValue,
       validator: validator,
     ).write();
   }
+
+  final InputKeyMap keymap;
 
   /// The text buffer being built character by character.
   final StringBuffer _input = StringBuffer();
@@ -64,12 +69,12 @@ class Prompt extends InteractiveWidget<String> {
   @override
   String get usage => usageHint([
     (keys: 'type your answer', action: ''),
-    (keys: 'enter', action: 'submit'),
+    (keys: keymap.submit.helpKey, action: keymap.submit.helpDesc),
   ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (defaultKeyMap.input.submit.matches(event)) {
+    if (keymap.submit.matches(event)) {
       if (validator != null) {
         final error = validator!(value);
         if (error != null) {
@@ -116,7 +121,7 @@ class Prompt extends InteractiveWidget<String> {
     // Track rows to handle manual wrapping correctly.
     // The rendered string is wrapped by updateScreen, so we must
     // wrap it here to calculate the correct physical lines.
-    final wrapped = rendered.wrapAnsi(terminal.columns);
+    final wrapped = rendered.wordWrap(terminal.columns);
     final lines = wrapped.split('\n');
     if (lines.isNotEmpty && lines.last.isEmpty) lines.removeLast();
 

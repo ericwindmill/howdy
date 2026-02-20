@@ -77,18 +77,18 @@ class Spinner extends DisplayWidget {
   String build(IndentedStringBuffer buf) {
     if (_stopped) {
       if (_success) {
-        return renderSpans([
+        return StyledText.renderSpans([
           StyledText('✔ ', style: TextStyle(foreground: Color.green)),
           if (rightPrompt != null) StyledText(rightPrompt!),
         ]);
       } else {
-        return renderSpans([
+        return StyledText.renderSpans([
           StyledText('✘ ', style: TextStyle(foreground: Color.red)),
           if (rightPrompt != null) StyledText(rightPrompt!),
         ]);
       }
     }
-    return renderSpans([
+    return StyledText.renderSpans([
       StyledText('${Icon.spinnerFrames[_frameIndex]} ', style: style),
       if (rightPrompt != null) StyledText(rightPrompt!),
     ]);
