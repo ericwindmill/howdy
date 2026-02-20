@@ -496,7 +496,7 @@ String usageHint(List<({String keys, String action})> parts) {
         (p) =>
             '${p.keys.style(t.help.shortKey)} ${p.action.style(t.help.shortDesc)}',
       )
-      .join('  $dot  ');
+      .join(' $dot ');
 }
 
 extension Theming on String {

@@ -49,22 +49,20 @@ class SpinnerTask<T> extends InteractiveWidget<T> {
 
   @override
   Future<T> write() async {
-    final spinner = Spinner();
+    final spinner = Spinner(rightPrompt: label);
 
-    // Render spinner + label on the same line.
     spinner.write();
-    terminal.writeSpans([StyledText(label)]);
 
     try {
       final result = await task();
       _value = result;
       _isDone = true;
       spinner.stop(success: true);
-      terminal.writeSpansLn([StyledText(label)]);
+      terminal.writeln();
       return result;
     } catch (e) {
       spinner.stop(success: false);
-      terminal.writeSpansLn([StyledText(label)]);
+      terminal.writeln();
       rethrow;
     }
   }

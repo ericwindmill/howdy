@@ -24,23 +24,33 @@ class Select<T> extends InteractiveWidget<T> {
   Select({
     required super.label,
     required this.options,
+    super.defaultValue,
     super.key,
     super.help,
     super.validator,
     super.theme,
-  });
+  }) {
+    if (defaultValue != null) {
+      final idx = options.indexWhere((opt) => opt.value == defaultValue);
+      if (idx != -1) {
+        selectedIndex = idx;
+      }
+    }
+  }
 
   /// Convenience factory, uses active theme values.
   static T send<T>({
     required String label,
     required List<Option<T>> options,
     String? help,
+    T? defaultValue,
     Validator<T>? validator,
   }) {
     return Select<T>(
       label: label,
       options: options,
       help: help,
+      defaultValue: defaultValue,
       validator: validator,
     ).write();
   }

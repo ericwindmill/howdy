@@ -8,10 +8,8 @@ import 'package:howdy/src/terminal/extensions.dart';
 ///
 /// ```dart
 /// Sign(
-///   content: [
-///     StyledText('Title', style: TextStyle(bold: true)),
-///     StyledText('Some longer text that will wrap automatically.'),
-///   ],
+///   content: StyledText('Title', style: TextStyle(bold: true)).render() +
+///     '\nSome longer text that will wrap automatically.',
 ///   padding: EdgeInsets.symmetric(horizontal: 1, vertical: 1),
 /// ).write();
 /// ```
@@ -40,8 +38,9 @@ class Sign extends DisplayWidget {
   });
 
   /// Convenience method — renders and writes a Sign immediately.
+  /// Useful when writing outside of a multiwidget.
   static void send(
-    List<StyledText> content, {
+    String content, {
     BorderType borderType = BorderType.rounded,
     EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 1),
     EdgeInsets margin = EdgeInsets.zero,
@@ -65,7 +64,7 @@ class Sign extends DisplayWidget {
   final TextStyle? borderStyle;
 
   /// The content to display inside the sign.
-  final List<StyledText> content;
+  final String content;
 
   /// Outer margin around the entire sign.
   ///
@@ -89,13 +88,28 @@ class Sign extends DisplayWidget {
       buf.writeln();
     }
 
-    // Render each StyledText span into a plain string,
-    // then delegate all border drawing to withBorder.
+    // Determine the maximum width for the inner content.
+    int? wrapWidth = width;
+    if (wrapWidth == null) {
+      int borderCols = 0;
+      if (borderType.left) borderCols++;
+      if (borderType.right) borderCols++;
+      wrapWidth =
+          terminal.columns -
+          margin.horizontal -
+          padding.horizontal -
+          borderCols;
+    }
+
+    // Render each line into the buffer,
+    // apply wrapping, then delegate all border drawing to withBorder.
     final contentBuf = StringBuffer();
-    for (final span in content) {
-      for (final line in span.text.split('\n')) {
-        contentBuf.writeln(StyledText(line, style: span.style).render());
+    for (final line in content.split('\n')) {
+      String rendered = line;
+      if (wrapWidth > 0) {
+        rendered = rendered.wrapAnsi(wrapWidth);
       }
+      contentBuf.writeln(rendered);
     }
 
     final leftMarginStr = ' ' * margin.left;

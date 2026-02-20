@@ -19,8 +19,8 @@ import 'package:howdy/howdy.dart';
 /// ```
 ///
 /// Use Tab/Enter to advance to the next field, Shift+Tab to go back.
-class Group extends MultiWidget {
-  Group(super.widgets) {
+class Page extends MultiWidget {
+  Page(super.widgets) {
     _focusIndex = _nextFocusableIndex(-1);
     if (_focusIndex == widgets.length) {
       _isDone = true;
@@ -29,7 +29,7 @@ class Group extends MultiWidget {
 
   /// Convenience to run a group and return results.
   static MultiWidgetResults send(List<Widget> widgets) {
-    return Group(widgets).write();
+    return Page(widgets).write();
   }
 
   bool _isDone = false;

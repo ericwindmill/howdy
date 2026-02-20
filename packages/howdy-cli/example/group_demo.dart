@@ -14,7 +14,7 @@ void main() {
     'Use Tab/Enter to advance, Shift+Tab to go back.\n',
   );
 
-  final results = Group.send([
+  final results = Page.send([
     Prompt(
       label: 'Project name',
       defaultValue: 'my_app',
@@ -85,7 +85,7 @@ void main() {
     style: TextStyle(bold: true, foreground: Color.cyan),
   ).write();
 
-  final results2 = Group.send([
+  final results2 = Page.send([
     Prompt(label: 'Nickname', key: 'nick'),
     Select<String>(
       label: 'Role',

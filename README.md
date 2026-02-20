@@ -2,11 +2,20 @@
 
 Howdy CLI is a powerful, declarative, and highly themeable terminal UI framework for Dart. It provides a robust set of interactive widgets, seamless terminal I/O management, and a flexible theming API to build beautiful command-line applications.
 
-## 1. High-Level Overview
+I was heavily inspired by / ripped off [Huh?](https://github.com/charmbracelet/huh)
 
-Howdy CLI is built around the concept of terminal widgets, similar to UI frameworks like Flutter. It separates terminal rendering from I/O logic and allows developers to easily compose forms, prompts, and structural components.
+<gif>
 
-Key features include:
+```dart
+
+
+
+
+```
+
+
+
+
 - **Declarative Components:** Easily build forms and interactive prompts.
 - **Theming System:** Centralized styling for colors, borders, icons, and text.
 - **Low-Level Terminal Control:** Exposed primitive terminal functions for cursors, escape sequences, and screen buffers.

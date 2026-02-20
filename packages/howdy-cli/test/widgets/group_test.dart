@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('Group', () {
-    late Group group;
+    late Page group;
     late ConfirmInput confirm;
     late Select<String> select;
 
@@ -17,7 +17,7 @@ void main() {
           Option(label: 'Go', value: 'go'),
         ],
       );
-      group = Group([confirm, select]);
+      group = Page([confirm, select]);
     });
 
     test('initial state: first widget is focused', () {

@@ -15,10 +15,11 @@ class MultiWidgetResults {
   Iterable<String> get keys => _values.keys;
 }
 
-abstract class MultiWidget extends Widget<MultiWidgetResults> {
+abstract class MultiWidget<T extends Widget>
+    extends Widget<MultiWidgetResults> {
   MultiWidget(this.widgets);
 
-  final List<Widget> widgets;
+  final List<T> widgets;
 
   int get focusIndex => 0;
 
@@ -43,8 +44,6 @@ abstract class MultiWidget extends Widget<MultiWidgetResults> {
     return results;
   }
 
-  // For now, all Multiwidgets use the same write logic.
-  // It's possible that I'll need to make this an abstract method, we'll see.
   @override
   MultiWidgetResults write() {
     terminal.cursorHide();

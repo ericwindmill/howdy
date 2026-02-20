@@ -24,12 +24,20 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   Multiselect({
     required super.label,
     required this.options,
+    super.defaultValue,
     super.help,
     super.validator,
     super.key,
     super.theme,
   }) {
     selected = List<bool>.filled(options.length, false);
+    if (defaultValue != null) {
+      for (var i = 0; i < options.length; i++) {
+        if (defaultValue!.contains(options[i].value)) {
+          selected[i] = true;
+        }
+      }
+    }
   }
 
   /// Convenience factory, uses active theme values.
@@ -37,12 +45,14 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     required String label,
     required List<Option<T>> options,
     String? description,
+    List<T>? defaultValue,
     Validator<List<T>>? validator,
   }) {
     return Multiselect<T>(
       label: label,
       options: options,
       help: description,
+      defaultValue: defaultValue,
       validator: validator,
     ).write();
   }

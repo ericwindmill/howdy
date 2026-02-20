@@ -3,7 +3,7 @@ import 'package:howdy/src/terminal/extensions.dart';
 
 /// A multi-page form container.
 ///
-/// Each page can be a [Group] (multiple widgets) or a single
+/// Each page can be a [Page] (multiple widgets) or a single
 /// [InteractiveWidget]. When a page completes, the form advances
 /// to the next one. After all pages are done, returns [MultiWidgetResults].
 ///
@@ -62,47 +62,26 @@ class Form extends MultiWidget {
   String build(IndentedStringBuffer buf) {
     final focused = _focusedWidget;
     final errorText = focused?.error;
-    final t = Theme.current;
 
     // ── Title ──
     buf.indent();
     if (title != null) {
       buf.writeln(
-        '${title!.style(t.group.title)} '
-        '${'(page ${_pageIndex + 1}/${widgets.length})'.style(t.group.description)}',
+        '${title!.style(Theme.current.group.title)} '
+        '${'(page ${_pageIndex + 1}/${widgets.length})'.style(
+          Theme.current.group.description,
+        )}',
       );
       buf.writeln();
     }
 
     // ── Page widgets with focus-aware left border ──
     final page = _currentPage;
-    final pageWidgets = page is MultiWidget ? page.widgets : [page];
-    final focusIdx = page is MultiWidget ? page.focusIndex : 0;
-
-    for (var i = 0; i < pageWidgets.length; i++) {
-      final isFocused = i == focusIdx;
-      final widget = pageWidgets[i];
-      if (widget is InteractiveWidget) {
-        widget.isFocused = isFocused;
-      }
-      final style = isFocused ? t.focused : t.blurred;
-
-      // Inject a red asterisk on the first content line when the widget
-      // has an error, so the error is visible at a glance even when unfocused.
-      var rendered = widget.render();
-      final hasWidgetError = widget is InteractiveWidget && widget.hasError;
-      if (hasWidgetError) {
-        rendered = _injectErrorMarker(rendered, t);
-      }
-
-      buf.writeln(
-        rendered.withBorder(
-          borderType: BorderType.leftOnly,
-          padding: EdgeInsets.only(left: 1),
-          borderStyle: style.base,
-        ),
-      );
-    }
+    buf = switch (page) {
+      Note note => _handleNote(buf, note),
+      MultiWidget mw => _handlePage(buf, mw),
+      Widget widget => _handleWidget(buf, widget),
+    };
 
     // ── Guide line ──
     buf.writeln(_guideTextFor(focused));
@@ -110,7 +89,9 @@ class Form extends MultiWidget {
     // ── Error line (from the focused widget) ──
     buf.writeln(
       errorText != null
-          ? '${Icon.error} $errorText'.style(t.focused.errorMessage)
+          ? '${Icon.error} $errorText'.style(
+              Theme.current.focused.errorMessage,
+            )
           : '',
     );
 
@@ -181,5 +162,86 @@ class Form extends MultiWidget {
         _setFormContext(child);
       }
     }
+  }
+
+  IndentedStringBuffer _handleNote(IndentedStringBuffer buf, Note note) {
+    final pageWidgets = note.widgets;
+    final focusIdx = note.focusIndex;
+
+    for (var i = 0; i < pageWidgets.length; i++) {
+      final isFocused = i == focusIdx;
+      final widget = pageWidgets[i];
+      if (widget is InteractiveWidget) {
+        widget.isFocused = isFocused;
+      }
+
+      // Inject a red asterisk on the first content line when the widget
+      // has an error, so the error is visible at a glance even when unfocused.
+      var rendered = widget.render();
+      final hasWidgetError = widget is InteractiveWidget && widget.hasError;
+      if (hasWidgetError) {
+        rendered = _injectErrorMarker(rendered, Theme.current);
+      }
+
+      buf.writeln(rendered);
+    }
+    return buf;
+  }
+
+  IndentedStringBuffer _handlePage(
+    IndentedStringBuffer buf,
+    MultiWidget page,
+  ) {
+    final pageWidgets = page.widgets;
+    final focusIdx = page.focusIndex;
+
+    for (var i = 0; i < pageWidgets.length; i++) {
+      final isFocused = i == focusIdx;
+      final widget = pageWidgets[i];
+      if (widget is InteractiveWidget) {
+        widget.isFocused = isFocused;
+      }
+      final style = isFocused ? Theme.current.focused : Theme.current.blurred;
+
+      // Inject a red asterisk on the first content line when the widget
+      // has an error, so the error is visible at a glance even when unfocused.
+      var rendered = widget.render();
+      final hasWidgetError = widget is InteractiveWidget && widget.hasError;
+      if (hasWidgetError) {
+        rendered = _injectErrorMarker(rendered, Theme.current);
+      }
+
+      buf.writeln(
+        rendered.withBorder(
+          borderType: BorderType.leftOnly,
+          padding: EdgeInsets.only(left: 1),
+          borderStyle: style.base,
+        ),
+      );
+    }
+    return buf;
+  }
+
+  IndentedStringBuffer _handleWidget(IndentedStringBuffer buf, Widget widget) {
+    if (widget is InteractiveWidget) {
+      widget.isFocused = true;
+    }
+
+    // Inject a red asterisk on the first content line when the widget
+    // has an error, so the error is visible at a glance even when unfocused.
+    var rendered = widget.render();
+    final hasWidgetError = widget is InteractiveWidget && widget.hasError;
+    if (hasWidgetError) {
+      rendered = _injectErrorMarker(rendered, Theme.current);
+    }
+
+    buf.writeln(
+      rendered.withBorder(
+        borderType: BorderType.leftOnly,
+        padding: EdgeInsets.only(left: 1),
+        borderStyle: Theme.current.focused.base,
+      ),
+    );
+    return buf;
   }
 }

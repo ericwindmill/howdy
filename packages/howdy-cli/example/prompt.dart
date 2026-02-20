@@ -32,7 +32,7 @@ void main() {
 
   // 3. Prompt within a Group
   terminal.writeln('3. Prompt in a Group:');
-  Group.send([
+  Page.send([
     Text('Profile Setup'),
     Prompt(
       label: 'Username',

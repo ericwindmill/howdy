@@ -18,17 +18,17 @@ export 'src/framework/option.dart';
 export 'src/framework/widget.dart';
 
 // Widgets
-export 'src/widgets/confirm_input.dart';
-export 'src/widgets/group.dart';
-export 'src/widgets/multi_select.dart';
-export 'src/widgets/select.dart';
+export 'src/widgets/confirm_button.dart';
+export 'src/widgets/form_multiwidget.dart';
+export 'src/widgets/page_multiwidget.dart';
+export 'src/widgets/multi_select_input.dart';
+export 'src/widgets/next_button.dart';
+export 'src/widgets/note_multiwidget.dart';
+export 'src/widgets/select_input.dart';
 export 'src/widgets/spinner.dart';
 export 'src/widgets/spinner_task.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
-export 'src/widgets/prompt.dart';
+export 'src/widgets/prompt_input.dart';
 export 'src/widgets/textarea.dart';
-export 'src/widgets/sign.dart';
-
-// Forms
-export 'src/forms/form.dart';
+export 'src/widgets/sign_display.dart';

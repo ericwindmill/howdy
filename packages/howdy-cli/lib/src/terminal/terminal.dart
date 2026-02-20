@@ -306,6 +306,12 @@ class Terminal {
   /// Move cursor to the start of the current line.
   void cursorToStart() => write('\r');
 
+  /// Move cursor to the top-left corner of the screen (home).
+  void cursorHome() => write('\x1B[H');
+
+  /// Move cursor to a specific [row] and [col] (1-indexed).
+  void cursorPosition(int row, int col) => write('\x1B[$row;${col}H');
+
   /// Save the current cursor position (DEC private).
   void cursorSave() => write('\x1B7');
 
@@ -359,6 +365,12 @@ class Terminal {
 
   /// Returns the escape sequence string for moving to column [col].
   static String cursorToColumnSeq(int col) => '\x1B[${col}G';
+
+  /// Returns the escape sequence string for moving to the top-left corner (home).
+  static String get cursorHomeSeq => '\x1B[H';
+
+  /// Returns the escape sequence string for moving to a specific [row] and [col] (1-indexed).
+  static String cursorPositionSeq(int row, int col) => '\x1B[$row;${col}H';
 
   /// Escape sequence for hiding the cursor.
   static String get cursorHideSeq => '\x1B[?25l';

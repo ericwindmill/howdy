@@ -18,9 +18,13 @@ import 'package:howdy/howdy.dart';
 /// spinner.stop();
 /// ```
 class Spinner extends DisplayWidget {
-  Spinner({this.style = const TextStyle(foreground: Color.yellow)});
+  Spinner({
+    this.style = const TextStyle(foreground: Color.yellow),
+    this.rightPrompt,
+  });
 
   final TextStyle style;
+  final String? rightPrompt;
 
   int _frameIndex = 0;
   Timer? _timer;
@@ -48,10 +52,12 @@ class Spinner extends DisplayWidget {
     if (success) {
       terminal.writeSpans([
         StyledText('✔ ', style: TextStyle(foreground: Color.green)),
+        if (rightPrompt != null) StyledText(rightPrompt!),
       ]);
     } else {
       terminal.writeSpans([
         StyledText('✘ ', style: TextStyle(foreground: Color.red)),
+        if (rightPrompt != null) StyledText(rightPrompt!),
       ]);
     }
 
@@ -63,6 +69,7 @@ class Spinner extends DisplayWidget {
     terminal.cursorToStart();
     terminal.writeSpans([
       StyledText('${Icon.spinnerFrames[_frameIndex]} ', style: style),
+      if (rightPrompt != null) StyledText(rightPrompt!),
     ]);
   }
 
@@ -72,15 +79,18 @@ class Spinner extends DisplayWidget {
       if (_success) {
         return renderSpans([
           StyledText('✔ ', style: TextStyle(foreground: Color.green)),
+          if (rightPrompt != null) StyledText(rightPrompt!),
         ]);
       } else {
         return renderSpans([
           StyledText('✘ ', style: TextStyle(foreground: Color.red)),
+          if (rightPrompt != null) StyledText(rightPrompt!),
         ]);
       }
     }
     return renderSpans([
       StyledText('${Icon.spinnerFrames[_frameIndex]} ', style: style),
+      if (rightPrompt != null) StyledText(rightPrompt!),
     ]);
   }
 

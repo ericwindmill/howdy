@@ -32,7 +32,7 @@ void confirmInput() {
   terminal.writeln();
   terminal.eraseScreen();
 
-  Group.send([
+  Page.send([
     Text('HOWDY!'),
     ConfirmInput(label: 'You good?', help: "Tell us how you're doing."),
     Text('Good.'),
@@ -41,7 +41,7 @@ void confirmInput() {
   terminal.writeln();
   terminal.eraseScreen();
   Form.send(title: 'Greeter', [
-    Group([
+    Page([
       Text('HOWDY!'),
       ConfirmInput(
         label: 'You good?',

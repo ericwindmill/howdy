@@ -163,12 +163,14 @@ class Textarea extends InteractiveWidget<String> {
     terminal.cursorToColumn(1);
   }
 
-  void _applyTrailingPipes(IndentedStringBuffer buf, [int? physicalLineCount]) {
+  void _applyTrailingPipes(
+    IndentedStringBuffer buf,
+    String pipeChar, [
+    int? physicalLineCount,
+  ]) {
     final lineCount =
         physicalLineCount ??
         (_input.isEmpty ? 1 : _input.toString().split('\n').length);
-    final pipe = Icon.pipe.style(fieldStyle.text.prompt);
-
     if (lineCount < 3) {
       _trailingPipesCounter = 3 - lineCount;
     } else {
@@ -176,7 +178,7 @@ class Textarea extends InteractiveWidget<String> {
     }
 
     for (int i = 0; i < _trailingPipesCounter; i++) {
-      buf.writeln('$pipe ');
+      buf.writeln(pipeChar);
     }
   }
 
@@ -200,12 +202,20 @@ class Textarea extends InteractiveWidget<String> {
     if (isDone) {
       buf.writeln('${Icon.check} $value'.success);
     } else {
-      final pipe = Icon.pipe.style(fieldStyle.text.prompt);
+      final pipe = renderContext == RenderContext.standalone
+          ? '${Icon.pipe.style(fieldStyle.text.prompt)} '
+          : '';
       if (_input.isEmpty) {
-        buf.writeln(
-          '$pipe ${(defaultValue ?? '').style(fieldStyle.text.placeholder)}',
-        );
-        _applyTrailingPipes(buf, 1);
+        if (renderContext == RenderContext.form) {
+          buf.writeln(
+            '${Icon.question.style(fieldStyle.text.prompt)} ${(defaultValue ?? '').style(fieldStyle.text.placeholder)}',
+          );
+        } else {
+          buf.writeln(
+            '$pipe${(defaultValue ?? '').style(fieldStyle.text.placeholder)}',
+          );
+        }
+        _applyTrailingPipes(buf, pipe, 1);
       } else {
         final wrapWidth = terminal.maxWidth! - 2; // Subtract pipe prefix width
         final lines = _input.toString().split('\n');
@@ -217,12 +227,12 @@ class Textarea extends InteractiveWidget<String> {
           final wrappedSublines = wrappedLine.split('\n');
           for (final subline in wrappedSublines) {
             physicalLineCount++;
-            buf.writeln('$pipe ${subline.style(fieldStyle.text.text)}');
+            buf.writeln('$pipe${subline.style(fieldStyle.text.text)}');
           }
         }
 
         terminal.maxWidth = currentMaxWidth;
-        _applyTrailingPipes(buf, physicalLineCount);
+        _applyTrailingPipes(buf, pipe, physicalLineCount);
       }
     }
 
