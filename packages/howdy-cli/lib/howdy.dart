@@ -37,5 +37,6 @@ export 'src/widgets/text.dart';
 export 'src/widgets/prompt_input.dart';
 export 'src/widgets/textarea.dart';
 export 'src/widgets/sign_display.dart';
+export 'src/widgets/list_display.dart';
 export 'src/widgets/file_tree.dart';
 export 'src/widgets/file_picker.dart';
