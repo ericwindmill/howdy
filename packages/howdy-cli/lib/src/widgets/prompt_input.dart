@@ -52,6 +52,7 @@ class Prompt extends InteractiveWidget<String> {
     ).write();
   }
 
+  @override
   final InputKeyMap keymap;
 
   /// The text buffer being built character by character.
@@ -65,12 +66,6 @@ class Prompt extends InteractiveWidget<String> {
 
   @override
   bool get isDone => _isDone;
-
-  @override
-  String get usage => usageHint([
-    (keys: 'type your answer', action: ''),
-    (keys: keymap.submit.helpKey, action: keymap.submit.helpDesc),
-  ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {

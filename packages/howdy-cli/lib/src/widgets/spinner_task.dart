@@ -36,6 +36,9 @@ class SpinnerTask<T> extends InteractiveWidget<T> {
   String get usage => '';
 
   @override
+  KeyMap get keymap => defaultKeyMap;
+
+  @override
   T get value => _value as T;
 
   @override

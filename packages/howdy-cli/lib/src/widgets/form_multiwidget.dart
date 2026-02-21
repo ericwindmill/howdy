@@ -9,8 +9,7 @@ import 'package:howdy/src/terminal/wrap.dart';
 ///
 /// Navigation:
 /// - Enter / Tab: advance within a page or to the next page.
-/// - ← (left-arrow), when not consumed by the focused widget: go back
-///   one page (resets the previous page so it can be re-edited).
+/// - Shift+Tab: go back one page (resets the previous page so it can be re-edited).
 ///
 /// ```dart
 /// final results = Form([
@@ -136,7 +135,7 @@ class Form extends MultiWidget {
     if (_isDone) return KeyResult.ignored;
 
     // ── Back navigation ──
-    // 'b' goes back one page and resets it for re-editing.
+    // Shift+Tab goes back one page and resets it for re-editing.
     if (keymap.back.matches(event) && _pageIndex > 0) {
       _pageIndex--;
       _currentPage.reset();

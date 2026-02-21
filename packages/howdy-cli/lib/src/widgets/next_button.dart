@@ -25,6 +25,7 @@ class NextButton extends InteractiveWidget<void> {
     ).write();
   }
 
+  @override
   final PageKeyMap keymap;
   bool _isDone = false;
 
@@ -32,11 +33,6 @@ class NextButton extends InteractiveWidget<void> {
 
   @override
   bool get isDone => _isDone;
-
-  @override
-  String get usage => usageHint([
-    (keys: keymap.next.helpKey, action: 'submit'),
-  ]);
 
   @override
   void get value {}

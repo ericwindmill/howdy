@@ -1,20 +1,24 @@
 // Organized low level -> high level
 
 // Terminal layer
-export 'src/framework/icons.dart';
-export 'src/framework/edge_insets.dart';
-export 'src/framework/indented_string_buffer.dart';
+
+export 'src/terminal/cursor.dart';
 export 'src/terminal/key_event.dart';
-export 'src/framework/keymap.dart';
 export 'src/terminal/screen_buffer.dart';
-export 'src/framework/border.dart';
+
 export 'src/terminal/styled_text.dart';
-export 'src/framework/table_style.dart';
 export 'src/terminal/terminal.dart';
 export 'src/terminal/text_style.dart';
-export 'src/framework/theme.dart';
 
-// Framework - base classes for widgets
+export 'src/framework/border.dart';
+export 'src/framework/edge_insets.dart';
+export 'src/framework/icons.dart';
+export 'src/framework/indented_string_buffer.dart';
+export 'src/framework/keymap/key_binding.dart';
+export 'src/framework/keymap/keymap.dart';
+export 'src/framework/table_style.dart';
+export 'src/framework/theme.dart';
+export 'src/framework/validate.dart';
 export 'src/framework/widget/option.dart';
 export 'src/framework/widget/widget.dart';
 

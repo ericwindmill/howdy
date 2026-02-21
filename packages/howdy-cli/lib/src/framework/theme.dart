@@ -499,6 +499,7 @@ String usageHint(List<({String keys, String action})> parts) {
       .join(' $dot ');
 }
 
+/// TODO: Add more of these or remove altogether
 extension Theming on String {
   String get label =>
       StyledText(this, style: Theme.current.focused.title).render();

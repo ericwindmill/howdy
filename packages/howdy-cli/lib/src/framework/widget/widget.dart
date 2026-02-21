@@ -30,9 +30,6 @@ enum RenderContext {
   form,
 }
 
-/// A validation function. Returns `null` if valid, or an error message string.
-typedef Validator<T> = String? Function(T value);
-
 /// Base class for all terminal widgets.
 ///
 /// **Output widgets** (Text, Table) only need to override [render]

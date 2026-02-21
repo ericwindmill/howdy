@@ -15,6 +15,12 @@ abstract class InteractiveWidget<T> extends Widget<T> {
   final T? defaultValue;
   final Validator<T>? validator;
 
+  /// Each widget must provide a keymap. Declared as an abstract getter so
+  /// concrete widgets can store it as their specific subtype (e.g.
+  /// [ConfirmKeyMap]) without casting, while still satisfying the contract
+  /// here via Dart's covariant field/getter promotion.
+  KeyMap get keymap;
+
   /// Whether this widget is currently focused in a group or form.
   bool isFocused = true;
 
@@ -39,7 +45,7 @@ abstract class InteractiveWidget<T> extends Widget<T> {
   ///
   /// Displayed below the widget when rendering standalone.
   /// Read by parent containers (e.g. [Form]) to show contextual guide text.
-  String get usage;
+  String get usage => keymap.usage;
 
   /// The rendering context for this widget.
   ///

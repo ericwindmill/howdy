@@ -61,6 +61,7 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   }
 
   final List<Option<T>> options;
+  @override
   final MultiSelectKeyMap keymap;
   late List<bool> selected;
 
@@ -77,16 +78,6 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     }
     return labels.isEmpty ? '(none)' : labels.join(', ');
   }
-
-  @override
-  String get usage => usageHint([
-    (
-      keys: '${keymap.prev.helpKey} / ${keymap.next.helpKey}',
-      action: 'navigate',
-    ),
-    (keys: keymap.toggle.helpKey, action: keymap.toggle.helpDesc),
-    (keys: keymap.submit.helpKey, action: keymap.submit.helpDesc),
-  ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {
@@ -144,7 +135,7 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
         );
       } else {
         final prefix = '  ';
-        final marker = isChecked ? Icon.check.success : Icon.optionEmpty.body;
+        final marker = isChecked ? Icon.check.style : Icon.optionEmpty.body;
         buf.write(prefix);
         buf.write(marker);
         buf.write(' ');

@@ -51,7 +51,7 @@ class Border {
     // Measure the widest visible line to determine inner content width.
     final innerWidth = lines.isEmpty
         ? 0
-        : lines.map((l) => content.stripAnsi().length).reduce(max);
+        : lines.map((l) => l.stripAnsi().length).reduce(max);
 
     // Total width inside the border (content + horizontal padding).
     final outerWidth = innerWidth + padding.horizontal;
@@ -111,26 +111,29 @@ class Border {
 
     // Top padding rows.
     for (var i = 0; i < padding.top; i++) {
-      buf.writeln('$leftEdge${' ' * outerWidth}$rightEdge');
+      final rightSide = borderType.right ? '${' ' * outerWidth}$rightEdge' : '';
+      buf.writeln('$leftEdge$rightSide');
     }
 
     // Content rows — pad each line to innerWidth (visible chars only).
     for (final line in lines) {
       final visible = line.stripAnsi().length;
       final rightPad = ' ' * (innerWidth - visible);
+      final rightSide = borderType.right
+          ? '$rightPad${' ' * padding.right}$rightEdge'
+          : '';
       buf.writeln(
         '$leftEdge'
         '${' ' * padding.left}'
         '$line'
-        '$rightPad'
-        '${' ' * padding.right}'
-        '$rightEdge',
+        '$rightSide',
       );
     }
 
     // Bottom padding rows.
     for (var i = 0; i < padding.bottom; i++) {
-      buf.writeln('$leftEdge${' ' * outerWidth}$rightEdge');
+      final rightSide = borderType.right ? '${' ' * outerWidth}$rightEdge' : '';
+      buf.writeln('$leftEdge$rightSide');
     }
 
     // Bottom border.

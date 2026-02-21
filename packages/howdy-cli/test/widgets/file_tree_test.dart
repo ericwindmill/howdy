@@ -25,13 +25,13 @@ void main() {
 
     test('renders root directory name', () {
       final widget = FileTree(tempDir.path);
-      final output = stripAnsi(widget.render());
+      final output = widget.render().stripAnsi();
       expect(output, contains(tempDir.path));
     });
 
     test('renders contents recursively with branch characters', () {
       final widget = FileTree(tempDir.path);
-      final output = stripAnsi(widget.render());
+      final output = widget.render().stripAnsi();
 
       // The sort order is directories first, then files:
       // index 0: dir
@@ -43,7 +43,7 @@ void main() {
 
     test('handles non-existent directory', () {
       final widget = FileTree(p.join(tempDir.path, 'nope'));
-      final output = stripAnsi(widget.render());
+      final output = widget.render().stripAnsi();
       expect(output, contains('Directory not found:'));
     });
   });

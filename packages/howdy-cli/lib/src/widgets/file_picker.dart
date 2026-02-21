@@ -5,7 +5,7 @@ import 'package:howdy/howdy.dart';
 class FilePicker extends InteractiveWidget<File> {
   FilePicker({
     required super.label,
-    SelectKeyMap? keymap,
+    ListSelectKeyMap? keymap,
     this.initialDirectory,
     super.help,
     super.validator,
@@ -18,7 +18,7 @@ class FilePicker extends InteractiveWidget<File> {
 
   static File send({
     required String label,
-    SelectKeyMap? keymap,
+    ListSelectKeyMap? keymap,
     String? initialDirectory,
     String? help,
     Validator<File>? validator,
@@ -33,7 +33,8 @@ class FilePicker extends InteractiveWidget<File> {
   }
 
   final String? initialDirectory;
-  final SelectKeyMap keymap;
+  @override
+  final ListSelectKeyMap keymap;
 
   late Directory _currentDir;
   List<FileSystemEntity> _entities = [];
@@ -42,14 +43,6 @@ class FilePicker extends InteractiveWidget<File> {
 
   @override
   bool get isDone => _isDone;
-
-  @override
-  String get usage => usageHint([
-    (keys: '${keymap.prev.helpKey}/${keymap.next.helpKey}', action: 'navigate'),
-    (keys: Icon.arrowRight, action: 'open dir'),
-    (keys: Icon.arrowLeft, action: 'parent dir'),
-    (keys: keymap.submit.helpKey, action: 'select file'),
-  ]);
 
   void _loadDirectory() {
     if (!_currentDir.existsSync()) {

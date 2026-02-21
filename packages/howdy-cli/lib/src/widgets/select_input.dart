@@ -24,7 +24,7 @@ class Select<T> extends InteractiveWidget<T> {
   Select({
     required super.label,
     required this.options,
-    SelectKeyMap? keymap,
+    ListSelectKeyMap? keymap,
     super.defaultValue,
     super.key,
     super.help,
@@ -43,7 +43,7 @@ class Select<T> extends InteractiveWidget<T> {
   static T send<T>({
     required String label,
     required List<Option<T>> options,
-    SelectKeyMap? keymap,
+    ListSelectKeyMap? keymap,
     String? help,
     T? defaultValue,
     Validator<T>? validator,
@@ -59,19 +59,14 @@ class Select<T> extends InteractiveWidget<T> {
   }
 
   final List<Option<T>> options;
-  final SelectKeyMap keymap;
+  @override
+  final ListSelectKeyMap keymap;
 
   int selectedIndex = 0;
   bool _isDone = false;
 
   @override
   bool get isDone => _isDone;
-
-  @override
-  String get usage => usageHint([
-    (keys: '${keymap.prev.helpKey} / ${keymap.next.helpKey}', action: 'select'),
-    (keys: keymap.submit.helpKey, action: keymap.submit.helpDesc),
-  ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {

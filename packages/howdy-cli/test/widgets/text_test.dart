@@ -7,14 +7,14 @@ void main() {
     test('render includes label', () {
       final widget = Text('Hello world');
       final output = widget.render();
-      expect(stripAnsi(output), contains('Hello world'));
+      expect(output.stripAnsi(), contains('Hello world'));
     });
 
     test('render includes leading text', () {
       final widget = Text('msg', leading: '> ');
       final output = widget.render();
-      expect(stripAnsi(output), contains('> '));
-      expect(stripAnsi(output), contains('msg'));
+      expect(output.stripAnsi(), contains('> '));
+      expect(output.stripAnsi(), contains('msg'));
     });
 
     test('newline true adds trailing newline', () {

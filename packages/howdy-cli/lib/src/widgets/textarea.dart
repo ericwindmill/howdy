@@ -4,7 +4,7 @@ import 'package:howdy/src/terminal/wrap.dart';
 /// A multi-line text input prompt.
 ///
 /// Visually renders with a `│` left-border on each line and uses
-/// Enter to insert newlines. Press **Ctrl+D** to submit.
+/// Enter to insert newlines. Press **Ctrl+J** to submit.
 ///
 ///```txt
 /// Title
@@ -23,18 +23,18 @@ import 'package:howdy/src/terminal/wrap.dart';
 class Textarea extends InteractiveWidget<String> {
   Textarea({
     required super.label,
-    InputKeyMap? keymap,
+    TextAreaKeyMap? keymap,
     super.help,
     super.defaultValue,
     super.validator,
     super.key,
     super.theme,
-  }) : keymap = keymap ?? defaultKeyMap.input;
+  }) : keymap = keymap ?? defaultKeyMap.textArea;
 
   /// Convenience factory for textareas.
   static String send(
     String label, {
-    InputKeyMap? keymap,
+    TextAreaKeyMap? keymap,
     String? help,
     String? defaultValue,
     Validator<String>? validator,
@@ -48,7 +48,8 @@ class Textarea extends InteractiveWidget<String> {
     ).write();
   }
 
-  final InputKeyMap keymap;
+  @override
+  final TextAreaKeyMap keymap;
 
   /// The text buffer being built character by character.
   final StringBuffer _input = StringBuffer();
@@ -64,16 +65,6 @@ class Textarea extends InteractiveWidget<String> {
 
   @override
   bool get isDone => _isDone;
-
-  @override
-  String get usage => usageHint([
-    (keys: 'type your answer', action: ''),
-    (keys: 'enter', action: 'newline'),
-    (
-      keys: keymap.submitTextarea.helpKey,
-      action: keymap.submitTextarea.helpDesc,
-    ),
-  ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {

@@ -1,7 +1,12 @@
-import 'package:howdy/src/framework/keymap.dart';
-import 'package:howdy/src/framework/theme.dart' show usageHint;
+import 'package:howdy/src/framework/icons.dart';
+import 'package:howdy/src/framework/indented_string_buffer.dart';
+import 'package:howdy/src/framework/keymap/keymap.dart';
+import 'package:howdy/src/framework/theme.dart';
+import 'package:howdy/src/framework/validate.dart';
 import 'package:howdy/src/framework/widget/widget.dart';
 import 'package:howdy/src/terminal/key_event.dart';
+import 'package:howdy/src/terminal/styled_text.dart';
+import 'package:howdy/src/terminal/terminal.dart';
 
 /// A yes/no confirmation prompt.
 ///
@@ -45,18 +50,13 @@ class ConfirmInput extends InteractiveWidget<bool> {
     ).write();
   }
 
+  @override
   final ConfirmKeyMap keymap;
   late bool _isYes;
   bool _isDone = false;
 
   @override
   bool get isDone => _isDone;
-
-  @override
-  String get usage => usageHint([
-    (keys: keymap.toggle.helpKey, action: 'choose'),
-    (keys: keymap.submit.helpKey, action: keymap.submit.helpDesc),
-  ]);
 
   @override
   KeyResult handleKey(KeyEvent event) {

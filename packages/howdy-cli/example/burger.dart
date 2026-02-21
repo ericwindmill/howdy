@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:howdy/howdy.dart';
+import 'package:path/path.dart' as p;
 
 void main() async {
   terminal.eraseScreen();
@@ -96,12 +99,25 @@ void main() async {
         key: 'discount',
       ),
     ]),
+    Page([
+      FilePicker(
+        label: 'Where would like the burger delivered?',
+        initialDirectory: '../',
+        help: 'Please enter the relative directions to your burger storage.',
+        key: 'location',
+      ),
+    ]),
+    Page([
+      SpinnerTask<void>(
+        label: 'Preparing your burger...',
+        task: () async => await Future.delayed(Duration(seconds: 2)),
+      ),
+      SpinnerTask<void>(
+        label: 'Delivering your burger...',
+        task: () async => await Future.delayed(Duration(seconds: 2)),
+      ),
+    ]),
   ]);
-
-  await SpinnerTask.send<void>(
-    label: 'Preparing your burger...',
-    task: () async => await Future.delayed(Duration(seconds: 2)),
-  );
 
   final burger = results['burger'] as String;
   final toppings = results['toppings'] as List<String>;
@@ -110,6 +126,10 @@ void main() async {
   final name = results['name'] as String;
   final instructions = results['instructions'] as String;
   final discount = results['discount'] as bool;
+  final location = results['location'] as String;
+
+  final fullPath = p.join(location, 'receipt.md');
+  final File f = File(fullPath);
 
   // Draw bordered box
   String keyword(String s) =>
@@ -129,12 +149,15 @@ void main() async {
   receiptBuf.writeln(
     'Thanks for your order${name.isNotEmpty ? ', $name' : ''}!',
   );
+  receiptBuf.writeln('Delivered to $fullPath');
   if (instructions.isNotEmpty) {
     receiptBuf.writeln('Instructions: ${keyword(instructions)}');
   }
   if (discount) {
     receiptBuf.writeln('Enjoy 15% off.');
   }
+
+  f.writeAsString(receiptBuf.toString());
 
   Sign.send(
     receiptBuf.toString().trimRight(),

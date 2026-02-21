@@ -11,6 +11,7 @@ abstract class Icon {
   static const String arrowUp = '↑';
   static const String arrowDown = '↓';
 
+  // File system widgets
   static const String branch = '├──';
   static const String lastBranch = '└──';
 

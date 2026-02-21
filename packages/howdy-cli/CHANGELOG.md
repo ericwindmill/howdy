@@ -4,4 +4,4 @@
 
 
 TODO:
-- [ ] Widget.usage should use the key bindings
+- [x] Widget.usage should use the key bindings

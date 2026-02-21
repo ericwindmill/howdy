@@ -26,17 +26,16 @@ void main() {
 
   group('renderSpans', () {
     test('concatenates styled spans', () {
-      final spans = [
+      final result = StyledText.renderSpans([
         StyledText('a', style: TextStyle(bold: true)),
         StyledText('b'),
-      ];
-      final result = renderSpans(spans);
+      ]);
       expect(result, contains('a'));
       expect(result, contains('b'));
     });
 
     test('empty list returns empty string', () {
-      expect(renderSpans([]), '');
+      expect(StyledText.renderSpans([]), '');
     });
   });
 

@@ -1,8 +1,11 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:howdy/src/terminal/cursor.dart';
 import 'package:howdy/src/terminal/wrap.dart';
 import 'package:howdy/src/terminal/key_event.dart';
 import 'package:howdy/src/terminal/styled_text.dart';
@@ -23,36 +26,6 @@ Terminal get terminal {
 /// ```dart
 /// Terminal.instance = Terminal(output: myCustomSink);
 /// ```
-/// Terminal cursor shape, controlled via ANSI escape sequences.
-///
-/// Each value carries its full escape sequence, including the
-/// `ESC[?12h` blink-enable prefix for blinking variants.
-/// Pass to [Terminal.setCursorShape].
-enum CursorShape {
-  /// Blinking block cursor (▋).
-  blinkingBlock('\x1B[?12h\x1B[1 q'),
-
-  /// Steady (non-blinking) block cursor (█).
-  steadyBlock('\x1B[2 q'),
-
-  /// Blinking underline cursor (_).
-  blinkingUnderline('\x1B[?12h\x1B[3 q'),
-
-  /// Steady underline cursor.
-  steadyUnderline('\x1B[4 q'),
-
-  /// Blinking bar cursor (|) — common IDE default.
-  blinkingBar('\x1B[?12h\x1B[5 q'),
-
-  /// Steady bar cursor.
-  steadyBar('\x1B[6 q')
-  ;
-
-  const CursorShape(this.sequence);
-
-  /// The full ANSI escape sequence for this cursor shape.
-  final String sequence;
-}
 
 class Terminal {
   /// The global terminal instance used by all widgets.
@@ -208,19 +181,48 @@ class Terminal {
     final byte = _input.readByteSync();
 
     if (byte == -1) return const SpecialKey(Key.escape);
-    if (byte == 10 || byte == 13) return const SpecialKey(Key.enter);
-    if (byte == 9) return const SpecialKey(Key.tab);
-    if (byte == 127 || byte == 8) return const SpecialKey(Key.backspace);
-    if (byte == 32) return const SpecialKey(Key.space);
-
-    // Ctrl+D (EOT, byte 4): used by textarea prompts to submit.
-    if (byte == 4) return const SpecialKey(Key.ctrlD);
 
     // Ctrl+C (ETX, byte 3): in raw mode the OS doesn't convert this to
     // SIGINT, so we handle cleanup and exit directly.
     if (byte == 3) _cleanupAndExit();
 
+    // ── Ctrl + letter keys (bytes 1–26) ──────────────────────────────────────
+    // byte 9  (Ctrl+I) == Tab         → emit tab for natural feel
+    // byte 10 (Ctrl+J) == \n          → distinct from Enter (\r), useful for soft-submit
+    // byte 13 (Ctrl+M) == \r / Enter  → emit enter
+    // byte 8  (Ctrl+H) == Backspace   → handled below via byte 127 check too
+    if (byte == 1) return const SpecialKey(Key.ctrlA);
+    if (byte == 2) return const SpecialKey(Key.ctrlB);
+    // byte 3 == Ctrl+C → handled above (exit)
+    if (byte == 4) return const SpecialKey(Key.ctrlD);
+    if (byte == 5) return const SpecialKey(Key.ctrlE);
+    if (byte == 6) return const SpecialKey(Key.ctrlF);
+    if (byte == 7) return const SpecialKey(Key.ctrlG);
+    if (byte == 8)
+      return const SpecialKey(Key.backspace); // Ctrl+H == backspace
+    if (byte == 9) return const SpecialKey(Key.tab); // Ctrl+I == tab
+    if (byte == 10)
+      return const SpecialKey(Key.ctrlJ); // \n — distinct from Enter
+    if (byte == 11) return const SpecialKey(Key.ctrlK);
+    if (byte == 12) return const SpecialKey(Key.ctrlL);
+    if (byte == 13) return const SpecialKey(Key.enter); // Ctrl+M == Enter (\r)
+    if (byte == 14) return const SpecialKey(Key.ctrlN);
+    if (byte == 15) return const SpecialKey(Key.ctrlO);
+    if (byte == 16) return const SpecialKey(Key.ctrlP);
+    if (byte == 17) return const SpecialKey(Key.ctrlQ);
+    if (byte == 18) return const SpecialKey(Key.ctrlR);
+    if (byte == 19) return const SpecialKey(Key.ctrlS);
+    if (byte == 20) return const SpecialKey(Key.ctrlT);
+    if (byte == 21) return const SpecialKey(Key.ctrlU);
+    if (byte == 22) return const SpecialKey(Key.ctrlV);
+    if (byte == 23) return const SpecialKey(Key.ctrlW);
+    if (byte == 24) return const SpecialKey(Key.ctrlX);
+    if (byte == 25) return const SpecialKey(Key.ctrlY);
+    if (byte == 26) return const SpecialKey(Key.ctrlZ);
+
     if (byte == 27) return _parseEscapeSequence();
+    if (byte == 32) return const SpecialKey(Key.space);
+    if (byte == 127) return const SpecialKey(Key.backspace);
 
     if (byte >= 32 && byte < 127) return CharKey(String.fromCharCode(byte));
 
@@ -263,6 +265,8 @@ class Terminal {
         70 => const SpecialKey(Key.end),
         90 => const SpecialKey(Key.shiftTab),
         51 => _consumeTilde(Key.delete),
+        53 => _consumeTilde(Key.pageUp),
+        54 => _consumeTilde(Key.pageDown),
         _ => const SpecialKey(Key.escape),
       };
     }

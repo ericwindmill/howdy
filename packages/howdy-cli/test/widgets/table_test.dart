@@ -83,7 +83,7 @@ void main() {
       // The cell should have left-padding
       final lines = output.split('\n');
       final dataLine = lines.firstWhere((l) => l.contains('42'));
-      final stripped = stripAnsi(dataLine);
+      final stripped = dataLine.stripAnsi();
       // '42' should be right-aligned: preceded by spaces
       final cellContent = stripped.split('│')[1].trim();
       expect(cellContent, '42');
@@ -130,7 +130,7 @@ void main() {
         ],
       );
       final output = table.render();
-      expect(stripAnsi(output), contains('ok'));
+      expect(output.stripAnsi(), contains('ok'));
     });
   });
 }

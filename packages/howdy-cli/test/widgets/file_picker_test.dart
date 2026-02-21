@@ -27,7 +27,7 @@ void main() {
         label: 'Pick a file',
         initialDirectory: tempDir.path,
       );
-      final output = stripAnsi(widget.render());
+      final output = widget.render().stripAnsi();
 
       expect(output, contains('Pick a file'));
       expect(output, contains(tempDir.path));
@@ -41,12 +41,12 @@ void main() {
         initialDirectory: tempDir.path,
       );
 
-      var output = stripAnsi(widget.render());
+      var output = widget.render().stripAnsi();
       expect(output, contains('❯ dir/'));
       expect(output, contains('  a.txt'));
 
       widget.handleKey(const SpecialKey(Key.arrowDown));
-      output = stripAnsi(widget.render());
+      output = widget.render().stripAnsi();
       expect(output, contains('❯ a.txt'));
       expect(output, contains('  dir/'));
     });
@@ -58,7 +58,7 @@ void main() {
       );
 
       widget.handleKey(const SpecialKey(Key.arrowRight));
-      final output = stripAnsi(widget.render());
+      final output = widget.render().stripAnsi();
       expect(output, contains(p.join(tempDir.path, 'dir')));
       expect(output, contains('<empty directory>'));
     });
