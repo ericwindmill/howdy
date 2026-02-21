@@ -20,7 +20,7 @@ void main() async {
     ], next: true),
     Page([
       Select<String>(
-        label: 'Choose your burger',
+        'Choose your burger',
         help: 'At Charm we truly have a burger for everyone.',
         options: [
           Option(label: 'Charmburger Classic', value: 'Charmburger Classic'),
@@ -35,7 +35,7 @@ void main() async {
         key: 'burger',
       ),
       Multiselect<String>(
-        label: 'Toppings',
+        'Toppings',
         help: 'Choose up to 4.',
         options: [
           Option(label: 'Lettuce', value: 'Lettuce'),
@@ -57,7 +57,7 @@ void main() async {
     ]),
     Page([
       Select<String>(
-        label: 'Spice level',
+        'Spice level',
         options: [
           Option(label: 'Mild', value: 'Mild'),
           Option(label: 'Medium-Spicy', value: 'Medium'),
@@ -67,7 +67,7 @@ void main() async {
         key: 'spice',
       ),
       Select<String>(
-        label: 'Sides',
+        'Sides',
         help: 'You get one free side with this order.',
         options: [
           Option(label: 'Fries', value: 'Fries'),
@@ -80,7 +80,7 @@ void main() async {
     ]),
     Page([
       Prompt(
-        label: "What's your name?",
+        "What's your name?",
         help: 'For when your order is ready.',
         defaultValue: 'Margaret Thatcher',
         validator: (v) =>
@@ -88,20 +88,20 @@ void main() async {
         key: 'name',
       ),
       Textarea(
-        label: 'Special Instructions',
+        'Special Instructions',
         help: 'Anything we should know?',
         defaultValue: 'Just put it in the mailbox please',
         key: 'instructions',
       ),
       ConfirmInput(
-        label: 'Would you like 15% off?',
+        'Would you like 15% off?',
         defaultValue: false,
         key: 'discount',
       ),
     ]),
     Page([
       FilePicker(
-        label: 'Where would like the burger delivered?',
+        'Where would like the burger delivered?',
         initialDirectory: '../',
         help: 'Please enter the relative directions to your burger storage.',
         key: 'location',
@@ -109,11 +109,11 @@ void main() async {
     ]),
     Page([
       SpinnerTask<void>(
-        label: 'Preparing your burger...',
+        'Preparing your burger...',
         task: () async => await Future.delayed(Duration(seconds: 2)),
       ),
       SpinnerTask<void>(
-        label: 'Delivering your burger...',
+        'Delivering your burger...',
         task: () async => await Future.delayed(Duration(seconds: 2)),
       ),
     ]),

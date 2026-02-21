@@ -4,7 +4,7 @@ import 'package:howdy/src/terminal/wrap.dart';
 /// A multi-page form container.
 ///
 /// Each page can be a [Page] (multiple widgets) or a single
-/// [InteractiveWidget]. When a page completes, the form advances
+/// [InputWidget]. When a page completes, the form advances
 /// to the next one. After all pages are done, returns [MultiWidgetResults].
 ///
 /// Navigation:
@@ -22,16 +22,16 @@ import 'package:howdy/src/terminal/wrap.dart';
 /// ]).write();
 /// ```
 class Form extends MultiWidget {
-  Form(super.widgets, {this.title, FormKeyMap? keymap})
+  Form(super.title, {FormKeyMap? keymap, required super.children})
     : keymap = keymap ?? defaultKeyMap.form {
     // Suppress inline error/chrome rendering — Form owns that display.
-    for (final widget in widgets) {
+    for (final widget in children) {
       _setFormContext(widget);
     }
   }
 
   /// Optional title shown above each page.
-  final String? title;
+  @override
   final FormKeyMap keymap;
 
   int _pageIndex = 0;
@@ -39,27 +39,34 @@ class Form extends MultiWidget {
 
   /// Convenience to run a form and return results.
   static MultiWidgetResults send(
-    List<Widget> pages, {
+    List<Widget> children, {
     String? title,
     FormKeyMap? keymap,
   }) {
-    return Form(pages, title: title, keymap: keymap).write();
+    final widget = Form(
+      title ?? '',
+      children: children,
+      keymap: keymap,
+    );
+
+    widget.write();
+    return widget.value;
   }
 
   /// The widget for the current page.
-  Widget get _currentPage => widgets[_pageIndex];
+  Widget get _currentPage => children[_pageIndex];
 
   /// The currently focused interactive widget on the current page.
   ///
   /// For a [MultiWidget] page, this is the focused child.
-  /// For a single [InteractiveWidget] page, that widget itself.
-  InteractiveWidget? get _focusedWidget {
+  /// For a single [InputWidget] page, that widget itself.
+  InputWidget? get _focusedWidget {
     final page = _currentPage;
     if (page is MultiWidget) {
-      final focused = page.widgets[page.focusIndex];
-      return focused is InteractiveWidget ? focused : null;
+      final focused = page.children[page.focusIndex];
+      return focused is InputWidget ? focused : null;
     }
-    if (page is InteractiveWidget) return page;
+    if (page is InputWidget) return page;
     return null;
   }
 
@@ -73,7 +80,7 @@ class Form extends MultiWidget {
     if (title != null) {
       buf.writeln(
         '${title!.style(Theme.current.group.title)} '
-        '${'(page ${_pageIndex + 1}/${widgets.length})'.style(
+        '${'(page ${_pageIndex + 1}/${children.length})'.style(
           Theme.current.group.description,
         )}',
       );
@@ -118,7 +125,7 @@ class Form extends MultiWidget {
 
   /// Returns the styled usage text for the focused widget, with a back hint
   /// appended when the user can go back.
-  String _guideTextFor(InteractiveWidget? focused) {
+  String _guideTextFor(InputWidget? focused) {
     final base = focused?.usage ?? '';
     if (_pageIndex > 0) {
       final t = Theme.current;
@@ -134,18 +141,21 @@ class Form extends MultiWidget {
   KeyResult handleKey(KeyEvent event) {
     if (_isDone) return KeyResult.ignored;
 
-    // ── Back navigation ──
-    // Shift+Tab goes back one page and resets it for re-editing.
-    if (keymap.back.matches(event) && _pageIndex > 0) {
+    // Delegate to the current page first so it can handle within-page
+    // back navigation. Only go back to the previous page when the page
+    // itself has no previous field (returns ignored for the back event).
+    final result = _currentPage.handleKey(event);
+
+    if (result == KeyResult.ignored &&
+        keymap.back.matches(event) &&
+        _pageIndex > 0) {
       _pageIndex--;
       _currentPage.reset();
       return KeyResult.consumed;
     }
 
-    final result = _currentPage.handleKey(event);
-
     if (result == KeyResult.done) {
-      if (_pageIndex < widgets.length - 1) {
+      if (_pageIndex < children.length - 1) {
         _pageIndex++;
         return KeyResult.consumed;
       } else {
@@ -160,30 +170,30 @@ class Form extends MultiWidget {
   /// Recursively set [RenderContext.form] on all interactive widgets
   /// so they suppress their own standalone chrome.
   void _setFormContext(Widget widget) {
-    if (widget is InteractiveWidget) {
+    if (widget is InputWidget) {
       widget.renderContext = RenderContext.form;
     } else if (widget is MultiWidget) {
-      for (final child in widget.widgets) {
+      for (final child in widget.children) {
         _setFormContext(child);
       }
     }
   }
 
   IndentedStringBuffer _handleNote(IndentedStringBuffer buf, Note note) {
-    final pageWidgets = note.widgets;
+    final pageWidgets = note.children;
     final focusIdx = note.focusIndex;
 
     for (var i = 0; i < pageWidgets.length; i++) {
       final isFocused = i == focusIdx;
       final widget = pageWidgets[i];
-      if (widget is InteractiveWidget) {
+      if (widget is InputWidget) {
         widget.isFocused = isFocused;
       }
 
       // Inject a red asterisk on the first content line when the widget
       // has an error, so the error is visible at a glance even when unfocused.
       var rendered = widget.render();
-      final hasWidgetError = widget is InteractiveWidget && widget.hasError;
+      final hasWidgetError = widget is InputWidget && widget.hasError;
       if (hasWidgetError) {
         rendered = _injectErrorMarker(rendered, Theme.current);
       }
@@ -197,13 +207,13 @@ class Form extends MultiWidget {
     IndentedStringBuffer buf,
     MultiWidget page,
   ) {
-    final pageWidgets = page.widgets;
+    final pageWidgets = page.children;
     final focusIdx = page.focusIndex;
 
     for (var i = 0; i < pageWidgets.length; i++) {
       final isFocused = i == focusIdx;
       final widget = pageWidgets[i];
-      if (widget is InteractiveWidget) {
+      if (widget is InputWidget) {
         widget.isFocused = isFocused;
       }
       final style = isFocused ? Theme.current.focused : Theme.current.blurred;
@@ -211,7 +221,7 @@ class Form extends MultiWidget {
       // Inject a red asterisk on the first content line when the widget
       // has an error, so the error is visible at a glance even when unfocused.
       var rendered = widget.render();
-      final hasWidgetError = widget is InteractiveWidget && widget.hasError;
+      final hasWidgetError = widget is InputWidget && widget.hasError;
       if (hasWidgetError) {
         rendered = _injectErrorMarker(rendered, Theme.current);
       }
@@ -229,14 +239,14 @@ class Form extends MultiWidget {
   }
 
   IndentedStringBuffer _handleWidget(IndentedStringBuffer buf, Widget widget) {
-    if (widget is InteractiveWidget) {
+    if (widget is InputWidget) {
       widget.isFocused = true;
     }
 
     // Inject a red asterisk on the first content line when the widget
     // has an error, so the error is visible at a glance even when unfocused.
     var rendered = widget.render();
-    final hasWidgetError = widget is InteractiveWidget && widget.hasError;
+    final hasWidgetError = widget is InputWidget && widget.hasError;
     if (hasWidgetError) {
       rendered = _injectErrorMarker(rendered, Theme.current);
     }

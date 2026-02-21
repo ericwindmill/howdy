@@ -20,10 +20,11 @@ import 'package:howdy/howdy.dart';
 ///
 /// Use Tab/Enter to advance to the next field, Shift+Tab to go back.
 class Page extends MultiWidget {
-  Page(super.widgets, {PageKeyMap? keymap})
-    : keymap = keymap ?? defaultKeyMap.page {
+  Page(List<Widget> widgets, {PageKeyMap? keymap})
+    : keymap = keymap ?? defaultKeyMap.page,
+      super(null, children: widgets) {
     _focusIndex = _nextFocusableIndex(-1);
-    if (_focusIndex == widgets.length) {
+    if (_focusIndex == children.length) {
       _isDone = true;
     }
   }
@@ -33,6 +34,7 @@ class Page extends MultiWidget {
     return Page(widgets, keymap: keymap).write();
   }
 
+  @override
   final PageKeyMap keymap;
   bool _isDone = false;
   late int _focusIndex;
@@ -44,15 +46,15 @@ class Page extends MultiWidget {
   bool get isDone => _isDone;
 
   int _nextFocusableIndex(int startIndex) {
-    for (var i = startIndex + 1; i < widgets.length; i++) {
-      if (widgets[i] is! DisplayWidget) return i;
+    for (var i = startIndex + 1; i < children.length; i++) {
+      if (children[i] is! DisplayWidget) return i;
     }
-    return widgets.length;
+    return children.length;
   }
 
   int _prevFocusableIndex(int startIndex) {
     for (var i = startIndex - 1; i >= 0; i--) {
-      if (widgets[i] is! DisplayWidget) return i;
+      if (children[i] is! DisplayWidget) return i;
     }
     return -1;
   }
@@ -60,7 +62,7 @@ class Page extends MultiWidget {
   @override
   KeyResult handleKey(KeyEvent event) {
     if (isDone) return KeyResult.ignored;
-    final focused = widgets[focusIndex];
+    final focused = children[focusIndex];
 
     // Check for group-level navigation first
     if (keymap.prev.matches(event)) {
@@ -75,15 +77,16 @@ class Page extends MultiWidget {
     // delegate to widget
     var result = switch (focused) {
       DisplayWidget _ => KeyResult.done, // Should unreachable now
-      InteractiveWidget w => _handleKeyInputWidget(event, w),
+      InputWidget w => _handleKeyInputWidget(event, w),
       MultiWidget w => _handleKeyMultiWidget(event, w),
+      _ => KeyResult.ignored,
     };
 
     // handle navigation
     if (result == KeyResult.done) {
       // Widget completed — advance focus
       final next = _nextFocusableIndex(focusIndex);
-      if (next < widgets.length) {
+      if (next < children.length) {
         _focusIndex = next;
         return KeyResult.consumed;
       } else {
@@ -100,15 +103,15 @@ class Page extends MultiWidget {
   void reset() {
     _isDone = false;
     _focusIndex = _nextFocusableIndex(-1);
-    if (_focusIndex == widgets.length) {
+    if (_focusIndex == children.length) {
       _isDone = true;
     }
-    for (final w in widgets) {
+    for (final w in children) {
       w.reset();
     }
   }
 
-  KeyResult _handleKeyInputWidget(KeyEvent event, InteractiveWidget widget) {
+  KeyResult _handleKeyInputWidget(KeyEvent event, InputWidget widget) {
     return widget.handleKey(event);
   }
 
@@ -118,9 +121,9 @@ class Page extends MultiWidget {
 
   @override
   String build(IndentedStringBuffer buf) {
-    for (var i = 0; i < widgets.length; i++) {
-      final widget = widgets[i];
-      if (widget is InteractiveWidget) {
+    for (var i = 0; i < children.length; i++) {
+      final widget = children[i];
+      if (widget is InputWidget) {
         widget.isFocused = i == _focusIndex;
       }
       buf.writeln(widget.render());

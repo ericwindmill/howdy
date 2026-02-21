@@ -5,6 +5,7 @@ import 'package:howdy/howdy.dart';
 class FileTree extends DisplayWidget {
   FileTree(
     this.path, {
+    super.title,
     super.key,
     super.theme,
   });
@@ -14,7 +15,7 @@ class FileTree extends DisplayWidget {
 
   /// Convenience factory to print a file tree.
   static void send(String path) {
-    FileTree(path).write();
+    FileTree(path).write;
   }
 
   @override

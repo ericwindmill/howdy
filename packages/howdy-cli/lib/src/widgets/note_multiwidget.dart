@@ -8,20 +8,20 @@ class Note extends MultiWidget<Widget> {
     List<DisplayWidget> notes, {
     this.next = false,
     this.nextLabel = 'Next',
-    this.keymap,
-  }) : super([
-         ...notes,
-         if (next) NextButton(label: nextLabel, keymap: keymap),
-       ]);
+    PageKeyMap? keymap,
+  }) : super(
+         null,
+         children: [
+           ...notes,
+           if (next) NextButton(nextLabel, keymap: keymap),
+         ],
+       );
 
   /// Whether this note should pause execution until the user continues.
   final bool next;
 
   /// The label for the continue button, if [next] is true.
   final String nextLabel;
-
-  /// The keymap to use for the continue button, if [next] is true.
-  final PageKeyMap? keymap;
 
   /// Convenience factory for standalone usage.
   static void send(
@@ -35,13 +35,13 @@ class Note extends MultiWidget<Widget> {
 
   @override
   int get focusIndex {
-    final idx = widgets.indexWhere((w) => w is NextButton);
+    final idx = children.indexWhere((w) => w is NextButton);
     return idx != -1 ? idx : 0;
   }
 
   @override
   bool get isDone {
-    final btn = widgets.whereType<NextButton>().firstOrNull;
+    final btn = children.whereType<NextButton>().firstOrNull;
     if (btn != null) return btn.isDone;
     return true;
   }
@@ -49,7 +49,7 @@ class Note extends MultiWidget<Widget> {
   @override
   KeyResult handleKey(KeyEvent event) {
     if (isDone) return KeyResult.ignored;
-    final btn = widgets.whereType<NextButton>().firstOrNull;
+    final btn = children.whereType<NextButton>().firstOrNull;
     if (btn != null) {
       return btn.handleKey(event);
     }
@@ -58,15 +58,15 @@ class Note extends MultiWidget<Widget> {
 
   @override
   void reset() {
-    for (final w in widgets) {
+    for (final w in children) {
       w.reset();
     }
   }
 
   @override
   String build(IndentedStringBuffer buf) {
-    for (var i = 0; i < widgets.length; i++) {
-      final widget = widgets[i];
+    for (var i = 0; i < children.length; i++) {
+      final widget = children[i];
       if (widget is NextButton) {
         // Enforce focus state so the NextButton receives the focused theme.
         widget.isFocused = true;

@@ -2,6 +2,4 @@
 
 - Initial version.
 
-
-TODO:
-- [x] Widget.usage should use the key bindings
+- [ ] NextButton doesn't need to be Interactive widget. Do we need to rethink the way the widget classes are structured?

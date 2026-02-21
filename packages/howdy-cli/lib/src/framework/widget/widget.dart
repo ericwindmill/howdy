@@ -4,7 +4,7 @@ import 'package:howdy/howdy.dart';
 
 part 'multi_widget.dart';
 part 'display_widget.dart';
-part 'interactive_widget.dart';
+part 'input_widget.dart';
 
 /// How a widget responded to a key event.
 enum KeyResult {
@@ -23,44 +23,71 @@ enum KeyResult {
 /// Controls whether the widget renders its own chrome (error messages,
 /// control hints) or defers to a parent container.
 enum RenderContext {
-  /// Standalone — widget owns all chrome (error line, control hints).
-  standalone,
+  /// Sginle — widget owns all chrome (error line, control hints).
+  single,
 
   /// Inside a container (e.g. [Form]) — container owns error and controls.
   form,
 }
 
 /// Base class for all terminal widgets.
-///
-/// **Output widgets** (Text, Table) only need to override [render]
-/// and [write].
-///
-/// **Input widgets** (Prompt, Select, etc.) also override [handleKey]
-/// and [value].
-///
-/// [write] is the standalone convenience method that handles IO directly.
-/// [render] + [handleKey] are the composable building blocks
-/// that Form/Group use.
 sealed class Widget<T> {
+  Widget(
+    this.title, {
+    this.help,
+    this.key,
+    Theme? theme,
+  }) : theme = theme ?? Theme.current;
+
+  /// The main text displayed by this widget.
+  final String? title;
+
+  /// Helper text for this widget.
+  final String? help;
+
   /// Used for easy retrieval of results in [MultiWidgetResults]
   String? key;
 
-  Widget({this.key, Theme? theme}) : theme = theme ?? Theme.current;
+  /// Whether this widget is currently focused in a group or form.
+  bool isFocused = false;
+
+  /// Keys that perform actions while this widget is focused.
+  KeyMap get keymap => NoActionKeyMap();
 
   /// Optional theme override for this widget.
   /// Falls back to [Theme.current] if not provided.
   final Theme theme;
 
-  /// The widget's current value.
-  ///
-  /// For input widgets, this may be a partial/default value until
-  /// [isDone] is true. For output widgets, this returns immediately.
-  T get value;
+  /// The active style based on focus state.
+  FieldStyles get fieldStyle => isFocused ? theme.focused : theme.blurred;
 
   /// Whether the widget has finished collecting input.
   bool get isDone => false;
 
+  /// The widget's current value.
+  ///
+  /// For input widgets, this may be a partial/default value until
+  /// [isDone] is true.
+  T get value;
+
+  /// The control hint text for this widget (e.g. "space to toggle, enter to submit").
+  ///
+  /// Displayed below the widget when rendering standalone.
+  /// Read by parent containers (e.g. [Form]) to show contextual guide text.
+  String get usage => keymap.usage;
+
   KeyResult handleKey(KeyEvent event) => KeyResult.done;
+
+  /// The rendering context for this widget.
+  ///
+  /// Defaults to [RenderContext.single] for standalone usage.
+  /// Parent containers (e.g. [Form]) set this to
+  /// [RenderContext.form] to take ownership of error display
+  /// and control hints.
+  RenderContext renderContext = RenderContext.single;
+
+  /// Whether this widget is rendering standalone (i.e. owns its chrome).
+  bool get isStandalone => renderContext == RenderContext.single;
 
   /// Reset the widget to its initial (unfilled) state.
   ///
@@ -85,5 +112,7 @@ sealed class Widget<T> {
   ///
   /// This is the convenience wrapper that wires [render] and
   /// [handleKey] together with terminal IO for one-off usage.
-  FutureOr<T> write();
+  FutureOr<void> write();
 }
+
+mixin FormElement on Widget {}

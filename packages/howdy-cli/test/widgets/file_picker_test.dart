@@ -24,7 +24,7 @@ void main() {
 
     test('renders current directory and its contents', () {
       final widget = FilePicker(
-        label: 'Pick a file',
+        'Pick a file',
         initialDirectory: tempDir.path,
       );
       final output = widget.render().stripAnsi();
@@ -37,7 +37,7 @@ void main() {
 
     test('handleKey down arrow changes selection', () {
       final widget = FilePicker(
-        label: 'Pick a file',
+        'Pick a file',
         initialDirectory: tempDir.path,
       );
 
@@ -53,7 +53,7 @@ void main() {
 
     test('handleKey right arrow on directory enters directory', () {
       final widget = FilePicker(
-        label: 'Pick a file',
+        'Pick a file',
         initialDirectory: tempDir.path,
       );
 
@@ -65,7 +65,7 @@ void main() {
 
     test('handleKey enter on file finishes with value', () {
       final widget = FilePicker(
-        label: 'Pick a file',
+        'Pick a file',
         initialDirectory: tempDir.path,
       );
 

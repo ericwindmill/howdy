@@ -16,7 +16,7 @@ void main() {
 
   final results = Page.send([
     Prompt(
-      label: 'Project name',
+      'Project name',
       defaultValue: 'my_app',
       validator: (value) {
         if (value.isEmpty) return 'Name is required';
@@ -26,7 +26,7 @@ void main() {
       key: 'name',
     ),
     Select<String>(
-      label: 'Language',
+      'Language',
       options: [
         Option(label: 'Dart', value: 'dart'),
         Option(label: 'TypeScript', value: 'ts'),
@@ -35,7 +35,7 @@ void main() {
       key: 'lang',
     ),
     Multiselect<String>(
-      label: 'Features',
+      'Features',
       options: [
         Option(label: 'Linting', value: 'lint'),
         Option(label: 'Testing', value: 'test'),
@@ -48,7 +48,7 @@ void main() {
       },
       key: 'features',
     ),
-    ConfirmInput(label: 'Initialize git?', defaultValue: true, key: 'git'),
+    ConfirmInput('Initialize git?', defaultValue: true, key: 'git'),
   ]);
 
   final name = results['name'] as String;
@@ -86,9 +86,9 @@ void main() {
   ).write();
 
   final results2 = Page.send([
-    Prompt(label: 'Nickname', key: 'nick'),
+    Prompt('Nickname', key: 'nick'),
     Select<String>(
-      label: 'Role',
+      'Role',
       options: [
         Option(label: 'Admin', value: 'admin'),
         Option(label: 'Editor', value: 'editor'),

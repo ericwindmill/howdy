@@ -20,9 +20,9 @@ import 'package:howdy/src/terminal/wrap.dart';
 ///   help: 'A brief summary of your project',
 /// );
 /// ```
-class Textarea extends InteractiveWidget<String> {
-  Textarea({
-    required super.label,
+class Textarea extends InputWidget<String> {
+  Textarea(
+    super.title, {
     TextAreaKeyMap? keymap,
     super.help,
     super.defaultValue,
@@ -40,7 +40,7 @@ class Textarea extends InteractiveWidget<String> {
     Validator<String>? validator,
   }) {
     return Textarea(
-      label: label,
+      label,
       keymap: keymap,
       help: help,
       defaultValue: defaultValue,
@@ -68,7 +68,7 @@ class Textarea extends InteractiveWidget<String> {
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (keymap.submitTextarea.matches(event)) {
+    if (keymap.submit.matches(event) || keymap.submitAlt.matches(event)) {
       if (validator != null) {
         final error = validator!(value);
         if (error != null) {
@@ -79,7 +79,7 @@ class Textarea extends InteractiveWidget<String> {
       error = null;
       _isDone = true;
       return KeyResult.done;
-    } else if (event == const SpecialKey(Key.enter)) {
+    } else if (keymap.newline.matches(event)) {
       error = null;
       _input.write('\n');
       return KeyResult.consumed;
@@ -184,7 +184,7 @@ class Textarea extends InteractiveWidget<String> {
   @override
   String build(IndentedStringBuffer buf) {
     // Title
-    buf.writeln(label.style(fieldStyle.title));
+    if (title != null) buf.writeln(title!.style(fieldStyle.title));
 
     // Help / description
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
@@ -195,7 +195,7 @@ class Textarea extends InteractiveWidget<String> {
     if (isDone) {
       buf.writeln('${Icon.check} $value'.success);
     } else {
-      final pipe = renderContext == RenderContext.standalone
+      final pipe = renderContext == RenderContext.single
           ? '${Icon.pipe.style(fieldStyle.text.prompt)} '
           : '';
       if (_input.isEmpty) {

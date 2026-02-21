@@ -6,7 +6,7 @@ void main() {
     late Prompt widget;
 
     setUp(() {
-      widget = Prompt(label: 'Name');
+      widget = Prompt('Name');
     });
 
     test('initial state', () {
@@ -16,7 +16,7 @@ void main() {
     });
 
     test('value returns defaultValue when no input', () {
-      final w = Prompt(label: 'Name', defaultValue: 'cat');
+      final w = Prompt('Name', defaultValue: 'cat');
       expect(w.value, 'cat');
     });
 
@@ -58,7 +58,7 @@ void main() {
 
       test('enter with failing validator blocks submit', () {
         final w = Prompt(
-          label: 'Q',
+          'Q',
           validator: (v) => v.isEmpty ? 'Required' : null,
         );
         final result = w.handleKey(SpecialKey(Key.enter));
@@ -69,7 +69,7 @@ void main() {
 
       test('enter clears error on successful validation', () {
         final w = Prompt(
-          label: 'Q',
+          'Q',
           validator: (v) => v.isEmpty ? 'Required' : null,
         );
         // First fail
@@ -84,7 +84,7 @@ void main() {
 
       test('character input clears error', () {
         final w = Prompt(
-          label: 'Q',
+          'Q',
           validator: (v) => v.isEmpty ? 'Required' : null,
         );
         w.handleKey(SpecialKey(Key.enter));
@@ -122,7 +122,7 @@ void main() {
       });
 
       test('contains default value as placeholder', () {
-        final w = Prompt(label: 'Q', defaultValue: 'cat');
+        final w = Prompt('Q', defaultValue: 'cat');
         expect(w.render(), contains('cat'));
       });
     });

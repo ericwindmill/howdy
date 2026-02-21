@@ -16,12 +16,12 @@ void main() async {
     // Page 1: Basics
     Page([
       Prompt(
-        label: 'Project name',
+        'Project name',
         validator: (v) => v.isEmpty ? 'Name is required' : null,
         key: 'name',
       ),
       Select<String>(
-        label: 'Language',
+        'Language',
         options: [
           Option(label: 'Dart', value: 'dart'),
           Option(label: 'TypeScript', value: 'ts'),
@@ -34,7 +34,7 @@ void main() async {
     // Page 2: Configuration
     Page([
       Multiselect<String>(
-        label: 'Features',
+        'Features',
         options: [
           Option(label: 'Linting', value: 'lint'),
           Option(label: 'Testing', value: 'test'),
@@ -44,7 +44,7 @@ void main() async {
         validator: (v) => v.isEmpty ? 'Select at least one' : null,
         key: 'features',
       ),
-      ConfirmInput(label: 'Initialize git?', defaultValue: true, key: 'git'),
+      ConfirmInput('Initialize git?', defaultValue: true, key: 'git'),
     ]),
   ], title: 'Create Project');
 

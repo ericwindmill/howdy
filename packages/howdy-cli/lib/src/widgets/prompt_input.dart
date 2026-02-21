@@ -24,9 +24,9 @@ import 'package:howdy/src/terminal/wrap.dart';
 ///   help: 'A brief summary of your project',
 /// ).write();
 /// ```
-class Prompt extends InteractiveWidget<String> {
-  Prompt({
-    required super.label,
+class Prompt extends InputWidget<String> {
+  Prompt(
+    super.title, {
     InputKeyMap? keymap,
     super.help,
     super.defaultValue,
@@ -44,7 +44,7 @@ class Prompt extends InteractiveWidget<String> {
     Validator<String>? validator,
   }) {
     return Prompt(
-      label: label,
+      label,
       keymap: keymap,
       help: help,
       defaultValue: defaultValue,
@@ -153,7 +153,7 @@ class Prompt extends InteractiveWidget<String> {
   @override
   String build(IndentedStringBuffer buf) {
     // Title
-    buf.writeln(label.style(fieldStyle.title));
+    if (title != null) buf.writeln(title!.style(fieldStyle.title));
 
     // Help / description
     if (help != null) buf.writeln(help!.style(fieldStyle.description));

@@ -12,7 +12,7 @@ void main() {
     late Select<String> widget;
 
     setUp(() {
-      widget = Select<String>(label: 'Language', options: options);
+      widget = Select<String>('Language', options: options);
     });
 
     test('initial state selects first option', () {
@@ -65,7 +65,7 @@ void main() {
 
       test('enter with failing validator blocks submit', () {
         final w = Select<String>(
-          label: 'Pick',
+          'Pick',
           options: options,
           validator: (v) => v == 'dart' ? 'Not Dart' : null,
         );
@@ -77,7 +77,7 @@ void main() {
 
       test('enter with passing validator completes', () {
         final w = Select<String>(
-          label: 'Pick',
+          'Pick',
           options: options,
           validator: (v) => v == 'dart' ? null : 'Must be Dart',
         );

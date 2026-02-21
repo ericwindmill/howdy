@@ -20,9 +20,9 @@ import 'package:howdy/howdy.dart';
 ///   ],
 /// );
 /// ```
-class Multiselect<T> extends InteractiveWidget<List<T>> {
-  Multiselect({
-    required super.label,
+class Multiselect<T> extends InputWidget<List<T>> {
+  Multiselect(
+    super.title, {
     required this.options,
     MultiSelectKeyMap? keymap,
     super.defaultValue,
@@ -51,7 +51,7 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
     Validator<List<T>>? validator,
   }) {
     return Multiselect<T>(
-      label: label,
+      label,
       options: options,
       keymap: keymap,
       help: description,
@@ -81,13 +81,13 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (keymap.prev.matches(event)) {
+    if (keymap.up.matches(event)) {
       if (selectedIndex > 0) {
         selectedIndex--;
         return KeyResult.consumed;
       }
       return KeyResult.ignored;
-    } else if (keymap.next.matches(event)) {
+    } else if (keymap.down.matches(event)) {
       if (selectedIndex < options.length - 1) {
         selectedIndex++;
         return KeyResult.consumed;
@@ -170,7 +170,7 @@ class Multiselect<T> extends InteractiveWidget<List<T>> {
   @override
   String build(IndentedStringBuffer buf) {
     // The prompt label (with hint for multiselect)
-    buf.writeln(label.style(fieldStyle.title));
+    if (title != null) buf.writeln(title!.style(fieldStyle.title));
 
     // Optional help text
     if (help != null) buf.writeln(help!.style(fieldStyle.description));

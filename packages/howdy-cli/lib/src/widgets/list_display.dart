@@ -23,7 +23,7 @@ import 'package:howdy/howdy.dart';
 class BulletList extends DisplayWidget {
   BulletList({
     required this.items,
-    this.title,
+    super.title,
     this.maxVisibleRows = 10,
     this.markerStyle,
     this.itemStyle,
@@ -50,9 +50,6 @@ class BulletList extends DisplayWidget {
 
   /// The items to display.
   final List<String> items;
-
-  /// Optional title rendered above the list.
-  final String? title;
 
   /// Maximum number of items visible at once. Defaults to 10.
   final int maxVisibleRows;

@@ -5,7 +5,7 @@ sealed class KeyEvent {
 
 /// Known special keys.
 enum Key {
-  // ── Navigation ────────────────────────────────────────────────────────────
+  // Navigation
   enter,
   escape,
   backspace,
@@ -22,7 +22,7 @@ enum Key {
   pageUp,
   pageDown,
 
-  // ── Ctrl + letter (bytes 1–26) ────────────────────────────────────────────
+  // Ctrl + letter (bytes 1–26)
   // Note: some overlap with other keys in some terminals:
   //   ctrlH == backspace (byte 8)
   //   ctrlI == tab       (byte 9)

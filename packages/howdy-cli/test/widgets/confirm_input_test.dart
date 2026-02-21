@@ -6,7 +6,7 @@ void main() {
     late ConfirmInput widget;
 
     setUp(() {
-      widget = ConfirmInput(label: 'Delete?');
+      widget = ConfirmInput('Delete?');
     });
 
     test('initial value defaults to false', () {
@@ -15,7 +15,7 @@ void main() {
     });
 
     test('initial value respects defaultValue: true', () {
-      final w = ConfirmInput(label: 'Ok?', defaultValue: true);
+      final w = ConfirmInput('Ok?', defaultValue: true);
       expect(w.value, isTrue);
     });
 
@@ -74,7 +74,7 @@ void main() {
 
       test('enter with failing validator sets error and returns consumed', () {
         final w = ConfirmInput(
-          label: 'Ok?',
+          'Ok?',
           validator: (v) => v ? 'Cannot be yes' : null,
         );
         w.handleKey(CharKey('y'));
@@ -87,7 +87,7 @@ void main() {
 
       test('enter with passing validator completes', () {
         final w = ConfirmInput(
-          label: 'Ok?',
+          'Ok?',
           validator: (v) => v ? null : 'Must be yes',
         );
         w.handleKey(CharKey('y'));
@@ -111,7 +111,7 @@ void main() {
       });
 
       test('restores to custom default', () {
-        final w = ConfirmInput(label: 'X', defaultValue: true);
+        final w = ConfirmInput('X', defaultValue: true);
         w.handleKey(CharKey('n'));
         w.reset();
         expect(w.value, isTrue);

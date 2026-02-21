@@ -9,7 +9,7 @@ void confirmInput() {
   terminal.eraseScreen();
 
   ConfirmInput(
-    label: 'Are you sure?',
+    'Are you sure?',
     help: 'Really?',
     defaultValue: true,
   ).write();
@@ -34,7 +34,7 @@ void confirmInput() {
 
   Page.send([
     Text('HOWDY!'),
-    ConfirmInput(label: 'You good?', help: "Tell us how you're doing."),
+    ConfirmInput('You good?', help: "Tell us how you're doing."),
     Text('Good.'),
   ]);
 
@@ -44,7 +44,7 @@ void confirmInput() {
     Page([
       Text('HOWDY!'),
       ConfirmInput(
-        label: 'You good?',
+        'You good?',
         validator: (bool value) {
           if (!value) {
             return 'You must be good.';
@@ -55,7 +55,7 @@ void confirmInput() {
       Text('Good.'),
     ]),
     ConfirmInput(
-      label: 'Do you want to exit?',
+      'Do you want to exit?',
       help: "Yes to exit, no to stay.",
       validator: (bool value) {
         if (!value) {

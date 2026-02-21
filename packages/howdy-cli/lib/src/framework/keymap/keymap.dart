@@ -14,6 +14,11 @@ abstract class KeyMap {
   String get usage;
 }
 
+class NoActionKeyMap extends KeyMap {
+  @override
+  String get usage => '';
+}
+
 /// A centralized registry of default interactive keybindings.
 class AppKeyMap implements KeyMap {
   const AppKeyMap({
@@ -24,6 +29,7 @@ class AppKeyMap implements KeyMap {
     this.form = const FormKeyMap(),
     this.confirm = const ConfirmKeyMap(),
     this.textArea = const TextAreaKeyMap(),
+    this.filePicker = const FilePickerKeyMap(),
   });
 
   final ListSelectKeyMap select;
@@ -33,63 +39,56 @@ class AppKeyMap implements KeyMap {
   final FormKeyMap form;
   final ConfirmKeyMap confirm;
   final TextAreaKeyMap textArea;
+  final FilePickerKeyMap filePicker;
 
   @override
   String get usage => '';
 }
 
-/// Keybindings for navigating lists and options.
+/// Keybindings for navigating lists that don't expect a selection.
+/// Used by [BulletList],
 class ListKeyMap extends KeyMap {
   const ListKeyMap({
-    this.next = const KeyBinding(
-      keys: [SpecialKey(Key.arrowDown)],
-      helpKey: Icon.arrowDown,
-      helpDesc: 'next',
-    ),
-    this.prev = const KeyBinding(
-      keys: [SpecialKey(Key.arrowUp)],
-      helpKey: Icon.arrowUp,
-      helpDesc: 'prev',
-    ),
+    this.down = KeyBinding.down,
+    this.up = KeyBinding.up,
   });
 
-  final KeyBinding next;
-  final KeyBinding prev;
+  final KeyBinding down;
+  final KeyBinding up;
 
   @override
   String get usage {
-    return '${next.usage} ${Icon.dot} ${prev.usage}';
+    return '${up.usage} ${Icon.dot} ${down.usage}';
   }
 }
 
-/// Keybindings for [SelectInput].
-class AllDirectionSelectKeyMap extends KeyMap {
-  const AllDirectionSelectKeyMap({
-    this.down = const KeyBinding(
-      keys: [SpecialKey(Key.arrowDown)],
-      helpKey: Icon.arrowDown,
-      helpDesc: 'down',
-    ),
-    this.up = const KeyBinding(
-      keys: [SpecialKey(Key.arrowUp)],
-      helpKey: Icon.arrowUp,
-      helpDesc: 'up',
-    ),
-    this.left = const KeyBinding(
-      keys: [SpecialKey(Key.arrowLeft)],
-      helpKey: Icon.arrowLeft,
-      helpDesc: 'left',
-    ),
-    this.right = const KeyBinding(
-      keys: [SpecialKey(Key.arrowRight)],
-      helpKey: Icon.arrowRight,
-      helpDesc: 'right',
-    ),
-    this.submit = const KeyBinding(
-      keys: [SpecialKey(Key.enter), SpecialKey(Key.tab)],
-      helpKey: 'enter/tab',
-      helpDesc: 'select',
-    ),
+/// Keybindings for navigating lists that expect a selection.
+/// Used by [Select].
+class ListSelectKeyMap extends KeyMap {
+  const ListSelectKeyMap({
+    this.down = KeyBinding.down,
+    this.up = KeyBinding.up,
+    this.submit = KeyBinding.enterTabSubmit,
+  });
+
+  final KeyBinding down;
+  final KeyBinding up;
+  final KeyBinding submit;
+
+  @override
+  String get usage =>
+      '${down.helpKey}/${up.helpKey} navigate ${Icon.dot} ${submit.usage}';
+}
+
+/// Keybindings for navigating in 4 directions that expect a selection.
+/// Used by [FilePicker].
+class DirectionalSelectKeyMap extends KeyMap {
+  const DirectionalSelectKeyMap({
+    this.down = KeyBinding.down,
+    this.up = KeyBinding.up,
+    this.left = KeyBinding.left,
+    this.right = KeyBinding.right,
+    this.submit = KeyBinding.enterTabSubmit,
   });
 
   final KeyBinding up;
@@ -104,87 +103,28 @@ class AllDirectionSelectKeyMap extends KeyMap {
       ' ${Icon.dot} ${left.usage} ${Icon.dot} ${right.usage} ${Icon.dot} ${submit.usage}';
 }
 
-/// Keybindings for [SelectInput].
-class ListSelectKeyMap extends KeyMap {
-  const ListSelectKeyMap({
-    this.next = const KeyBinding(
-      keys: [SpecialKey(Key.arrowDown)],
-      helpKey: Icon.arrowDown,
-      helpDesc: 'next',
-    ),
-    this.prev = const KeyBinding(
-      keys: [SpecialKey(Key.arrowUp)],
-      helpKey: Icon.arrowUp,
-      helpDesc: 'prev',
-    ),
-    this.submit = const KeyBinding(
-      keys: [SpecialKey(Key.enter), SpecialKey(Key.tab)],
-      helpKey: 'enter/tab',
-      helpDesc: 'select',
-    ),
-  });
-
-  final KeyBinding next;
-  final KeyBinding prev;
-  final KeyBinding submit;
-
-  @override
-  String get usage =>
-      '${next.usage} ${Icon.dot} ${prev.usage} ${Icon.dot} ${submit.usage}';
-}
-
 /// Keybindings for [MultiSelectInput].
 class MultiSelectKeyMap extends KeyMap {
   const MultiSelectKeyMap({
-    this.next = const KeyBinding(
-      keys: [SpecialKey(Key.arrowDown)],
-      helpKey: Icon.arrowDown,
-      helpDesc: 'next',
-    ),
-    this.prev = const KeyBinding(
-      keys: [SpecialKey(Key.arrowUp)],
-      helpKey: Icon.arrowUp,
-      helpDesc: 'prev',
-    ),
-    this.toggle = const KeyBinding(
-      keys: [SpecialKey(Key.space)],
-      helpKey: 'space',
-      helpDesc: 'toggle',
-    ),
-    this.submit = const KeyBinding(
-      keys: [SpecialKey(Key.enter), SpecialKey(Key.tab)],
-      helpKey: 'enter/tab',
-      helpDesc: 'confirm',
-    ),
+    this.down = KeyBinding.down,
+    this.up = KeyBinding.up,
+    this.submit = KeyBinding.enterTabSubmit,
+    this.toggle = KeyBinding.spaceSelect,
   });
 
-  final KeyBinding next;
-  final KeyBinding prev;
+  final KeyBinding down;
+  final KeyBinding up;
   final KeyBinding toggle;
   final KeyBinding submit;
 
   @override
   String get usage =>
-      '${next.usage} ${Icon.dot} ${prev.usage} ${Icon.dot} ${toggle.usage} ${Icon.dot} ${submit.usage}';
+      '${down.usage} ${Icon.dot} ${up.usage} ${Icon.dot} ${toggle.usage} ${Icon.dot} ${submit.usage}';
 }
 
-/// Keybindings for [PromptInput] and [Textarea].
-///
-/// Single-line prompts use [submit] (Enter or Tab).
-/// Multi-line textareas use [newline] for Enter and [submitTextarea]
-/// (Ctrl+J) to advance — making both ergonomic without key conflicts.
-///
-/// Ctrl+J sends byte 10 (\n), which is reliably distinct from Enter (\r,
-/// byte 13) in raw mode.  It's the closest cross-terminal equivalent to
-/// "Ctrl+Enter" and is far more natural than Ctrl+D.
+/// Keybindings for [PromptInput]
 class InputKeyMap extends KeyMap {
-  const InputKeyMap({
-    this.submit = const KeyBinding(
-      keys: [SpecialKey(Key.enter), SpecialKey(Key.tab)],
-      helpKey: 'enter/tab',
-      helpDesc: 'submit',
-    ),
-  });
+  const InputKeyMap({this.submit = KeyBinding.enterTabSubmit});
 
   /// Single-line prompt submit (Enter or Tab).
   final KeyBinding submit;
@@ -193,39 +133,70 @@ class InputKeyMap extends KeyMap {
   String get usage => submit.usage;
 }
 
-/// Ctrl+J sends byte 10 (\n), which is reliably distinct from Enter (\r,
-/// byte 13) in raw mode.  It's the closest cross-terminal equivalent to
-/// "Ctrl+Enter" and is far more natural than Ctrl+D.
+/// Keybindings for [Textarea].
+///
+/// Enter inserts a newline. Tab or Ctrl+J submits.
+/// Ctrl+J (byte 10, \n) is reliably distinct from Enter (\r, byte 13)
+/// in raw mode — the closest cross-terminal equivalent to "Ctrl+Enter".
 class TextAreaKeyMap extends KeyMap {
   const TextAreaKeyMap({
-    this.submit = const KeyBinding(
-      keys: [SpecialKey(Key.enter), SpecialKey(Key.tab)],
-      helpKey: 'tab',
-      helpDesc: 'submit',
-    ),
-    this.newline = const KeyBinding(
-      keys: [SpecialKey(Key.enter)],
-      helpKey: 'enter',
-      helpDesc: 'newline',
-    ),
-    this.submitTextarea = const KeyBinding(
-      keys: [SpecialKey(Key.ctrlJ)],
-      helpKey: 'ctrl+j',
-      helpDesc: 'submit',
-    ),
+    this.submit = KeyBinding.tabSubmit,
+    this.newline = KeyBinding.newline,
+    this.submitAlt = KeyBinding.ctrlJSubmit,
   });
 
-  /// Single-line prompt submit (Enter or Tab).
+  /// Submit the textarea (Tab).
   final KeyBinding submit;
 
-  /// Newline in a textarea (Enter only).
+  /// Insert a newline (Enter).
   final KeyBinding newline;
 
-  /// Multi-line textarea submit (Ctrl+J — acts as a soft "ctrl+enter").
-  final KeyBinding submitTextarea;
+  /// Alternative submit via Ctrl+J.
+  final KeyBinding submitAlt;
 
   @override
   String get usage => '${newline.usage} ${Icon.dot} ${submit.usage}';
+}
+
+/// Keybindings for [FilePicker].
+///
+/// Up/Down navigates the file list. Right enters a directory, Left goes to the
+/// parent. Enter or Tab selects the currently highlighted item.
+class FilePickerKeyMap extends KeyMap {
+  const FilePickerKeyMap({
+    this.down = KeyBinding.down,
+    this.up = KeyBinding.up,
+    this.stepIn = const KeyBinding(
+      keys: [SpecialKey(Key.arrowRight)],
+      helpKey: Icon.arrowRight,
+      helpDesc: 'step in',
+    ),
+    this.parent = const KeyBinding(
+      keys: [SpecialKey(Key.arrowLeft)],
+      helpKey: Icon.arrowLeft,
+      helpDesc: 'parent',
+    ),
+    this.submit = KeyBinding.enterTabSubmit,
+  });
+
+  /// Navigate down the list.
+  final KeyBinding down;
+
+  /// Navigate up the list.
+  final KeyBinding up;
+
+  /// Enter a directory (ArrowRight).
+  final KeyBinding stepIn;
+
+  /// Go to the parent directory (ArrowLeft).
+  final KeyBinding parent;
+
+  /// Select the highlighted file (Enter or Tab).
+  final KeyBinding submit;
+
+  @override
+  String get usage =>
+      '${up.usage} ${Icon.dot} ${down.usage} ${Icon.dot} ${stepIn.usage} ${Icon.dot} ${parent.usage} ${Icon.dot} ${submit.usage}';
 }
 
 /// Keybindings for [NoteMultiwidget] and generic page navigation.
@@ -282,11 +253,7 @@ class ConfirmKeyMap extends KeyMap {
       helpKey: '${Icon.arrowLeft}/${Icon.arrowRight}',
       helpDesc: 'toggle',
     ),
-    this.submit = const KeyBinding(
-      keys: [SpecialKey(Key.enter), SpecialKey(Key.tab)],
-      helpKey: 'enter/tab',
-      helpDesc: 'confirm',
-    ),
+    this.submit = KeyBinding.enterTabSubmit,
     this.accept = const KeyBinding(
       keys: [CharKey('y'), CharKey('Y')],
       helpKey: 'y',

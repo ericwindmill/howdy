@@ -14,14 +14,14 @@ import 'package:howdy/howdy.dart';
 ///   },
 /// ).render();
 /// ```
-class SpinnerTask<T> extends InteractiveWidget<T> {
-  SpinnerTask({required super.label, required this.task});
+class SpinnerTask<T> extends InputWidget<T> {
+  SpinnerTask(super.title, {required this.task});
 
   static Future<T> send<T>({
     required String label,
     required Future<T> Function() task,
   }) {
-    return SpinnerTask<T>(label: label, task: task).write();
+    return SpinnerTask<T>(label, task: task).write();
   }
 
   final Future<T> Function() task;
@@ -44,15 +44,15 @@ class SpinnerTask<T> extends InteractiveWidget<T> {
   @override
   String build(IndentedStringBuffer buf) {
     if (_isDone) {
-      return '${StyledText.renderSpans([StyledText('✔ '), StyledText(label)])}\n';
+      return '${StyledText.renderSpans([StyledText('✔ '), StyledText(title ?? '')])}\n';
     }
     // While running, the spinner handles its own animation frames.
-    return label;
+    return title ?? '';
   }
 
   @override
   Future<T> write() async {
-    final spinner = Spinner(rightPrompt: label);
+    final spinner = Spinner(rightPrompt: title ?? '');
 
     spinner.write();
 

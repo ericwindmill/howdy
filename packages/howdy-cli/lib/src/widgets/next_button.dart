@@ -8,9 +8,9 @@ import 'package:howdy/howdy.dart';
 /// ```dart
 /// NextButton(label: 'Continue');
 /// ```
-class NextButton extends InteractiveWidget<void> {
-  NextButton({
-    required super.label,
+class NextButton extends InputWidget<void> {
+  NextButton(
+    super.title, {
     PageKeyMap? keymap,
     super.key,
     super.theme,
@@ -20,7 +20,7 @@ class NextButton extends InteractiveWidget<void> {
   /// Convenience factory, uses active theme values.
   static void send(String label, {PageKeyMap? keymap}) {
     NextButton(
-      label: label,
+      label,
       keymap: keymap,
     ).write();
   }
@@ -36,6 +36,11 @@ class NextButton extends InteractiveWidget<void> {
 
   @override
   void get value {}
+
+  @override
+  String get usage {
+    return keymap.next.usage;
+  }
 
   @override
   KeyResult handleKey(KeyEvent event) {
@@ -55,9 +60,9 @@ class NextButton extends InteractiveWidget<void> {
   @override
   String build(IndentedStringBuffer buf) {
     if (isDone) {
-      buf.writeln('${Icon.check} $label'.success);
+      buf.writeln('${Icon.check} $title'.success);
     } else {
-      final button = ' $label ${Icon.arrowRight} '.style(
+      final button = ' $title ${Icon.arrowRight} '.style(
         fieldStyle.confirm.focusedButton,
       );
       buf.writeln(button);

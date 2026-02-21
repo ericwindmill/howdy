@@ -8,9 +8,9 @@ void main() {
     late Select<String> select;
 
     setUp(() {
-      confirm = ConfirmInput(label: 'Ok?', key: 'ok');
+      confirm = ConfirmInput('Ok?', key: 'ok');
       select = Select<String>(
-        label: 'Lang',
+        'Lang',
         key: 'lang',
         options: [
           Option(label: 'Dart', value: 'dart'),

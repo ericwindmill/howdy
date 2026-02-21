@@ -35,11 +35,11 @@ void main() {
   Page.send([
     Text('Profile Setup'),
     Prompt(
-      label: 'Username',
+      'Username',
       validator: (v) => v.isEmpty ? 'Required' : null,
     ),
     Prompt(
-      label: 'City',
+      'City',
     ),
   ]);
 }

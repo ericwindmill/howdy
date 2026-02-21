@@ -12,7 +12,7 @@ void main() {
     late Multiselect<String> widget;
 
     setUp(() {
-      widget = Multiselect<String>(label: 'Features', options: options);
+      widget = Multiselect<String>('Features', options: options);
     });
 
     test('initial state has nothing selected', () {
@@ -83,7 +83,7 @@ void main() {
 
       test('enter with failing validator blocks submit', () {
         final w = Multiselect<String>(
-          label: 'Pick',
+          'Pick',
           options: options,
           validator: (v) => v.isEmpty ? 'Select at least one' : null,
         );

@@ -22,6 +22,7 @@ class Theme {
   final HelpStyles help;
 
   /// Returns a new base theme with general styles to be inherited by other themes.
+  /// TODO: Not currently used
   factory Theme.base() {
     return const Theme(
       focused: FieldStyles(
@@ -376,7 +377,7 @@ class GroupStyles {
   final TextStyle description;
 }
 
-/// FieldStyles are the styles for input fields.
+/// FieldStyles are the styles for [Input]
 class FieldStyles {
   const FieldStyles({
     this.base = const TextStyle(),
@@ -406,7 +407,7 @@ class FieldStyles {
   final ConfirmStyles confirm;
 }
 
-/// SelectStyles are the styles for select fields.
+/// SelectStyles are the styles for [Select], [MultiSelect], and [List].
 class SelectStyles {
   const SelectStyles({
     this.selector = const TextStyle(),

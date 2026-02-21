@@ -6,7 +6,6 @@ import 'package:howdy/src/framework/validate.dart';
 import 'package:howdy/src/framework/widget/widget.dart';
 import 'package:howdy/src/terminal/key_event.dart';
 import 'package:howdy/src/terminal/styled_text.dart';
-import 'package:howdy/src/terminal/terminal.dart';
 
 /// A yes/no confirmation prompt.
 ///
@@ -20,40 +19,44 @@ import 'package:howdy/src/terminal/terminal.dart';
 /// ```dart
 /// final ok = ConfirmInput.send('Delete everything?', defaultValue: false);
 /// ```
-class ConfirmInput extends InteractiveWidget<bool> {
-  ConfirmInput({
-    required super.label,
-    ConfirmKeyMap? keymap,
-    super.key,
+class ConfirmInput extends InputWidget<bool> {
+  ConfirmInput(
+    super.title, {
     super.help,
+    super.key,
     super.defaultValue = false,
     super.validator,
     super.theme,
-  }) : keymap = keymap ?? defaultKeyMap.confirm {
-    _isYes = defaultValue ?? false;
+    ConfirmKeyMap? keymap,
+  }) {
+    keymap ??= defaultKeyMap.confirm;
   }
 
-  /// Convenience factory, uses active theme values.
+  /// Convenience factory for standalone widget.
+  /// Uses active theme values and keymap
   static bool send(
-    String label, {
-    ConfirmKeyMap? keymap,
-    String? description,
+    String title, {
+    String? help,
     bool defaultValue = false,
     Validator<bool>? validator,
   }) {
-    return ConfirmInput(
-      label: label,
-      keymap: keymap,
-      help: description,
+    var widget = ConfirmInput(
+      title,
+      help: help,
       defaultValue: defaultValue,
       validator: validator,
-    ).write();
+    );
+
+    widget.write();
+    return widget.value;
   }
 
-  @override
-  final ConfirmKeyMap keymap;
-  late bool _isYes;
   bool _isDone = false;
+
+  bool _value = true;
+
+  @override
+  late ConfirmKeyMap keymap;
 
   @override
   bool get isDone => _isDone;
@@ -61,16 +64,16 @@ class ConfirmInput extends InteractiveWidget<bool> {
   @override
   KeyResult handleKey(KeyEvent event) {
     if (keymap.toggle.matches(event)) {
-      _isYes = !_isYes;
+      _value = !_value;
       return KeyResult.consumed;
     } else if (keymap.accept.matches(event)) {
-      _isYes = true;
+      _value = true;
       return KeyResult.consumed;
     } else if (keymap.reject.matches(event)) {
-      _isYes = false;
+      _value = false;
       return KeyResult.consumed;
     } else if (keymap.submit.matches(event)) {
-      final chosen = _isYes;
+      final chosen = _value;
       if (validator != null) {
         final err = validator!(chosen);
         if (err != null) {
@@ -86,29 +89,22 @@ class ConfirmInput extends InteractiveWidget<bool> {
   }
 
   @override
-  void reset() {
-    super.reset();
-    _isYes = defaultValue ?? false;
-    _isDone = false;
-  }
-
-  @override
-  bool get value => _isYes;
+  bool get value => _value;
 
   @override
   String build(IndentedStringBuffer buf) {
-    buf.writeln(label.style(fieldStyle.title));
+    if (title != null) buf.writeln(title!.style(fieldStyle.title));
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
     buf.writeln();
 
     if (isDone) {
-      buf.writeln('${Icon.check} ${_isYes ? 'Yes' : 'No'}'.success);
+      buf.writeln('${Icon.check} ${_value ? 'Yes' : 'No'}'.success);
     } else {
       // Render both options inline; highlight the active one.
-      final yesStyle = _isYes
+      final yesStyle = _value
           ? fieldStyle.confirm.focusedButton
           : fieldStyle.confirm.blurredButton;
-      final noStyle = !_isYes
+      final noStyle = !_value
           ? fieldStyle.confirm.focusedButton
           : fieldStyle.confirm.blurredButton;
 
@@ -126,27 +122,5 @@ class ConfirmInput extends InteractiveWidget<bool> {
       buf.writeln();
     }
     return buf.toString();
-  }
-
-  @override
-  bool write() {
-    terminal.cursorHide();
-    terminal.updateScreen(render());
-
-    terminal.runRawModeSync<void>(() {
-      while (true) {
-        final event = terminal.readKeySync();
-        final keyResult = handleKey(event);
-        if (keyResult == KeyResult.done) return;
-        if (keyResult == KeyResult.consumed) {
-          terminal.updateScreen(render());
-        }
-      }
-    });
-
-    terminal.clearScreen();
-    terminal.write(render());
-    terminal.cursorShow();
-    return value;
   }
 }

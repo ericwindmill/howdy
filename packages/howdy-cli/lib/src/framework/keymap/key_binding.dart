@@ -39,4 +39,58 @@ class KeyBinding {
 
   String get usage =>
       '${helpKey.style(Theme.current.help.shortKey)} ${helpDesc.style(Theme.current.help.shortDesc)}';
+
+  static const up = KeyBinding(
+    keys: [SpecialKey(Key.arrowUp)],
+    helpKey: Icon.arrowUp,
+    helpDesc: 'up',
+  );
+
+  static const down = KeyBinding(
+    keys: [SpecialKey(Key.arrowDown)],
+    helpKey: Icon.arrowDown,
+    helpDesc: 'down',
+  );
+
+  static const left = KeyBinding(
+    keys: [SpecialKey(Key.arrowLeft)],
+    helpKey: Icon.arrowLeft,
+    helpDesc: 'left',
+  );
+
+  static const right = KeyBinding(
+    keys: [SpecialKey(Key.arrowRight)],
+    helpKey: Icon.arrowRight,
+    helpDesc: 'right',
+  );
+
+  static const newline = KeyBinding(
+    keys: [SpecialKey(Key.enter)],
+    helpKey: 'enter',
+    helpDesc: 'newline',
+  );
+
+  static const enterTabSubmit = KeyBinding(
+    keys: [SpecialKey(Key.enter), SpecialKey(Key.tab)],
+    helpKey: 'enter/tab',
+    helpDesc: 'submit',
+  );
+
+  static const tabSubmit = KeyBinding(
+    keys: [SpecialKey(Key.tab)],
+    helpKey: 'tab',
+    helpDesc: 'submit',
+  );
+
+  static const ctrlJSubmit = KeyBinding(
+    keys: [SpecialKey(Key.ctrlJ)],
+    helpKey: 'ctrl+j',
+    helpDesc: 'submit',
+  );
+
+  static const spaceSelect = KeyBinding(
+    keys: [SpecialKey(Key.space)],
+    helpKey: 'space',
+    helpDesc: 'select',
+  );
 }

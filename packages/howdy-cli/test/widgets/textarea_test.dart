@@ -6,7 +6,7 @@ void main() {
     late Textarea widget;
 
     setUp(() {
-      widget = Textarea(label: 'Description');
+      widget = Textarea('Description');
     });
 
     test('enter inserts newline instead of submitting', () {

@@ -20,9 +20,9 @@ import 'package:howdy/howdy.dart';
 ///   ],
 /// );
 /// ```
-class Select<T> extends InteractiveWidget<T> {
-  Select({
-    required super.label,
+class Select<T> extends InputWidget<T> {
+  Select(
+    super.title, {
     required this.options,
     ListSelectKeyMap? keymap,
     super.defaultValue,
@@ -49,7 +49,7 @@ class Select<T> extends InteractiveWidget<T> {
     Validator<T>? validator,
   }) {
     return Select<T>(
-      label: label,
+      label,
       options: options,
       keymap: keymap,
       help: help,
@@ -70,13 +70,13 @@ class Select<T> extends InteractiveWidget<T> {
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (keymap.prev.matches(event)) {
+    if (keymap.up.matches(event)) {
       if (selectedIndex > 0) {
         selectedIndex--;
         return KeyResult.consumed;
       }
       return KeyResult.ignored;
-    } else if (keymap.next.matches(event)) {
+    } else if (keymap.down.matches(event)) {
       if (selectedIndex < options.length - 1) {
         selectedIndex++;
         return KeyResult.consumed;
@@ -135,7 +135,7 @@ class Select<T> extends InteractiveWidget<T> {
   @override
   String build(IndentedStringBuffer buf) {
     // The prompt label
-    buf.writeln(label.style(fieldStyle.title));
+    if (title != null) buf.writeln(title!.style(fieldStyle.title));
 
     // Optional help text
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
