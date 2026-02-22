@@ -192,6 +192,7 @@ class Textarea extends InputWidget<String> {
     // If no max width, give it one so long text areas don't span the whole terminal.
     int? currentMaxWidth = terminal.maxWidth;
     terminal.maxWidth ??= 60;
+    final cursor = ' '.style(fieldStyle.text.cursor);
     if (isDone && !isFocused) {
       buf.writeln('${Icon.check} $value'.success);
     } else {
@@ -208,8 +209,6 @@ class Textarea extends InputWidget<String> {
             '$pipe${(defaultValue ?? '').style(fieldStyle.text.placeholder)}',
           );
         }
-        final cursor = ' '.style(fieldStyle.text.cursor);
-        buf.write(cursor); // styled block
         _applyTrailingPipes(buf, pipe, 1);
       } else {
         final wrapWidth = terminal.maxWidth! - 2; // Subtract pipe prefix width
@@ -220,13 +219,17 @@ class Textarea extends InputWidget<String> {
           final line = lines[i];
           final wrappedLine = line.wordWrap(wrapWidth);
           final wrappedSublines = wrappedLine.split('\n');
-          for (final subline in wrappedSublines) {
+          final isLastLine = i == lines.length - 1;
+          for (int j = 0; j < wrappedSublines.length; j++) {
             physicalLineCount++;
-            buf.writeln('$pipe${subline.style(fieldStyle.text.text)}');
+            final isLastSubline = isLastLine && j == wrappedSublines.length - 1;
+            final content =
+                '$pipe${wrappedSublines[j].style(fieldStyle.text.text)}';
+            buf.writeln(isLastSubline ? '$content$cursor' : content);
           }
         }
-        final cursor = ' '.style(fieldStyle.text.cursor);
-        buf.write(cursor); // styled block
+
+        // styled block
         terminal.maxWidth = currentMaxWidth;
         _applyTrailingPipes(buf, pipe, physicalLineCount);
       }
