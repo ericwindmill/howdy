@@ -106,7 +106,7 @@ class Select<T> extends InputWidget<T> {
           ? option.textStyle
           : fieldStyle.base;
 
-      if (isSelected && !isDone) {
+      if (isSelected && !isDone && isFocused) {
         buf.writeln(
           '${Icon.pointer.style(fieldStyle.select.selector)} ${option.label.style(fieldStyle.select.option)}',
         );

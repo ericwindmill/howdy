@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:howdy/howdy.dart';
 
-class FilePicker extends InputWidget<File> {
+class FilePicker extends InputWidget<FileSystemEntity> {
   FilePicker(
     super.title, {
     FilePickerKeyMap? keymap,
@@ -16,12 +16,12 @@ class FilePicker extends InputWidget<File> {
     _loadDirectory();
   }
 
-  static File send({
+  static FileSystemEntity send({
     required String title,
     FilePickerKeyMap? keymap,
     String? initialDirectory,
     String? help,
-    Validator<File>? validator,
+    Validator<FileSystemEntity>? validator,
   }) {
     final widget = FilePicker(
       title,
@@ -109,26 +109,24 @@ class FilePicker extends InputWidget<File> {
       // Enter/Tab: select the highlighted file (directories are not selectable).
       if (_entities.isEmpty) return KeyResult.ignored;
       final selected = _entities[_selectedIndex];
-      if (selected is File) {
-        if (validator != null) {
-          final err = validator!(selected);
-          if (err != null) {
-            error = err;
-            return KeyResult.consumed;
-          }
+      if (validator != null) {
+        final err = validator!(selected);
+        if (err != null) {
+          error = err;
+          return KeyResult.consumed;
         }
-        error = null;
-        _isDone = true;
-        return KeyResult.done;
       }
+      error = null;
+      _isDone = true;
+      return KeyResult.done;
     }
     return KeyResult.ignored;
   }
 
   @override
-  File get value {
+  FileSystemEntity get value {
     if (_entities.isEmpty) throw StateError('No file selected');
-    return _entities[_selectedIndex] as File;
+    return _entities[_selectedIndex];
   }
 
   @override

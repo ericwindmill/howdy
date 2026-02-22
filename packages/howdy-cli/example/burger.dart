@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:howdy/howdy.dart';
+import 'package:howdy/src/terminal/wrap.dart';
 import 'package:path/path.dart' as p;
 
 void main() async {
   terminal.eraseScreen();
   terminal.cursorHome();
 
-  final results = Form.send([
+  final results = Form.send(title: 'Charmburger ordering', [
     Note([
       Text(
         '\n🍔 Charmburger\n',
@@ -31,7 +32,7 @@ void main() async {
             value: 'Charmpossible™ Burger',
           ),
         ],
-        validator: (v) => v == 'Fishburger' ? 'no fish today, sorry' : null,
+        validator: (v) => v == 'Chickwich' ? 'no chicken today, sorry' : null,
         key: 'burger',
       ),
       Multiselect<String>(
@@ -82,7 +83,7 @@ void main() async {
       Prompt(
         "What's your name?",
         help: 'For when your order is ready.',
-        defaultValue: 'Margaret Thatcher',
+        defaultValue: 'Big Rick',
         validator: (v) =>
             v.toLowerCase() == 'frank' ? 'no franks, sorry' : null,
         key: 'name',
@@ -90,7 +91,7 @@ void main() async {
       Textarea(
         'Special Instructions',
         help: 'Anything we should know?',
-        defaultValue: 'Just put it in the mailbox please',
+        defaultValue: 'Danimal style?',
         key: 'instructions',
       ),
       ConfirmInput(
@@ -107,18 +108,54 @@ void main() async {
         key: 'location',
       ),
     ]),
-    Page([
-      SpinnerTask<void>(
-        'Preparing your burger...',
-        task: () async => await Future.delayed(Duration(seconds: 2)),
-      ),
-      SpinnerTask<void>(
-        'Delivering your burger...',
-        task: () async => await Future.delayed(Duration(seconds: 2)),
-      ),
-    ]),
   ]);
 
+  final receiptBuf = _buildReceipt(results);
+
+  SpinnerTask<void>(
+    'Preparing your burger...',
+    task: () async {
+      await Future.delayed(Duration(seconds: 2));
+      try {
+        final location = results['location'] as FileSystemEntity;
+
+        String? fullPath;
+        if (location is File) {
+          fullPath = p.join(location.parent.path, 'burger-receipt.md');
+        } else if (location is Directory) {
+          fullPath = p.join(location.path, 'burger-receipt.md');
+        }
+        if (fullPath != null) {
+          final File f = File(fullPath);
+
+          SpinnerTask<void>(
+            'Delivering your burger...',
+            task: () async {
+              await Future.delayed(Duration(seconds: 2));
+              f.writeAsString(receiptBuf.toString().stripAnsi());
+            },
+          ).write();
+        }
+      } catch (e) {
+        rethrow;
+      }
+    },
+  ).write();
+
+  terminal.eraseScreen();
+  terminal.cursorHome();
+
+  Sign.send(
+    receiptBuf.toString().trimRight(),
+    borderType: BorderType.rounded,
+    padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+    borderStyle: TextStyle(foreground: Color.purpleLight),
+    width: 50,
+  );
+}
+
+StringBuffer _buildReceipt(MultiWidgetResults results) {
+  final receiptBuf = StringBuffer();
   final burger = results['burger'] as String;
   final toppings = results['toppings'] as List<String>;
   final spice = results['spice'] as String;
@@ -126,19 +163,12 @@ void main() async {
   final name = results['name'] as String;
   final instructions = results['instructions'] as String;
   final discount = results['discount'] as bool;
-  final location = results['location'] as String;
-
-  final fullPath = p.join(location, 'receipt.md');
-  final File f = File(fullPath);
+  final location = results['location'] as FileSystemEntity;
 
   // Draw bordered box
   String keyword(String s) =>
       StyledText(s, style: TextStyle(foreground: Color.cyan)).render();
 
-  terminal.eraseScreen();
-  terminal.cursorHome();
-
-  final receiptBuf = StringBuffer();
   receiptBuf.writeln(
     StyledText('BURGER RECEIPT', style: TextStyle(bold: true)).render(),
   );
@@ -146,24 +176,21 @@ void main() async {
   receiptBuf.writeln(
     'One ${keyword(spice)} ${keyword(burger)}, topped with ${keyword(toppings.join(', '))} with ${keyword(side)} on the side.',
   );
+  receiptBuf.writeln();
   receiptBuf.writeln(
     'Thanks for your order${name.isNotEmpty ? ', $name' : ''}!',
   );
-  receiptBuf.writeln('Delivered to $fullPath');
-  if (instructions.isNotEmpty) {
-    receiptBuf.writeln('Instructions: ${keyword(instructions)}');
-  }
+
+  receiptBuf.writeln();
+  receiptBuf.writeln('Instructions:');
+  receiptBuf.writeln('${Icon.dot} ${keyword(instructions)}');
+  receiptBuf.writeln('${Icon.dot} Delivered to ${keyword(location.path)}');
+
   if (discount) {
     receiptBuf.writeln('Enjoy 15% off.');
+  } else {
+    receiptBuf.writeln("You didn't take the 15% off?");
   }
 
-  f.writeAsString(receiptBuf.toString());
-
-  Sign.send(
-    receiptBuf.toString().trimRight(),
-    borderType: BorderType.rounded,
-    padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-    borderStyle: TextStyle(foreground: Color.purpleLight),
-    width: 40,
-  );
+  return receiptBuf;
 }

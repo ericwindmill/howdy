@@ -68,7 +68,7 @@ class Textarea extends InputWidget<String> {
 
   @override
   KeyResult handleKey(KeyEvent event) {
-    if (keymap.submit.matches(event) || keymap.submitAlt.matches(event)) {
+    if (keymap.submit.matches(event)) {
       if (validator != null) {
         final error = validator!(value);
         if (error != null) {

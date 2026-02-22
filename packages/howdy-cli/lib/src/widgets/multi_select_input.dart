@@ -125,23 +125,28 @@ class Multiselect<T> extends InputWidget<List<T>> {
         final marker = isChecked
             ? Icon.optionFilled.style(fieldStyle.multiSelect.selectedPrefix)
             : Icon.optionEmpty.style(fieldStyle.multiSelect.unselectedPrefix);
+
         buf.write(prefix);
         buf.write(marker);
         buf.write(' ');
         buf.writeln(
           label.style(
-            isChecked ? fieldStyle.multiSelect.selectedOption : fieldStyle.base,
+            isChecked
+                ? fieldStyle.multiSelect.selectedOption
+                : fieldStyle.multiSelect.unselectedOption,
           ),
         );
       } else {
-        final prefix = '  ';
+        const prefix = '  ';
         final marker = isChecked ? Icon.check.style : Icon.optionEmpty.body;
         buf.write(prefix);
         buf.write(marker);
         buf.write(' ');
         buf.writeln(
           label.style(
-            isChecked ? fieldStyle.multiSelect.selectedOption : fieldStyle.base,
+            isChecked
+                ? fieldStyle.multiSelect.selectedOption
+                : fieldStyle.multiSelect.unselectedOption,
           ),
         );
       }
@@ -153,8 +158,6 @@ class Multiselect<T> extends InputWidget<List<T>> {
   @override
   void reset() {
     super.reset();
-    selected = List<bool>.filled(options.length, false);
-    selectedIndex = 0;
     _isDone = false;
   }
 

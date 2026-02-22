@@ -104,6 +104,13 @@ class Theme {
         select: const SelectStyles(
           selector: TextStyle(dim: true),
         ),
+        multiSelect: const MultiSelectStyles(
+          selector: TextStyle(dim: true),
+          selectedPrefix: TextStyle(dim: true),
+          selectedOption: TextStyle(dim: true),
+          unselectedPrefix: TextStyle(dim: true),
+          unselectedOption: TextStyle(dim: true),
+        ),
         text: TextStyles(
           prompt: const TextStyle(dim: true),
           placeholder: const TextStyle(dim: true),
@@ -146,6 +153,14 @@ class Theme {
       ),
       blurred: FieldStyles(
         base: TextStyle(dim: true),
+        title: TextStyle(dim: true),
+        multiSelect: MultiSelectStyles(
+          selector: TextStyle(dim: true),
+          selectedPrefix: TextStyle(dim: true),
+          selectedOption: TextStyle(dim: true),
+          unselectedPrefix: TextStyle(dim: true),
+          unselectedOption: TextStyle(dim: true),
+        ),
       ),
     );
   }
@@ -204,6 +219,13 @@ class Theme {
         description: const TextStyle(dim: true),
         select: const SelectStyles(
           selector: TextStyle(dim: true),
+        ),
+        multiSelect: const MultiSelectStyles(
+          selector: TextStyle(dim: true),
+          selectedPrefix: TextStyle(dim: true),
+          selectedOption: TextStyle(dim: true),
+          unselectedPrefix: TextStyle(dim: true),
+          unselectedOption: TextStyle(dim: true),
         ),
         text: TextStyles(
           prompt: const TextStyle(dim: true),
@@ -270,6 +292,13 @@ class Theme {
         select: const SelectStyles(
           selector: TextStyle(dim: true),
         ),
+        multiSelect: const MultiSelectStyles(
+          selector: TextStyle(dim: true),
+          selectedPrefix: TextStyle(dim: true),
+          selectedOption: TextStyle(dim: true),
+          unselectedPrefix: TextStyle(dim: true),
+          unselectedOption: TextStyle(dim: true),
+        ),
         text: TextStyles(
           prompt: const TextStyle(foreground: grey),
           text: const TextStyle(foreground: lightGrey),
@@ -335,6 +364,13 @@ class Theme {
         description: const TextStyle(dim: true),
         select: const SelectStyles(
           selector: TextStyle(dim: true),
+        ),
+        multiSelect: const MultiSelectStyles(
+          selector: TextStyle(dim: true),
+          selectedPrefix: TextStyle(dim: true),
+          selectedOption: TextStyle(dim: true),
+          unselectedPrefix: TextStyle(dim: true),
+          unselectedOption: TextStyle(dim: true),
         ),
         text: TextStyles(
           prompt: const TextStyle(dim: true),

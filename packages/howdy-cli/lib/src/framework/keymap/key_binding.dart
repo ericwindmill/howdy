@@ -64,14 +64,18 @@ class KeyBinding {
     helpDesc: 'right',
   );
 
+  // NOTE: macOS terminals apply ICRNL translation (\ r → \n) before Dart reads
+  // stdin in raw mode, so pressing Enter arrives as byte 10 (Key.ctrlJ), not
+  // byte 13 (Key.enter). Both are included in all Enter-related bindings so
+  // they work correctly on macOS and other platforms.
   static const newline = KeyBinding(
-    keys: [SpecialKey(Key.enter)],
+    keys: [SpecialKey(Key.enter), SpecialKey(Key.ctrlJ)],
     helpKey: 'enter',
     helpDesc: 'newline',
   );
 
   static const enterTabSubmit = KeyBinding(
-    keys: [SpecialKey(Key.enter), SpecialKey(Key.tab)],
+    keys: [SpecialKey(Key.enter), SpecialKey(Key.ctrlJ), SpecialKey(Key.tab)],
     helpKey: 'enter/tab',
     helpDesc: 'submit',
   );
@@ -80,6 +84,12 @@ class KeyBinding {
     keys: [SpecialKey(Key.tab)],
     helpKey: 'tab',
     helpDesc: 'submit',
+  );
+
+  static const back = KeyBinding(
+    keys: [SpecialKey(Key.shiftTab)],
+    helpKey: 'shift+tab',
+    helpDesc: 'back',
   );
 
   static const ctrlJSubmit = KeyBinding(

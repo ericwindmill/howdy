@@ -56,7 +56,7 @@ class ConfirmInput extends InputWidget<bool> {
   bool _value = true;
 
   @override
-  late ConfirmKeyMap keymap;
+  ConfirmKeyMap keymap = defaultKeyMap.confirm;
 
   @override
   bool get isDone => _isDone;

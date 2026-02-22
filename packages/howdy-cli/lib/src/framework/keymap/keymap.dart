@@ -76,8 +76,13 @@ class ListSelectKeyMap extends KeyMap {
   final KeyBinding submit;
 
   @override
-  String get usage =>
-      '${down.helpKey}/${up.helpKey} navigate ${Icon.dot} ${submit.usage}';
+  String get usage {
+    final upDown = '${down.helpKey}/${up.helpKey}'.style(
+      Theme.current.help.shortKey,
+    );
+    final nav = 'navigate'.style(Theme.current.help.shortDesc);
+    return '$upDown $nav ${Icon.dot} ${submit.usage}';
+  }
 }
 
 /// Keybindings for navigating in 4 directions that expect a selection.
@@ -118,8 +123,13 @@ class MultiSelectKeyMap extends KeyMap {
   final KeyBinding submit;
 
   @override
-  String get usage =>
-      '${down.usage} ${Icon.dot} ${up.usage} ${Icon.dot} ${toggle.usage} ${Icon.dot} ${submit.usage}';
+  String get usage {
+    final upDown = '${down.helpKey}/${up.helpKey}'.style(
+      Theme.current.help.shortKey,
+    );
+    final nav = 'navigate'.style(Theme.current.help.shortDesc);
+    return '$upDown $nav ${Icon.dot} ${toggle.usage} ${Icon.dot} ${submit.usage}';
+  }
 }
 
 /// Keybindings for [PromptInput]
@@ -135,27 +145,33 @@ class InputKeyMap extends KeyMap {
 
 /// Keybindings for [Textarea].
 ///
-/// Enter inserts a newline. Tab or Ctrl+J submits.
-/// Ctrl+J (byte 10, \n) is reliably distinct from Enter (\r, byte 13)
-/// in raw mode — the closest cross-terminal equivalent to "Ctrl+Enter".
+/// Tab submits. On macOS, Enter arrives as Ctrl+J (ICRNL: \r→\n), so both
+/// Tab and Enter effectively submit. The [newline] binding is kept for
+/// non-macOS platforms where Enter == Key.enter.
 class TextAreaKeyMap extends KeyMap {
   const TextAreaKeyMap({
     this.submit = KeyBinding.tabSubmit,
-    this.newline = KeyBinding.newline,
-    this.submitAlt = KeyBinding.ctrlJSubmit,
+    // Only Key.enter (byte 13) — not ctrlJ — so macOS Enter (→ ctrlJ)
+    // falls through to submitAlt and submits rather than inserting a newline.
+    this.newline = const KeyBinding(
+      keys: [SpecialKey(Key.enter), SpecialKey(Key.ctrlJ)],
+      helpKey: 'enter',
+      helpDesc: 'newline',
+    ),
+    // this.submitAlt = KeyBinding.ctrlJSubmit,
   });
 
   /// Submit the textarea (Tab).
   final KeyBinding submit;
 
-  /// Insert a newline (Enter).
+  /// Insert a newline (Enter, non-macOS).
   final KeyBinding newline;
 
-  /// Alternative submit via Ctrl+J.
-  final KeyBinding submitAlt;
+  /// Alternative submit via Ctrl+J (also handles macOS Enter via ICRNL).
+  // final KeyBinding submitAlt;
 
   @override
-  String get usage => '${newline.usage} ${Icon.dot} ${submit.usage}';
+  String get usage => submit.usage;
 }
 
 /// Keybindings for [FilePicker].
@@ -169,7 +185,7 @@ class FilePickerKeyMap extends KeyMap {
     this.stepIn = const KeyBinding(
       keys: [SpecialKey(Key.arrowRight)],
       helpKey: Icon.arrowRight,
-      helpDesc: 'step in',
+      helpDesc: 'open dir',
     ),
     this.parent = const KeyBinding(
       keys: [SpecialKey(Key.arrowLeft)],
@@ -204,16 +220,8 @@ class FilePickerKeyMap extends KeyMap {
 /// Tab = next, Shift+Tab = back. Enter also advances for convenience.
 class PageKeyMap extends KeyMap {
   const PageKeyMap({
-    this.next = const KeyBinding(
-      keys: [SpecialKey(Key.tab), SpecialKey(Key.enter)],
-      helpKey: 'tab/enter',
-      helpDesc: 'next',
-    ),
-    this.prev = const KeyBinding(
-      keys: [SpecialKey(Key.shiftTab)],
-      helpKey: 'shift+tab',
-      helpDesc: 'back',
-    ),
+    this.next = .enterTabSubmit,
+    this.prev = .back,
   });
 
   final KeyBinding next;
