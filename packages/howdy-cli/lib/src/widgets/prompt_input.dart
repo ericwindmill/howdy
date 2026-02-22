@@ -158,7 +158,7 @@ class Prompt extends InputWidget<String> {
     // Help / description
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
 
-    if (isDone) {
+    if (isDone && !isFocused) {
       // ── Completed state ───────────────────────────────────────────
       buf.writeln('${Icon.check} $value'.success);
     } else {
@@ -169,10 +169,11 @@ class Prompt extends InputWidget<String> {
           '${(defaultValue ?? '').style(fieldStyle.text.placeholder)}',
         );
       } else {
+        final cursor = ' '.style(fieldStyle.text.cursor); // styled block
         buf.writeln(
           '${Icon.question.style(fieldStyle.text.prompt)} '
-                  '$_input'
-              .style(fieldStyle.text.text),
+          '${_input.toString().style(fieldStyle.text.text)}'
+          '$cursor',
         );
       }
     }

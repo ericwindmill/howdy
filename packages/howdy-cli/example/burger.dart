@@ -149,6 +149,7 @@ void main() async {
     receiptBuf.toString().trimRight(),
     borderType: BorderType.rounded,
     padding: EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+    margin: EdgeInsets.all(2),
     borderStyle: TextStyle(foreground: Color.purpleLight),
     width: 50,
   );

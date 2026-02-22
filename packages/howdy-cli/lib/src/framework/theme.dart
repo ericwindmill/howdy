@@ -82,7 +82,7 @@ class Theme {
           unselectedPrefix: TextStyle(dim: true),
         ),
         text: TextStyles(
-          cursor: TextStyle(foreground: green),
+          cursor: TextStyle(background: indigo),
           placeholder: TextStyle(foreground: Color.grey, dim: true),
           prompt: TextStyle(foreground: fuchsia),
         ),
