@@ -207,16 +207,39 @@ class TextStyle {
     return '\x1B[${parts.join(";")}m';
   }
 
-  /// The ANSI reset sequence.
+  /// The ANSI full-reset sequence. Prefer [closeSequence] to avoid
+  /// clobbering surrounding styles when nesting styled substrings.
   static const String resetSequence = '\x1B[0m';
+
+  /// A scoped close sequence that undoes only the attributes set by this
+  /// style, leaving any surrounding (outer) styles intact.
+  ///
+  /// For example, wrapping a word in italic inside a coloured string:
+  /// ```dart
+  /// 'Hello ${'world'.italic} there'.blue
+  /// ```
+  /// …works correctly because `italic` closes with `\x1B[23m` (italic-off)
+  /// rather than a full reset that would strip the outer colour.
+  String get closeSequence {
+    if (!hasStyle) return '';
+    final parts = <String>[];
+    if (bold || dim) parts.add('22'); // normal intensity
+    if (italic) parts.add('23');
+    if (underline) parts.add('24');
+    if (strikethrough) parts.add('29');
+    if (foreground != null) parts.add('39'); // default fg
+    if (background != null) parts.add('49'); // default bg
+    return '\x1B[${parts.join(';')}m';
+  }
 
   /// Apply this style to [text].
   ///
-  /// Wraps [text] in the open sequence and a reset sequence.
+  /// Wraps [text] in the open sequence and a scoped close sequence so that
+  /// surrounding styles are preserved when this span is embedded.
   /// If no style is set, returns [text] unchanged.
   String apply(String text) {
     if (!hasStyle) return text;
-    return '$openSequence$text$resetSequence';
+    return '$openSequence$text$closeSequence';
   }
 
   @override

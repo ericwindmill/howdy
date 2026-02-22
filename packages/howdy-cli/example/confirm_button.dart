@@ -3,11 +3,12 @@ import 'package:howdy/howdy.dart';
 void main() {
   terminal.eraseScreen();
   terminal.cursorHome();
-
-  Text.body('FileTree example');
+  Text.body('Confirm example');
   Text.body('-----------------------');
   terminal.writeln();
-  terminal.writeln();
 
-  FileTree.send('example');
+  ConfirmInput.send(
+    'Are you sure?',
+    help: "You should be ${'very'.italic} sure.",
+  );
 }

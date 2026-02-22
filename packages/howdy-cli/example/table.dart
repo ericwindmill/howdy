@@ -1,10 +1,14 @@
 import 'package:howdy/howdy.dart';
 
 void main() {
-  terminal.writeln('Table demo\n');
+  terminal.eraseScreen();
+  terminal.cursorHome();
 
-  // ── Auto-sized (default) ───────────────────────────────────────────────────
-  terminal.writeln('Auto-sized:');
+  Text.body('Table example');
+  Text.body('-----------------------');
+  terminal.writeln();
+  terminal.writeln();
+
   Table(
     headers: ['Service', 'Status', 'Uptime'],
     rows: [
@@ -24,33 +28,5 @@ void main() {
         '6h 12m',
       ],
     ],
-  ).write();
-
-  terminal.writeln();
-
-  // ── Per-column widths ─────────────────────────────────────────────────────
-  terminal.writeln('columnWidths: [20, 12, 10]:');
-  Table(
-    headers: ['Service', 'Status', 'Uptime'],
-    rows: [
-      ['auth-service', 'running', '14d 3h'],
-      ['db-worker', 'stopped', '—'],
-    ],
-    columnWidths: [20, 12, 10],
-  ).write();
-
-  terminal.writeln();
-
-  // ── Fixed total width ─────────────────────────────────────────────────────
-  terminal.writeln('totalWidth: 60 (columns share evenly):');
-  Table(
-    headers: ['Setting', 'Value'],
-    rows: [
-      ['Project name', 'my-app'],
-      ['Language', 'Dart'],
-      ['Git', 'yes'],
-    ],
-    totalWidth: 60,
-    columnAlignments: [ColumnAlignment.left, ColumnAlignment.right],
   ).write();
 }

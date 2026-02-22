@@ -212,7 +212,7 @@ class FilePickerKeyMap extends KeyMap {
 
   @override
   String get usage =>
-      '${up.usage} ${Icon.dot} ${down.usage} ${Icon.dot} ${stepIn.usage} ${Icon.dot} ${parent.usage} ${Icon.dot} ${submit.usage}';
+      '${up.helpKey}/${down.helpKey} ${'move'.style(Theme.current.help.shortDesc)} ${Icon.dot} ${stepIn.usage} ${Icon.dot} ${parent.usage} ${Icon.dot} ${submit.usage}';
 }
 
 /// Keybindings for [NoteMultiwidget] and generic page navigation.

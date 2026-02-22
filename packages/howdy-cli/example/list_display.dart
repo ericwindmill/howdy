@@ -1,7 +1,13 @@
 import 'package:howdy/howdy.dart';
 
 void main() {
-  Text.body('Scrollable list example');
+  terminal.eraseScreen();
+  terminal.cursorHome();
+
+  Text.body('BulletList example');
+  Text.body('-----------------------');
+  terminal.writeln();
+  terminal.writeln();
 
   BulletList.send(
     [
@@ -15,13 +21,8 @@ void main() {
       'Oxygen',
       'Fluorine',
       'Neon',
-      'Sodium',
-      'Magnesium',
-      'Aluminium',
-      'Silicon',
-      'Phosphorus',
     ],
-    title: 'First 15 elements',
+    title: 'First 10 elements',
     maxVisibleRows: 7,
   );
 }

@@ -4,10 +4,10 @@ void main() {
   terminal.eraseScreen();
   terminal.cursorHome();
 
-  Text.body('FileTree example');
+  Text.body('Prompt example');
   Text.body('-----------------------');
   terminal.writeln();
   terminal.writeln();
 
-  FileTree.send('example');
+  Prompt.send('What is your name?');
 }

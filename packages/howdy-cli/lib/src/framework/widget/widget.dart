@@ -49,7 +49,7 @@ sealed class Widget<T> {
   String? key;
 
   /// Whether this widget is currently focused in a group or form.
-  bool isFocused = false;
+  bool isFocused = true;
 
   /// Keys that perform actions while this widget is focused.
   KeyMap get keymap => NoActionKeyMap();
