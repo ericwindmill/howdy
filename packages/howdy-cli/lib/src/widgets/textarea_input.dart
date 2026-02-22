@@ -194,7 +194,7 @@ class Textarea extends InputWidget<String> {
     terminal.maxWidth ??= 60;
     final cursor = ' '.style(fieldStyle.text.cursor);
     if (isDone && !isFocused) {
-      buf.writeln('${Icon.check} $value'.success);
+      buf.writeln('${Icon.check} $value'.style(fieldStyle.successMessage));
     } else {
       final pipe = renderContext == RenderContext.single
           ? '${Icon.pipe.style(fieldStyle.text.prompt)} '

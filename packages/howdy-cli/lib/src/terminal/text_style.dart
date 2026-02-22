@@ -59,9 +59,16 @@ enum Color {
   cyanDark(0, 131, 143),
 
   // ── Dracula palette ──────────────────────────────
+  /// TODO: comment - What color is this?
   draculaBackground(40, 42, 54),
+
+  /// TODO: comment - What color is this?
   draculaSelection(68, 71, 90),
+
+  /// TODO: comment - What color is this?
   draculaForeground(248, 248, 242),
+
+  /// TODO: comment - What color is this?
   draculaComment(98, 114, 164),
   draculaGreen(80, 250, 123),
   draculaPurple(189, 147, 249),

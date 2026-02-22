@@ -122,11 +122,11 @@ class Prompt extends InputWidget<String> {
 
     // Find the row where the cursor should sit.
     // The ❯ pointer row.
-    final inputLineIndex = lines.indexWhere((l) => l.contains(Icon.pointer));
+    final inputLineIndex = lines.indexWhere((l) => l.contains(Icon.question));
 
     if (inputLineIndex != -1) {
       _linesBelow = lines.length - 1 - inputLineIndex;
-      terminal.cursorUp(_linesBelow + 1);
+      terminal.cursorUp(_linesBelow);
 
       // Extract the line and find where the cursor should be.
       // The cursor should be at the end of the visible text.
@@ -140,7 +140,7 @@ class Prompt extends InputWidget<String> {
   /// Move cursor back to the end of the rendered output so that
   /// [updateScreen]'s erase logic works from the correct position.
   void _restoreCursorToBottom() {
-    terminal.cursorDown(_linesBelow + 1);
+    terminal.cursorDown(_linesBelow);
     terminal.cursorToColumn(1);
   }
 
@@ -158,9 +158,9 @@ class Prompt extends InputWidget<String> {
     // Help / description
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
 
-    if (isDone && !isFocused) {
+    if (isDone) {
       // ── Completed state ───────────────────────────────────────────
-      buf.writeln('${Icon.check} $value'.success);
+      buf.writeln('${Icon.check} $value'.style(fieldStyle.successMessage));
     } else {
       // ── Single-line: original ❯ pointer ─────────────────────────
       if (_input.isEmpty) {
@@ -195,10 +195,9 @@ class Prompt extends InputWidget<String> {
 
   @override
   String write() {
-    // Use a blinking block cursor during text input so the insertion
-    // point is clearly visible. Show the cursor (don't hide it).
-    terminal.setCursorShape(CursorShape.blinkingBlock);
-    terminal.cursorShow();
+    // Hide the real cursor — the styled block character in build() acts as
+    // the fake cursor so position is always correct.
+    terminal.cursorHide();
     _renderAndPosition();
 
     terminal.runRawModeSync<void>(() {
@@ -226,8 +225,7 @@ class Prompt extends InputWidget<String> {
     terminal.clearScreen();
     terminal.write(render());
 
-    // Restore default cursor shape and show it to release the session.
-    terminal.resetCursorShape();
+    // Restore default cursor and show it to release the session.
     terminal.cursorShow();
 
     return value;

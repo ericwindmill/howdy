@@ -155,7 +155,7 @@ class FilePicker extends InputWidget<FileSystemEntity> {
             '${Icon.pointer.style(fieldStyle.select.selector)} ${name.style(fieldStyle.select.option)}',
           );
         } else if (isSelected && isDone) {
-          buf.writeln('${Icon.check} $name'.success);
+          buf.writeln('${Icon.check} $name'.style(fieldStyle.successMessage));
         } else {
           buf.writeln('  ${name.style(fieldStyle.base)}');
         }

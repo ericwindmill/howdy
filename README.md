@@ -15,7 +15,7 @@ I was heavily inspired by / ripped off [Huh?](https://github.com/charmbracelet/h
 
 
 
-
+- **Extendible:** Use built in widgets or write your own.
 - **Declarative Components:** Easily build forms and interactive prompts.
 - **Theming System:** Centralized styling for colors, borders, icons, and text.
 - **Low-Level Terminal Control:** Exposed primitive terminal functions for cursors, escape sequences, and screen buffers.

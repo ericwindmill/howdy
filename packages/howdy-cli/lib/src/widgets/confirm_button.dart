@@ -1,7 +1,6 @@
 import 'package:howdy/src/framework/icons.dart';
 import 'package:howdy/src/framework/indented_string_buffer.dart';
 import 'package:howdy/src/framework/keymap/keymap.dart';
-import 'package:howdy/src/framework/theme.dart';
 import 'package:howdy/src/framework/validate.dart';
 import 'package:howdy/src/framework/widget/widget.dart';
 import 'package:howdy/src/terminal/key_event.dart';
@@ -98,7 +97,11 @@ class ConfirmInput extends InputWidget<bool> {
     buf.writeln();
 
     if (isDone) {
-      buf.writeln('${Icon.check} ${_value ? 'Yes' : 'No'}'.success);
+      buf.writeln(
+        '${Icon.check} ${_value ? 'Yes' : 'No'}'.style(
+          fieldStyle.successMessage,
+        ),
+      );
     } else {
       // Render both options inline; highlight the active one.
       final yesStyle = _value

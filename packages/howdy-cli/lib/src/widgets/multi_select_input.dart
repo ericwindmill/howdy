@@ -1,4 +1,5 @@
 import 'package:howdy/howdy.dart';
+import 'package:howdy/src/framework/renderState.dart';
 
 /// A multi-choice select list.
 ///
@@ -138,7 +139,9 @@ class Multiselect<T> extends InputWidget<List<T>> {
         );
       } else {
         const prefix = '  ';
-        final marker = isChecked ? Icon.check.style : Icon.optionEmpty.body;
+        final marker = isChecked
+            ? Icon.check.style(fieldStyle.multiSelect.selectedPrefix)
+            : Icon.optionEmpty.style(fieldStyle.multiSelect.unselectedPrefix);
         buf.write(prefix);
         buf.write(marker);
         buf.write(' ');
@@ -172,6 +175,13 @@ class Multiselect<T> extends InputWidget<List<T>> {
 
   @override
   String build(IndentedStringBuffer buf) {
+    var renderState = RenderState.get((
+      isFocused: isFocused,
+      isComplete: isDone,
+      isFormElement: renderContext == .form,
+      hasError: hasError,
+    ));
+
     // The prompt label (with hint for multiselect)
     if (title != null) buf.writeln(title!.style(fieldStyle.title));
 

@@ -112,7 +112,7 @@ class Select<T> extends InputWidget<T> {
         );
       } else if (isSelected && isDone) {
         buf.writeln(
-          '${Icon.check} ${option.label}'.success,
+          '${Icon.check} ${option.label}'.style(fieldStyle.successMessage),
         );
       } else {
         buf.writeln(option.label.style(style));

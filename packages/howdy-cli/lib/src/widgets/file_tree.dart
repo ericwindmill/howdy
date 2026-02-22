@@ -15,7 +15,7 @@ class FileTree extends DisplayWidget {
 
   /// Convenience factory to print a file tree.
   static void send(String path) {
-    FileTree(path).write;
+    FileTree(path).write();
   }
 
   @override

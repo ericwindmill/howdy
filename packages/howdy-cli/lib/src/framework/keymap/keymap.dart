@@ -1,6 +1,6 @@
 import 'package:howdy/src/framework/icons.dart';
 import 'package:howdy/src/framework/keymap/key_binding.dart';
-import 'package:howdy/src/framework/theme.dart';
+import 'package:howdy/src/framework/themes/theme.dart';
 import 'package:howdy/src/terminal/key_event.dart';
 import 'package:howdy/src/terminal/styled_text.dart';
 

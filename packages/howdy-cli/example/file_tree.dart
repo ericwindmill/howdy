@@ -7,7 +7,6 @@ void main() {
   Text.body('FileTree example');
   Text.body('-----------------------');
   terminal.writeln();
-  terminal.writeln();
 
   FileTree.send('example');
 }

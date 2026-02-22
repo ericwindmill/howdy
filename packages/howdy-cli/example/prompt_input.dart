@@ -7,7 +7,19 @@ void main() {
   Text.body('Prompt example');
   Text.body('-----------------------');
   terminal.writeln();
-  terminal.writeln();
 
   Prompt.send('What is your name?');
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
 }

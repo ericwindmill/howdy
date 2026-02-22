@@ -63,7 +63,9 @@ class Form extends MultiWidget {
   InputWidget? get _focusedWidget {
     final page = _currentPage;
     if (page is MultiWidget) {
-      final focused = page.children[page.focusIndex];
+      final idx = page.focusIndex;
+      if (idx >= page.children.length) return null;
+      final focused = page.children[idx];
       return focused is InputWidget ? focused : null;
     }
     if (page is InputWidget) return page;

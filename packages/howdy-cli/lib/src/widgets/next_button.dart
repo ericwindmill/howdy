@@ -60,7 +60,7 @@ class NextButton extends InputWidget<void> {
   @override
   String build(IndentedStringBuffer buf) {
     if (isDone) {
-      buf.writeln('${Icon.check} $title'.success);
+      buf.writeln('${Icon.check} $title'.style(fieldStyle.successMessage));
     } else {
       final button = ' $title ${Icon.arrowRight} '.style(
         fieldStyle.confirm.focusedButton,
