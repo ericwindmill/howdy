@@ -106,7 +106,7 @@ class Select<T> extends InputWidget<T> {
           ? option.textStyle
           : fieldStyle.base;
 
-      if (isSelected && !isDone && isFocused) {
+      if (isSelected && !isDone && renderState.isFocused) {
         buf.writeln(
           '${Icon.pointer.style(fieldStyle.select.selector)} ${option.label.style(fieldStyle.select.option)}',
         );
@@ -141,31 +141,32 @@ class Select<T> extends InputWidget<T> {
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
 
     // The result / option list
-
     renderOptionsString(buf);
 
-    // Chrome: usage hint + error — only shown when standalone
-    // Otherwise handled by form
+    // Chrome: usage hint + error — only shown when standalone.
+    // When inside a form, parent owns this chrome.
     switch (renderState) {
       case RenderState.editing:
       case RenderState.waiting:
-      case RenderState.complete:
-        if (isStandalone) {
+      case RenderState.waitingInForm:
+      case RenderState.editingInForm:
+      case RenderState.completeInForm:
+        if (!renderState.isFormElement) {
           buf.writeln();
           buf.writeln(usage.style(theme.help.shortDesc));
           buf.writeln();
           buf.writeln();
         }
-      case RenderState.hasError:
-        if (isStandalone) {
-          buf.writeln();
-          buf.writeln(usage.style(theme.help.shortDesc));
-          buf.writeln('${Icon.error} $error'.style(fieldStyle.errorMessage));
-          buf.writeln();
-        }
+      case RenderState.error:
+        buf.writeln();
+        buf.writeln(usage.style(theme.help.shortDesc));
+        buf.writeln('${Icon.error} $error'.style(fieldStyle.errorMessage));
+        buf.writeln();
+      case RenderState.errorInForm:
+        break; // form owns chrome
       case RenderState.verified:
-        // form owns chrome when verified inside a form, nothing extra needed
-        break;
+      case RenderState.verifiedInForm:
+        break; // form owns chrome
     }
     buf.dedent();
 

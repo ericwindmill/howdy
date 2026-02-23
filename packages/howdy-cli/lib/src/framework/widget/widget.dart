@@ -18,8 +18,67 @@ enum KeyResult {
   done,
 }
 
+/// Encapsulates the four boolean axes that drive [RenderState] for a widget.
+///
+/// Provides private backing fields, public setters (used by parent containers
+/// such as [Form] and [Page]), and the [renderState] getter that derives the
+/// correct [RenderState] value from those fields.
+///
+/// All widget base classes use this mixin so the state-management logic lives
+/// in one place.  Widget `build` methods should consume [renderState] rather
+/// than any individual field.
+mixin RenderStateMixin {
+  /// Whether this widget is currently focused in a group or form.
+  bool _isFocused = true;
+
+  /// Whether the widget has finished collecting input.
+  bool _isComplete = false;
+
+  bool _isFormElement = false;
+
+  /// Whether the widget currently has a validation error.
+  /// [InputWidget] overrides [hasError] to check its [error] field instead.
+  bool _hasError = false;
+
+  set isFocused(bool value) {
+    _isFocused = value;
+  }
+
+  set isComplete(bool value) {
+    _isComplete = value;
+  }
+
+  set isFormElement(bool value) {
+    _isFormElement = value;
+  }
+
+  set hasError(bool value) {
+    _hasError = value;
+  }
+
+  /// Whether the widget currently has a validation error.
+  ///
+  /// Overridden by [InputWidget] to return `error != null`.
+  bool get hasError => _hasError;
+
+  /// Whether the widget has finished collecting input.
+  ///
+  /// Overridden by concrete input widgets.
+  bool get isDone => _isComplete;
+
+  /// The current render state derived from widget properties.
+  RenderState get renderState {
+    return RenderState.get((
+      isFocused: _isFocused,
+      isComplete: isDone,
+      isFormElement: _isFormElement,
+      hasError: hasError,
+    ));
+  }
+}
+
 /// Base class for all terminal widgets.
-sealed class Widget<T> {
+sealed class Widget<T> with RenderStateMixin {
   Widget(
     this.title, {
     this.help,
@@ -36,25 +95,12 @@ sealed class Widget<T> {
   /// Used for easy retrieval of results in [MultiWidgetResults]
   String? key;
 
-  /// Whether this widget is currently focused in a group or form.
-  bool isFocused = true;
-
   /// Keys that perform actions while this widget is focused.
   KeyMap get keymap => NoActionKeyMap();
 
   /// Optional theme override for this widget.
   /// Falls back to [Theme.current] if not provided.
   final Theme theme;
-
-  /// The active style based on focus state.
-  FieldStyles get fieldStyle => isFocused ? theme.focused : theme.blurred;
-
-  /// Whether the widget has finished collecting input.
-  bool get isDone => false;
-
-  /// Whether the widget currently has a validation error.
-  /// InputWidget overrides this to check the error field.
-  bool get hasError => false;
 
   /// The widget's current value.
   ///
@@ -70,22 +116,14 @@ sealed class Widget<T> {
 
   KeyResult handleKey(KeyEvent event) => KeyResult.done;
 
-  /// Whether this widget is inside a form/page container.
+  /// Convenience getter — returns [theme.focused] or [theme.blurred]
+  /// based on the current [renderState].
   ///
-  /// When true, the parent container owns chrome (error messages, usage hints).
-  /// Set to true by [Form] when adding widgets to a page.
-  bool isFormElement = false;
-
-  /// Whether this widget is rendering standalone (i.e. owns its chrome).
-  bool get isStandalone => !isFormElement;
-
-  /// The current render state derived from widget properties.
-  RenderState get renderState => RenderState.get((
-    isFocused: isFocused,
-    isComplete: isDone,
-    isFormElement: isFormElement,
-    hasError: hasError,
-  ));
+  /// Widget `build` methods should use this instead of accessing
+  /// `theme.focused` / `theme.blurred` directly so the focused/blurred
+  /// decision is always derived from [renderState].
+  FieldStyles get fieldStyle =>
+      renderState.isFocused ? theme.focused : theme.blurred;
 
   /// Reset the widget to its initial (unfilled) state.
   ///
@@ -112,5 +150,3 @@ sealed class Widget<T> {
   /// [handleKey] together with terminal IO for one-off usage.
   FutureOr<void> write();
 }
-
-mixin FormElement on Widget {}
