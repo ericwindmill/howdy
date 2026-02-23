@@ -112,6 +112,12 @@ class Form extends MultiWidget {
     return buf.toString();
   }
 
+  @override
+  MultiWidgetResults write() {
+    terminal.clearScreen();
+    return super.write();
+  }
+
   /// Appends a red asterisk to the first non-blank visible line.
   String _injectErrorMarker(String rendered, Theme t) {
     final lines = rendered.split('\n');
