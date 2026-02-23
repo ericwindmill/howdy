@@ -42,19 +42,19 @@ class Multiselect<T> extends InputWidget<List<T>> {
   }
 
   /// Convenience factory, uses active theme values.
-  static List<T> send<T>({
-    required String label,
+  static List<T> send<T>(
+    String title, {
     required List<Option<T>> options,
     MultiSelectKeyMap? keymap,
-    String? description,
+    String? help,
     List<T>? defaultValue,
     Validator<List<T>>? validator,
   }) {
     return Multiselect<T>(
-      label,
+      title,
       options: options,
       keymap: keymap,
-      help: description,
+      help: help,
       defaultValue: defaultValue,
       validator: validator,
     ).write();

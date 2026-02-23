@@ -9,7 +9,7 @@ void main() {
   terminal.writeln();
 
   Select.send<String>(
-    label: 'Preferred language',
+    'Preferred language',
     options: [
       Option(label: 'Dart', value: 'dart'),
       Option(label: 'TypeScript', value: 'ts'),

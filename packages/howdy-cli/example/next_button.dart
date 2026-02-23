@@ -5,24 +5,28 @@ void main() {
   terminal.cursorHome();
 
   Form.send([
-    Page([
-      Text('''   ____  _   _ ______ 
+    Page(
+      children: [
+        Text('''   ____  _   _ ______ 
   / __ \\| \\ | |  ____|
  | |  | |  \\| | |__   
  | |  | | . ` |  __|  
  | |__| | |\\  | |____ 
   \\____/|_| \\_|______|
 '''),
-      NextButton('Continue'),
-    ]),
-    Page([
-      Text(r'''  _                 
+        NextButton('Continue'),
+      ],
+    ),
+    Page(
+      children: [
+        Text(r'''  _                 
  | |                
  | |___      _____  
  | __\ \ /\ / / _ \ 
  | |_ \ V  V / (_) |
   \__| \_/\_/ \___/                
 '''),
-    ]),
+      ],
+    ),
   ], title: 'Form next button');
 }

@@ -8,5 +8,5 @@ void main() {
   Text.body('-----------------------');
   terminal.writeln();
 
-  FilePicker.send(title: 'Select a file to process:', initialDirectory: 'lib');
+  FilePicker.send('Select a file to process:', initialDirectory: 'lib');
 }

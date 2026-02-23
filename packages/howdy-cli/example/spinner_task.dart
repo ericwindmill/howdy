@@ -11,7 +11,7 @@ Future<void> main() async {
   terminal.writeln();
 
   final version = await SpinnerTask.send<String>(
-    label: 'Fetching dependencies',
+    'Fetching dependencies',
     task: () async {
       await Future.delayed(Duration(seconds: 2));
       return 'v2.4.1';

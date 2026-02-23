@@ -17,11 +17,11 @@ import 'package:howdy/howdy.dart';
 class SpinnerTask<T> extends InputWidget<T> {
   SpinnerTask(super.title, {required this.task});
 
-  static Future<T> send<T>({
-    required String label,
+  static Future<T> send<T>(
+    String title, {
     required Future<T> Function() task,
   }) {
-    return SpinnerTask<T>(label, task: task).write();
+    return SpinnerTask<T>(title, task: task).write();
   }
 
   final Future<T> Function() task;

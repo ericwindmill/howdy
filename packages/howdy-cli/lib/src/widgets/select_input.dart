@@ -40,8 +40,8 @@ class Select<T> extends InputWidget<T> {
   }
 
   /// Convenience factory, uses active theme values.
-  static T send<T>({
-    required String label,
+  static T send<T>(
+    String title, {
     required List<Option<T>> options,
     ListSelectKeyMap? keymap,
     String? help,
@@ -49,7 +49,7 @@ class Select<T> extends InputWidget<T> {
     Validator<T>? validator,
   }) {
     return Select<T>(
-      label,
+      title,
       options: options,
       keymap: keymap,
       help: help,
