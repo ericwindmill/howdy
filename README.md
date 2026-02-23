@@ -249,6 +249,17 @@ class MyWidget extends InputWidget<String> {
 
 Howdy CLI features a centralized hierarchical theming API. This ensures consistent styling across all widgets, managing focus and blur states automatically.
 
+
+### Use themes
+
+To use one of the included themes, set the static `current` field.
+
+```dart
+
+Theme.current = Theme.dracula();
+
+```
+
 ### Included Themes
 
 Out of the box, the following themes are provided:
@@ -258,7 +269,7 @@ Out of the box, the following themes are provided:
 - `Theme.base16()`: A 16-color ANSI palette theme.
 - `Theme.catppuccin()`: Based on the Catppuccin Mocha color scheme.
 
-### Using Theme API to Write Your Own
+### Using Theme API to write your own
 
 You can create a custom theme by instantiating the `Theme` class and providing specific `FieldStyles`, `GroupStyles`, and `FormStyles`.
 

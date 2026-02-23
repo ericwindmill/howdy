@@ -12,13 +12,4 @@ void main() {
   Text.success('This is success text.');
   Text.warning('This is warning text.');
   Text.error('This is error text.');
-
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
 }

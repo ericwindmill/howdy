@@ -178,15 +178,28 @@ class Prompt extends InputWidget<String> {
       }
     }
 
-    if (isStandalone) {
-      buf.writeln();
-      buf.writeln(usage.style(theme.help.shortDesc));
-      if (hasError) {
-        buf.writeln(
-          '${Icon.error} $error'.style(fieldStyle.errorMessage),
-        );
-      }
-      buf.writeln();
+    // Chrome: usage hint + error — only shown when standalone
+    // Otherwise handled by form
+    switch (renderState) {
+      case RenderState.editing:
+      case RenderState.waiting:
+      case RenderState.complete:
+        if (isStandalone) {
+          buf.writeln();
+          buf.writeln(usage.style(theme.help.shortDesc));
+          buf.writeln();
+          buf.writeln();
+        }
+      case RenderState.hasError:
+        if (isStandalone) {
+          buf.writeln();
+          buf.writeln(usage.style(theme.help.shortDesc));
+          buf.writeln('${Icon.error} $error'.style(fieldStyle.errorMessage));
+          buf.writeln();
+        }
+      case RenderState.verified:
+        // form owns chrome when verified inside a form, nothing extra needed
+        break;
     }
     buf.dedent();
 

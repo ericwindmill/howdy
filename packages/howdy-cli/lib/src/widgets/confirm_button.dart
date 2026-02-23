@@ -1,6 +1,7 @@
 import 'package:howdy/src/framework/icons.dart';
 import 'package:howdy/src/framework/indented_string_buffer.dart';
 import 'package:howdy/src/framework/keymap/keymap.dart';
+import 'package:howdy/src/framework/render_state.dart';
 import 'package:howdy/src/framework/validate.dart';
 import 'package:howdy/src/framework/widget/widget.dart';
 import 'package:howdy/src/terminal/key_event.dart';
@@ -116,13 +117,28 @@ class ConfirmInput extends InputWidget<bool> {
       buf.writeln('$yes $no');
     }
 
-    if (isStandalone) {
-      buf.writeln();
-      buf.writeln(usage.style(theme.help.shortDesc));
-      if (hasError) {
-        buf.writeln('${Icon.error} $error'.style(fieldStyle.errorMessage));
-      }
-      buf.writeln();
+    // Chrome: usage hint + error — only shown when standalone
+    // Otherwise handled by form
+    switch (renderState) {
+      case RenderState.editing:
+      case RenderState.waiting:
+      case RenderState.complete:
+        if (isStandalone) {
+          buf.writeln();
+          buf.writeln(usage.style(theme.help.shortDesc));
+          buf.writeln();
+          buf.writeln();
+        }
+      case RenderState.hasError:
+        if (isStandalone) {
+          buf.writeln();
+          buf.writeln(usage.style(theme.help.shortDesc));
+          buf.writeln('${Icon.error} $error'.style(fieldStyle.errorMessage));
+          buf.writeln();
+        }
+      case RenderState.verified:
+        // form owns chrome when verified inside a form, nothing extra needed
+        break;
     }
     return buf.toString();
   }
