@@ -18,6 +18,7 @@ export 'src/framework/keymap/key_binding.dart';
 export 'src/framework/keymap/keymap.dart';
 export 'src/framework/table_style.dart';
 export 'src/framework/themes/theme.dart';
+export 'src/framework/render_state.dart';
 export 'src/framework/validate.dart';
 export 'src/framework/widget/option.dart';
 export 'src/framework/widget/widget.dart';

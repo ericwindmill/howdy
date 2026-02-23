@@ -157,3 +157,161 @@ class BulletList extends DisplayWidget {
     terminal.cursorShow();
   }
 }
+
+/// A display widget that renders a numbered list (`1.`, `2.`, …) as the marker.
+///
+/// Supports scrolling with ↑/↓ arrow keys when rendered via [write()].
+/// The visible window is controlled by [maxVisibleRows]; ellipsis lines
+/// (`...`) appear above/below when the list is clipped. Numbers are
+/// right-padded so items stay aligned when the count reaches double-digits.
+///
+/// ```dart
+/// NumberList(
+///   items: ['Plan', 'Execute', 'Review'],
+///   title: 'Steps',
+/// ).write();
+/// ```
+///
+/// Output:
+/// ```
+/// Steps
+/// 1. Plan
+/// 2. Execute
+/// 3. Review
+/// ```
+class NumberList extends DisplayWidget {
+  NumberList({
+    required this.items,
+    super.title,
+    this.maxVisibleRows = 10,
+    this.markerStyle,
+    this.itemStyle,
+    super.key,
+    super.theme,
+  }) : _offset = 0;
+
+  /// Convenience method — creates and immediately writes a [NumberList].
+  static void send(
+    List<String> items, {
+    String? title,
+    int maxVisibleRows = 10,
+    TextStyle? markerStyle,
+    TextStyle? itemStyle,
+  }) {
+    NumberList(
+      items: items,
+      title: title,
+      maxVisibleRows: maxVisibleRows,
+      markerStyle: markerStyle,
+      itemStyle: itemStyle,
+    ).write();
+  }
+
+  /// The items to display.
+  final List<String> items;
+
+  /// Maximum number of items visible at once. Defaults to 10.
+  final int maxVisibleRows;
+
+  /// Style applied to the `1.` marker. Defaults to the theme's description style.
+  final TextStyle? markerStyle;
+
+  /// Style applied to each item label. Defaults to the theme's base style.
+  final TextStyle? itemStyle;
+
+  /// Current scroll offset (index of the first visible item).
+  int _offset;
+
+  @override
+  KeyResult handleKey(KeyEvent event) {
+    if (event is SpecialKey) {
+      if (event.key == Key.arrowDown &&
+          _offset + maxVisibleRows < items.length) {
+        _offset++;
+        return KeyResult.consumed;
+      } else if (event.key == Key.arrowUp && _offset > 0) {
+        _offset--;
+        return KeyResult.consumed;
+      }
+    }
+    return KeyResult.ignored;
+  }
+
+  @override
+  String build(IndentedStringBuffer buf) {
+    if (title != null) {
+      buf.writeln(title!.style(theme.focused.title));
+    }
+
+    if (items.isEmpty) {
+      buf.writeln('  (empty)'.style(theme.blurred.description));
+      return buf.toString();
+    }
+
+    final end = (_offset + maxVisibleRows).clamp(0, items.length);
+
+    // Width of the widest number label (e.g. "10." = 3 chars) for alignment.
+    final labelWidth = '${items.length}.'.length;
+
+    // Ellipsis above
+    if (_offset > 0) {
+      buf.writeln('  ...'.style(theme.blurred.description));
+    }
+
+    final markerSty = markerStyle ?? theme.focused.description;
+    final itemSty = itemStyle ?? theme.focused.base;
+
+    for (var i = _offset; i < end; i++) {
+      final number = '${i + 1}.'.padRight(labelWidth);
+      final marker = number.style(markerSty);
+      final label = items[i].style(itemSty);
+      buf.writeln('$marker $label');
+    }
+
+    // Ellipsis below
+    if (end < items.length) {
+      buf.writeln('  ...'.style(theme.blurred.description));
+    }
+
+    return buf.toString();
+  }
+
+  @override
+  void write() {
+    if (items.isEmpty || items.length <= maxVisibleRows) {
+      terminal.write(render());
+      return;
+    }
+
+    terminal.cursorHide();
+    terminal.updateScreen(render());
+
+    terminal.runRawModeSync<void>(() {
+      while (true) {
+        final event = terminal.readKeySync();
+
+        if (event is SpecialKey) {
+          switch (event.key) {
+            case Key.arrowDown:
+            case Key.arrowUp:
+              final result = handleKey(event);
+              if (result == KeyResult.consumed) {
+                terminal.updateScreen(render());
+              }
+            case Key.enter:
+            case Key.escape:
+              return;
+            default:
+              break;
+          }
+        } else if (event is CharKey && event.char == 'q') {
+          return;
+        }
+      }
+    });
+
+    terminal.clearScreen();
+    terminal.write(render());
+    terminal.cursorShow();
+  }
+}

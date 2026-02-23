@@ -7,7 +7,6 @@ void main() {
   Text.body('Multiselect example');
   Text.body('-----------------------');
   terminal.writeln();
-  terminal.writeln();
 
   Multiselect.send<String>(
     label: 'Features',

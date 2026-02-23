@@ -1,3 +1,4 @@
+/// The elements that combine to determine the RenderState.
 typedef RenderOptions = ({
   bool isFocused,
   bool isComplete,
@@ -19,7 +20,7 @@ enum RenderState {
   // complete and has focus
   verified,
 
-  //
+  // We've moved onto the next element
   complete
   ;
 
@@ -63,7 +64,3 @@ enum RenderState {
     };
   }
 }
-
-void mapRenderStateToTheme(
-  RenderState state,
-) {}

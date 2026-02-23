@@ -9,13 +9,14 @@ Future<void> main() async {
   Text.body('SpinnerTask example');
   Text.body('-----------------------');
   terminal.writeln();
-  terminal.writeln();
 
-  await SpinnerTask.send<String>(
+  final version = await SpinnerTask.send<String>(
     label: 'Fetching dependencies',
     task: () async {
       await Future.delayed(Duration(seconds: 2));
       return 'v2.4.1';
     },
   );
+
+  Text.body('Downloaded version $version');
 }

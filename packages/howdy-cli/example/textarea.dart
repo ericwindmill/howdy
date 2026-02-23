@@ -9,5 +9,14 @@ void main() {
   terminal.writeln();
   terminal.writeln();
 
-  Textarea.send('Describe your project');
+  Textarea.send('Tell me about yourself.');
+
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
+  terminal.writeln();
 }

@@ -7,7 +7,6 @@ void main() {
   Text.body('Select example');
   Text.body('-----------------------');
   terminal.writeln();
-  terminal.writeln();
 
   Select.send<String>(
     label: 'Preferred language',

@@ -24,6 +24,7 @@ abstract class InputWidget<T> extends Widget<T> {
 
   bool get hasDefault => defaultValue != null;
 
+  @override
   bool get hasError => error != null;
 
   @override

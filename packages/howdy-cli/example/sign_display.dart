@@ -7,7 +7,6 @@ void main() {
   Text.body('Sign example');
   Text.body('-----------------------');
   terminal.writeln();
-  terminal.writeln();
 
   Sign(
     content:
