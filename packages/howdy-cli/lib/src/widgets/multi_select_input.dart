@@ -1,5 +1,4 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/framework/renderState.dart';
 
 /// A multi-choice select list.
 ///
@@ -61,16 +60,19 @@ class Multiselect<T> extends InputWidget<List<T>> {
     ).write();
   }
 
-  final List<Option<T>> options;
-  @override
-  final MultiSelectKeyMap keymap;
-  late List<bool> selected;
-
-  int selectedIndex = 0;
   bool _isDone = false;
 
   @override
   bool get isDone => _isDone;
+
+  @override
+  final MultiSelectKeyMap keymap;
+
+  final List<Option<T>> options;
+
+  late List<bool> selected;
+
+  int selectedIndex = 0;
 
   String get selectedLabels {
     final labels = <String>[];
@@ -119,40 +121,31 @@ class Multiselect<T> extends InputWidget<List<T>> {
       final isChecked = selected[i];
       final label = options[i].label;
 
-      if (!isDone) {
-        final prefix = isPointer
-            ? '${Icon.pointer.style(fieldStyle.multiSelect.selector)} '
-            : '  ';
-        final marker = isChecked
-            ? Icon.optionFilled.style(fieldStyle.multiSelect.selectedPrefix)
-            : Icon.optionEmpty.style(fieldStyle.multiSelect.unselectedPrefix);
+      final prefix = (!isDone && isPointer)
+          ? '${Icon.pointer.style(fieldStyle.multiSelect.selector)} '
+          : '  ';
+      final marker = isDone
+          ? (isChecked
+                ? Icon.check.style(fieldStyle.multiSelect.selectedPrefix)
+                : Icon.optionEmpty.style(
+                    fieldStyle.multiSelect.unselectedPrefix,
+                  ))
+          : (isChecked
+                ? Icon.optionFilled.style(fieldStyle.multiSelect.selectedPrefix)
+                : Icon.optionEmpty.style(
+                    fieldStyle.multiSelect.unselectedPrefix,
+                  ));
 
-        buf.write(prefix);
-        buf.write(marker);
-        buf.write(' ');
-        buf.writeln(
-          label.style(
-            isChecked
-                ? fieldStyle.multiSelect.selectedOption
-                : fieldStyle.multiSelect.unselectedOption,
-          ),
-        );
-      } else {
-        const prefix = '  ';
-        final marker = isChecked
-            ? Icon.check.style(fieldStyle.multiSelect.selectedPrefix)
-            : Icon.optionEmpty.style(fieldStyle.multiSelect.unselectedPrefix);
-        buf.write(prefix);
-        buf.write(marker);
-        buf.write(' ');
-        buf.writeln(
-          label.style(
-            isChecked
-                ? fieldStyle.multiSelect.selectedOption
-                : fieldStyle.multiSelect.unselectedOption,
-          ),
-        );
-      }
+      buf.write(prefix);
+      buf.write(marker);
+      buf.write(' ');
+      buf.writeln(
+        label.style(
+          isChecked
+              ? fieldStyle.multiSelect.selectedOption
+              : fieldStyle.multiSelect.unselectedOption,
+        ),
+      );
     }
     buf.dedent();
     return buf.toString();
@@ -175,33 +168,37 @@ class Multiselect<T> extends InputWidget<List<T>> {
 
   @override
   String build(IndentedStringBuffer buf) {
-    var renderState = RenderState.get((
-      isFocused: isFocused,
-      isComplete: isDone,
-      isFormElement: renderContext == .form,
-      hasError: hasError,
-    ));
-
-    // The prompt label (with hint for multiselect)
+    // Title and optional help
     if (title != null) buf.writeln(title!.style(fieldStyle.title));
-
-    // Optional help text
     if (help != null) buf.writeln(help!.style(fieldStyle.description));
 
-    // The result / option list
-
+    // Option list — appearance varies by state but is always rendered
     renderOptionsString(buf);
 
-    if (isStandalone) {
-      buf.writeln();
-      buf.writeln(usage.style(theme.help.shortDesc));
-      hasError
-          ? buf.writeln(
-              '${Icon.error} $error'.style(fieldStyle.errorMessage),
-            )
-          : '';
-      buf.writeln();
+    // Chrome: usage hint + error — only shown when standalone
+    // Otherwise handled by form
+    switch (renderState) {
+      case RenderState.editing:
+      case RenderState.waiting:
+      case RenderState.complete:
+        if (isStandalone) {
+          buf.writeln();
+          buf.writeln(usage.style(theme.help.shortDesc));
+          buf.writeln();
+          buf.writeln();
+        }
+      case RenderState.hasError:
+        if (isStandalone) {
+          buf.writeln();
+          buf.writeln(usage.style(theme.help.shortDesc));
+          buf.writeln('${Icon.error} $error'.style(fieldStyle.errorMessage));
+          buf.writeln();
+        }
+      case RenderState.verified:
+        // form owns chrome when verified inside a form, nothing extra needed
+        break;
     }
+
     buf.dedent();
     return buf.toString();
   }

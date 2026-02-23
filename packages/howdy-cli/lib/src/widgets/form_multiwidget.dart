@@ -173,7 +173,7 @@ class Form extends MultiWidget {
   /// so they suppress their own standalone chrome.
   void _setFormContext(Widget widget) {
     if (widget is InputWidget) {
-      widget.renderContext = RenderContext.form;
+      widget.isFormElement = true;
     } else if (widget is MultiWidget) {
       for (final child in widget.children) {
         _setFormContext(child);

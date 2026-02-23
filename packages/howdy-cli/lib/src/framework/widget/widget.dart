@@ -18,18 +18,6 @@ enum KeyResult {
   done,
 }
 
-/// The rendering context for an interactive widget.
-///
-/// Controls whether the widget renders its own chrome (error messages,
-/// control hints) or defers to a parent container.
-enum RenderContext {
-  /// Sginle — widget owns all chrome (error line, control hints).
-  single,
-
-  /// Inside a container (e.g. [Form]) — container owns error and controls.
-  form,
-}
-
 /// Base class for all terminal widgets.
 sealed class Widget<T> {
   Widget(
@@ -64,6 +52,10 @@ sealed class Widget<T> {
   /// Whether the widget has finished collecting input.
   bool get isDone => false;
 
+  /// Whether the widget currently has a validation error.
+  /// InputWidget overrides this to check the error field.
+  bool get hasError => false;
+
   /// The widget's current value.
   ///
   /// For input widgets, this may be a partial/default value until
@@ -78,16 +70,22 @@ sealed class Widget<T> {
 
   KeyResult handleKey(KeyEvent event) => KeyResult.done;
 
-  /// The rendering context for this widget.
+  /// Whether this widget is inside a form/page container.
   ///
-  /// Defaults to [RenderContext.single] for standalone usage.
-  /// Parent containers (e.g. [Form]) set this to
-  /// [RenderContext.form] to take ownership of error display
-  /// and control hints.
-  RenderContext renderContext = RenderContext.single;
+  /// When true, the parent container owns chrome (error messages, usage hints).
+  /// Set to true by [Form] when adding widgets to a page.
+  bool isFormElement = false;
 
   /// Whether this widget is rendering standalone (i.e. owns its chrome).
-  bool get isStandalone => renderContext == RenderContext.single;
+  bool get isStandalone => !isFormElement;
+
+  /// The current render state derived from widget properties.
+  RenderState get renderState => RenderState.get((
+    isFocused: isFocused,
+    isComplete: isDone,
+    isFormElement: isFormElement,
+    hasError: hasError,
+  ));
 
   /// Reset the widget to its initial (unfilled) state.
   ///

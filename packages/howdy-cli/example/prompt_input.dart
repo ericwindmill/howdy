@@ -9,17 +9,4 @@ void main() {
   terminal.writeln();
 
   Prompt.send('What is your name?');
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
-  terminal.writeln();
 }

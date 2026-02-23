@@ -112,7 +112,7 @@ void main() async {
 
   final receiptBuf = _buildReceipt(results);
 
-  SpinnerTask<void>(
+  final delivered = await SpinnerTask<bool>(
     'Preparing your burger...',
     task: () async {
       await Future.delayed(Duration(seconds: 2));
@@ -128,7 +128,7 @@ void main() async {
         if (fullPath != null) {
           final File f = File(fullPath);
 
-          SpinnerTask<void>(
+          await SpinnerTask<void>(
             'Delivering your burger...',
             task: () async {
               await Future.delayed(Duration(seconds: 2));
@@ -136,6 +136,7 @@ void main() async {
             },
           ).write();
         }
+        return true;
       } catch (e) {
         rethrow;
       }
@@ -153,6 +154,8 @@ void main() async {
     borderStyle: TextStyle(foreground: Color.purpleLight),
     width: 50,
   );
+
+  if (delivered) Text.success("Burger delivered to ${results['location']}");
 }
 
 StringBuffer _buildReceipt(MultiWidgetResults results) {

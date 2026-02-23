@@ -196,17 +196,17 @@ class Textarea extends InputWidget<String> {
     if (isDone && !isFocused) {
       buf.writeln('${Icon.check} $value'.style(fieldStyle.successMessage));
     } else {
-      final pipe = renderContext == RenderContext.single
+      final pipe = !isFormElement
           ? '${Icon.pipe.style(fieldStyle.text.prompt)} '
           : '';
       if (_input.isEmpty) {
-        if (renderContext == RenderContext.form) {
+        if (isFormElement) {
           buf.writeln(
             '${Icon.question.style(fieldStyle.text.prompt)} ${(defaultValue ?? '').style(fieldStyle.text.placeholder)}',
           );
         } else {
           buf.writeln(
-            '$pipe${(defaultValue ?? '').style(fieldStyle.text.placeholder)}',
+            '$pipe${(defaultValue ?? '').style(fieldStyle.text.placeholder)}$cursor',
           );
         }
         _applyTrailingPipes(buf, pipe, 1);
@@ -255,7 +255,7 @@ class Textarea extends InputWidget<String> {
     // Use a blinking block cursor during text input so the insertion
     // point is clearly visible. Show the cursor (don't hide it).
     terminal.setCursorShape(CursorShape.blinkingBlock);
-    terminal.cursorShow();
+    terminal.cursorHide();
     _renderAndPosition();
 
     terminal.runRawModeSync<void>(() {
@@ -286,6 +286,7 @@ class Textarea extends InputWidget<String> {
     // Restore default cursor shape and show it to release the session.
     terminal.resetCursorShape();
     terminal.cursorShow();
+    terminal.writeln();
 
     return value;
   }

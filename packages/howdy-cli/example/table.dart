@@ -7,7 +7,6 @@ void main() {
   Text.body('Table example');
   Text.body('-----------------------');
   terminal.writeln();
-  terminal.writeln();
 
   Table(
     headers: ['Service', 'Status', 'Uptime'],
