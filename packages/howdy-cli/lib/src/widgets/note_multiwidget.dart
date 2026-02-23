@@ -4,15 +4,15 @@ import 'package:howdy/howdy.dart';
 /// and optionally pauses execution with a [NextButton].
 class Note extends MultiWidget<Widget> {
   // ignore: use_super_parameters
-  Note(
-    List<DisplayWidget> notes, {
+  Note({
+    required List<DisplayWidget> children,
     this.next = false,
     this.nextLabel = 'Next',
     PageKeyMap? keymap,
   }) : super(
          null,
          children: [
-           ...notes,
+           ...children,
            if (next) NextButton(nextLabel, keymap: keymap),
          ],
        );
@@ -24,13 +24,18 @@ class Note extends MultiWidget<Widget> {
   final String nextLabel;
 
   /// Convenience factory for standalone usage.
-  static void send(
-    List<DisplayWidget> widgets, {
+  static void send({
+    required List<DisplayWidget> children,
     bool next = false,
     String nextLabel = 'Next',
     PageKeyMap? keymap,
   }) {
-    Note(widgets, next: next, nextLabel: nextLabel, keymap: keymap).write();
+    Note(
+      children: children,
+      next: next,
+      nextLabel: nextLabel,
+      keymap: keymap,
+    ).write();
   }
 
   @override

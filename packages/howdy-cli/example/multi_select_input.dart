@@ -9,7 +9,7 @@ void main() {
   terminal.writeln();
 
   Multiselect.send<String>(
-    label: 'Features',
+    'Features',
     options: [
       Option(label: 'Linting', value: 'lint'),
       Option(label: 'Testing', value: 'test'),

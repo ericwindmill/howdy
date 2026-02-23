@@ -17,7 +17,7 @@ void main() {
           Option(label: 'Go', value: 'go'),
         ],
       );
-      group = Page([confirm, select]);
+      group = Page(children: [confirm, select]);
     });
 
     test('initial state: first widget is focused', () {

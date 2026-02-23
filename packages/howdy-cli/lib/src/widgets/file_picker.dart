@@ -16,8 +16,8 @@ class FilePicker extends InputWidget<FileSystemEntity> {
     _loadDirectory();
   }
 
-  static FileSystemEntity send({
-    required String title,
+  static FileSystemEntity send(
+    String title, {
     FilePickerKeyMap? keymap,
     String? initialDirectory,
     String? help,
