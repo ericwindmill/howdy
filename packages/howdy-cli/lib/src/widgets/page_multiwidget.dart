@@ -82,7 +82,6 @@ class Page extends MultiWidget {
       DisplayWidget _ => KeyResult.done, // Should unreachable now
       InputWidget w => _handleKeyInputWidget(event, w),
       MultiWidget w => _handleKeyMultiWidget(event, w),
-      _ => KeyResult.ignored,
     };
 
     // handle navigation

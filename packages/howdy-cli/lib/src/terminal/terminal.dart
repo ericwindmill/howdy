@@ -517,6 +517,14 @@ class Terminal {
     _lastLineCount = 0;
   }
 
+  /// Scroll the viewport to a blank screen by pushing existing content
+  /// above the top edge, preserving scrollback history.
+  void scrollClear() {
+    write('\n' * rows);
+    cursorHome();
+    _lastLineCount = 0;
+  }
+
   void _eraseScreen() {
     for (var i = 0; i < _lastLineCount; i++) {
       cursorUp();

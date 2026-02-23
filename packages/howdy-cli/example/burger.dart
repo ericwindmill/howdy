@@ -5,9 +5,9 @@ import 'package:howdy/src/terminal/wrap.dart';
 import 'package:path/path.dart' as p;
 
 void main() async {
-  terminal.eraseScreen();
+  terminal.scrollClear();
+  terminal.writeln();
   terminal.cursorHome();
-
   final results = Form.send(title: 'Charmburger ordering', [
     Note(
       children: [
