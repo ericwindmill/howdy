@@ -175,28 +175,30 @@ class Multiselect<T> extends InputWidget<List<T>> {
     // Option list — appearance varies by state but is always rendered
     renderOptionsString(buf);
 
-    // Chrome: usage hint + error — only shown when standalone
-    // Otherwise handled by form
+    // Chrome: usage hint + error — only shown when standalone.
+    // When inside a form, parent owns this chrome.
     switch (renderState) {
       case RenderState.editing:
       case RenderState.waiting:
-      case RenderState.complete:
-        if (isStandalone) {
+      case RenderState.waitingInForm:
+      case RenderState.editingInForm:
+      case RenderState.completeInForm:
+        if (!renderState.isFormElement) {
           buf.writeln();
           buf.writeln(usage.style(theme.help.shortDesc));
           buf.writeln();
           buf.writeln();
         }
-      case RenderState.hasError:
-        if (isStandalone) {
-          buf.writeln();
-          buf.writeln(usage.style(theme.help.shortDesc));
-          buf.writeln('${Icon.error} $error'.style(fieldStyle.errorMessage));
-          buf.writeln();
-        }
+      case RenderState.error:
+        buf.writeln();
+        buf.writeln(usage.style(theme.help.shortDesc));
+        buf.writeln('${Icon.error} $error'.style(fieldStyle.errorMessage));
+        buf.writeln();
+      case RenderState.errorInForm:
+        break; // form owns chrome
       case RenderState.verified:
-        // form owns chrome when verified inside a form, nothing extra needed
-        break;
+      case RenderState.verifiedInForm:
+        break; // form owns chrome
     }
 
     buf.dedent();

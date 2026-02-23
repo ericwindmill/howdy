@@ -68,7 +68,7 @@ class NextButton extends InputWidget<void> {
       buf.writeln(button);
     }
 
-    if (!isDone && isStandalone) {
+    if (!isDone && !renderState.isFormElement) {
       buf.writeln();
       buf.writeln(usage.style(theme.help.shortDesc));
       buf.writeln();
