@@ -20,6 +20,8 @@ abstract class Icon {
   static const String asterisk = '*';
   static const String pipe = '│';
 
+  static const String altCursor = '➜';
+
   /// Spinner animation frames.
   static List<String> spinnerFrames = [
     '⠋',

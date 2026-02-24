@@ -1,10 +1,10 @@
 name: howdy
 description: A pleasant Dart CLI library.
-version: 0.0.4
+version: 0.0.5
 repository: https://github.com/ericwindmill/howdy
 
 environment:
-  sdk: ^3.12.0-113.1.beta
+  sdk: ^3.10.0
 
 # Add regular dependencies here.
 dependencies:
