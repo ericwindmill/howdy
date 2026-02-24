@@ -1,5 +1,4 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/wrap.dart';
 
 /// A text input prompt.
 ///

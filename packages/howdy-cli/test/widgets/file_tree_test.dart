@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/terminal/wrap.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as p;
 

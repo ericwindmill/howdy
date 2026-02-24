@@ -1,15 +1,15 @@
 // Organized low level -> high level
 
 // Terminal layer
-
 export 'src/terminal/cursor.dart';
 export 'src/terminal/key_event.dart';
 export 'src/terminal/screen_buffer.dart';
-
 export 'src/terminal/styled_text.dart';
 export 'src/terminal/terminal.dart';
 export 'src/terminal/text_style.dart';
+export 'src/terminal/wrap.dart';
 
+// Framework layer
 export 'src/framework/border.dart';
 export 'src/framework/edge_insets.dart';
 export 'src/framework/icons.dart';
@@ -17,6 +17,11 @@ export 'src/framework/indented_string_buffer.dart';
 export 'src/framework/keymap/key_binding.dart';
 export 'src/framework/keymap/keymap.dart';
 export 'src/framework/table_style.dart';
+export 'src/framework/themes/base16.dart';
+export 'src/framework/themes/catppuccin.dart';
+export 'src/framework/themes/charm.dart';
+export 'src/framework/themes/dracula.dart';
+export 'src/framework/themes/standard.dart';
 export 'src/framework/themes/theme.dart';
 export 'src/framework/render_state.dart';
 export 'src/framework/validate.dart';

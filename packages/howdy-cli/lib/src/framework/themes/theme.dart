@@ -1,9 +1,4 @@
 import 'package:howdy/howdy.dart';
-import 'package:howdy/src/framework/themes/base16.dart';
-import 'package:howdy/src/framework/themes/catppuccin.dart';
-import 'package:howdy/src/framework/themes/charm.dart';
-import 'package:howdy/src/framework/themes/dracula.dart';
-import 'package:howdy/src/framework/themes/standard.dart';
 
 /// A collection of styles for components of the form.
 class Theme {
