@@ -380,7 +380,7 @@ final results = Form([
 ], title: 'New Project').write();
 
 // Convenience static method
-final results = Form.send([...], title: 'New Project');
+final results = Form.send(children: [...], title: 'New Project');
 ```
 
 ```template (page 1 of 3)

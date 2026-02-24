@@ -99,6 +99,11 @@ class Select<T> extends InputWidget<T> {
 
   /// Build the option list string.
   String renderOptionsString(IndentedStringBuffer buf) {
+    final hasHelp = options.any((o) => o.help != null);
+    final maxLabelLen = hasHelp
+        ? options.map((o) => o.label.length).reduce((a, b) => a > b ? a : b)
+        : 0;
+
     for (var i = 0; i < options.length; i++) {
       final isSelected = i == selectedIndex;
       final option = options[i];
@@ -106,16 +111,28 @@ class Select<T> extends InputWidget<T> {
           ? option.textStyle
           : fieldStyle.base;
 
+      String labelPart(String label) {
+        if (!hasHelp) return label;
+        return label.padRight(maxLabelLen);
+      }
+
+      String helpSuffix(String label) {
+        if (option.help == null) return '';
+        return '  ${option.help!.style(fieldStyle.description)}';
+      }
+
       if (isSelected && !isDone && renderState.isFocused) {
+        final label = labelPart(option.label);
         buf.writeln(
-          '${Icon.pointer.style(fieldStyle.select.selector)} ${option.label.style(fieldStyle.select.option)}',
+          '${Icon.pointer.style(fieldStyle.select.selector)} ${label.style(fieldStyle.select.option)}${helpSuffix(label)}',
         );
       } else if (isSelected && isDone) {
         buf.writeln(
           '${Icon.check} ${option.label}'.style(fieldStyle.successMessage),
         );
       } else {
-        buf.writeln('  ${option.label.style(style)}');
+        final label = labelPart(option.label);
+        buf.writeln('  ${label.style(style)}${helpSuffix(label)}');
         buf.dedent();
       }
     }

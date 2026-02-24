@@ -11,9 +11,13 @@ class Option<T> {
   /// Optional custom style for this option's label.
   final TextStyle textStyle;
 
+  /// Optional help text shown as a second column alongside the label.
+  final String? help;
+
   const Option({
     required this.label,
     required this.value,
     this.textStyle = const TextStyle(),
+    this.help,
   });
 }

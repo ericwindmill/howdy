@@ -37,8 +37,8 @@ class Form extends MultiWidget {
   bool _isDone = false;
 
   /// Convenience to run a form and return results.
-  static MultiWidgetResults send(
-    List<Widget> children, {
+  static MultiWidgetResults send({
+    required List<Widget> children,
     String? title,
     FormKeyMap? keymap,
   }) {

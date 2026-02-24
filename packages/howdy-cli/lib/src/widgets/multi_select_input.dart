@@ -116,10 +116,16 @@ class Multiselect<T> extends InputWidget<List<T>> {
 
   /// Build the option list string.
   String renderOptionsString(IndentedStringBuffer buf) {
+    final hasHelp = options.any((o) => o.help != null);
+    final maxLabelLen = hasHelp
+        ? options.map((o) => o.label.length).reduce((a, b) => a > b ? a : b)
+        : 0;
+
     for (var i = 0; i < options.length; i++) {
       final isPointer = i == selectedIndex;
       final isChecked = selected[i];
       final label = options[i].label;
+      final help = options[i].help;
 
       final prefix = (!isDone && isPointer)
           ? '${Icon.pointer.style(fieldStyle.multiSelect.selector)} '
@@ -136,15 +142,18 @@ class Multiselect<T> extends InputWidget<List<T>> {
                     fieldStyle.multiSelect.unselectedPrefix,
                   ));
 
+      final paddedLabel = hasHelp ? label.padRight(maxLabelLen) : label;
+      final helpSuffix = (hasHelp && help != null)
+          ? '  ${help.style(fieldStyle.description)}'
+          : '';
+
       buf.write(prefix);
       buf.write(marker);
       buf.write(' ');
       buf.writeln(
-        label.style(
-          isChecked
-              ? fieldStyle.multiSelect.selectedOption
-              : fieldStyle.multiSelect.unselectedOption,
-        ),
+        '${paddedLabel.style(
+          isChecked ? fieldStyle.multiSelect.selectedOption : fieldStyle.multiSelect.unselectedOption,
+        )}$helpSuffix',
       );
     }
     buf.dedent();
